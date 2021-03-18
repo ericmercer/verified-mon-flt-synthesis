@@ -1,0 +1,16 @@
+Set the context for this work: define system level theorem that we intend to prove with the added components? Big picture of the overall goal of the project.
+
+Components (complexity (and expressiveness) increases along the way):
+* Filter: takes a stream of data and delivers a new stream of data where the property is enforced--reasons over an infinite stream of date. Connects to the system correctness over traces. Predicate on a single piece of data, paying no attention to previous history--no temporal awareness, deciting if it passes or not. Can be very secure and very efficient.
+* Monitor: Captures a relation over time on the data. Is able to reason about temporal properties. Supports multiple inputs and is able to do arbitrary computation for complex output over the inputs.
+
+The attestation gate is an aside to show how the tools we have are rich enough to create other complex things that blend the two: filter and monitor.
+
+This paper addresses only the verified components. Here is what we verify:
+
+* The resulting assembly code exactly implements the specification--preserves the meaning of the original specification in the actual assembly code.
+
+-- Scheduling and Trace Relationships: we assume a stream of correct data-types and the existence of some scheduler to schedule components appropriately. In the later section we give an example of a system that uses seL4 with a pacer to schedule over different domains to provide memory isolation. Scheduling atd the relation to the trace semantics is not part of this paper.
+
+\cite{kalhauge2018sound}
+
