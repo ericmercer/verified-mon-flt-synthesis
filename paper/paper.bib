@@ -1,9 +1,140 @@
-@article{kalhauge2018sound,
-        Author = {Kalhauge, Christian Gram and Palsberg, Jens},
-        Journal = {Proceedings of the ACM on Programming Languages},
-        Number = {OOPSLA},
-        Pages = {1--29},
-        Publisher = {ACM New York, NY, USA},
-        Title = {Sound deadlock prediction},
-        Volume = {2},
-        Year = {2018}}
+# Compsitional Reasoning with AGREE
+@InProceedings{10.1007/978-3-642-28891-3_13,
+author="Cofer, Darren
+and Gacek, Andrew
+and Miller, Steven
+and Whalen, Michael W.
+and LaValley, Brian
+and Sha, Lui",
+editor="Goodloe, Alwyn E.
+and Person, Suzette",
+title="Compositional Verification of Architectural Models",
+booktitle="NASA Formal Methods",
+year="2012",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="126--140",
+abstract="This paper describes a design flow and supporting tools to significantly improve the design and verification of complex cyber-physical systems. We focus on system architecture models composed from libraries of components and complexity-reducing design patterns having formally verified properties. This allows new system designs to be developed rapidly using patterns that have been shown to reduce unnecessary complexity and coupling between components. Components and patterns are annotated with formal contracts describing their guaranteed behaviors and the contextual assumptions that must be satisfied for their correct operation. We describe the compositional reasoning framework that we have developed for proving the correctness of a system design, and provide a proof of the soundness of our compositional reasoning approach. An example based on an aircraft flight control system is provided to illustrate the method and supporting analysis tools.",
+isbn="978-3-642-28891-3"
+}
+
+@ARTICLE {composition1,
+author = {S. Rayadurgam and M. E. Heimdahl and A. Murugesan and D. Cofer and A. Gacek and M. W. Whalen},
+journal = {IEEE Software},
+title = {Your "What" Is My "How": Iteration and Hierarchy in System Design},
+year = {2013},
+volume = {30},
+number = {02},
+issn = {1937-4194},
+pages = {54-60},
+keywords = {computer architecture;contracts;software;analytical models;cognition;aerospace electronics;architecture;formal methods;requirements;refinement;model checking},
+doi = {10.1109/MS.2012.173},
+publisher = {IEEE Computer Society},
+address = {Los Alamitos, CA, USA},
+month = {mar}
+}
+
+@article{10.1145/2658982.2527272,
+author = {Murugesan, Anitha and Whalen, Michael W. and Rayadurgam, Sanjai and Heimdahl, Mats P.E.},
+title = {Compositional Verification of a Medical Device System},
+year = {2013},
+issue_date = {December 2013},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {33},
+number = {3},
+issn = {1094-3641},
+url = {https://doi.org/10.1145/2658982.2527272},
+doi = {10.1145/2658982.2527272},
+abstract = {Complex systems are by necessity hierarchically organized. Decomposition into subsystems allows for intellectual control, as well as enabling different subsystems to be created by distinct teams. This decomposition affects both requirements and architecture. The architecture describes the structure and this affects how requirements ``flow down'' to each subsystem. Moreover, discoveries in the design process may affect the requirements. Demonstrating that a complex system satisfies its requirements when the subsystems are composed is a challenging problem.In this paper, we present a medical device case example where we apply an iterative approach to architecture and verification based on software architectural models. We represent the hierarchical composition of the system in the Architecture Analysis and Design Language (AADL), and use an extension to the AADL language to describe the requirements at different levels of abstraction for compositional verification. The component-level behavior for the model is described in Simulink/Stateflow. We assemble proofs of system level properties by using the Simulink Design Verifier to establish component-level properties and an open-source plug-in for the OSATE AADL environment to perform the compositional verification of the architecture. This combination of verification tools allows us to iteratively explore design and verification of detailed behavioral models, and to scale formal analysis to large software systems.},
+journal = {Ada Lett.},
+month = nov,
+pages = {51–64},
+numpages = {14},
+keywords = {system decomposition, cyber physical systems, compositional verification}
+}
+
+@InProceedings{10.1007/978-3-319-17524-9_7,
+author="Backes, John
+and Cofer, Darren
+and Miller, Steven
+and Whalen, Michael W.",
+editor="Havelund, Klaus
+and Holzmann, Gerard
+and Joshi, Rajeev",
+title="Requirements Analysis of a Quad-Redundant Flight Control System",
+booktitle="NASA Formal Methods",
+year="2015",
+publisher="Springer International Publishing",
+address="Cham",
+pages="82--96",
+abstract="In this paper we detail our effort to formalize and prove requirements for the Quad-redundant Flight Control System (QFCS) within NASA's Transport Class Model (TCM). We use a compositional approach with assume-guarantee contracts that correspond to the requirements for software components embedded in an AADL system architecture model. This approach is designed to exploit the verification effort and artifacts that are already part of typical software verification processes in the avionics domain. Our approach is supported by an AADL annex that allows specification of contracts along with a tool, called AGREE, for performing compositional verification. The goal of this paper is to show the benefits of a compositional verification approach applied to a realistic avionics system and to demonstrate the effectiveness of the AGREE tool in performing this analysis.",
+isbn="978-3-319-17524-9"
+}
+
+# Realizability in Assume-guarantee Reactive Systems 
+@InProceedings{10.1007/978-3-319-17524-9_13,
+author="Gacek, Andrew
+and Katis, Andreas
+and Whalen, Michael W.
+and Backes, John
+and Cofer, Darren",
+editor="Havelund, Klaus
+and Holzmann, Gerard
+and Joshi, Rajeev",
+title="Towards Realizability Checking of Contracts Using Theories",
+booktitle="NASA Formal Methods",
+year="2015",
+publisher="Springer International Publishing",
+address="Cham",
+pages="173--187",
+abstract="Virtual integration techniques focus on building architectural models of systems that can be analyzed early in the design cycle to try to lower cost, reduce risk, and improve quality of complex embedded systems. Given appropriate architectural descriptions and compositional reasoning rules, these techniques can be used to prove important safety properties about the architecture prior to system construction. Such proofs build from ``leaf-level'' assume/guarantee component contracts through architectural layers towards top-level safety properties. The proofs are built upon the premise that each leaf-level component contract is realizable; i.e., it is possible to construct a component such that for any input allowed by the contract assumptions, there is some output value that the component can produce that satisfies the contract guarantees. Without engineering support it is all too easy to write leaf-level components that can't be realized. Realizability checking for propositional contracts has been well-studied for many years, both for component synthesis and checking correctness of temporal logic requirements. However, checking realizability for contracts involving infinite theories is still an open problem. In this paper, we describe a new approach for checking realizability of contracts involving theories and demonstrate its usefulness on several examples.",
+isbn="978-3-319-17524-9"
+}
+
+@InProceedings{10.1007/978-3-319-29613-5_7,
+author="Katis, Andreas
+and Gacek, Andrew
+and Whalen, Michael W.",
+editor="Gurfinkel, Arie
+and Seshia, Sanjit A.",
+title="Machine-Checked Proofs for Realizability Checking Algorithms",
+booktitle="Verified Software: Theories, Tools, and Experiments",
+year="2016",
+publisher="Springer International Publishing",
+address="Cham",
+pages="110--123",
+abstract="Virtual integration techniques focus on building architectural models of systems that can be analyzed early in the design cycle to try to lower cost, reduce risk, and improve quality of complex embedded systems. Given appropriate architectural descriptions, assume/guarantee contracts, and compositional reasoning rules, these techniques can be used to prove important safety properties about the architecture prior to system construction. For these proofs to be meaningful, each leaf-level component contract must be realizable; i.e., it is possible to construct a component such that for any input allowed by the contract assumptions, there is some output value that the component can produce that satisfies the contract guarantees.",
+isbn="978-3-319-29613-5"
+}
+
+
+# Synthesis for Reactive Assume-guarantee reasoning
+@misc{katis2017synthesis,
+      title={Synthesis from Assume-Guarantee Contracts using Skolemized Proofs of Realizability}, 
+      author={Andreas Katis and Grigory Fedyukovich and Andrew Gacek and John Backes and Arie Gurfinkel and Michael W. Whalen},
+      year={2017},
+      eprint={1610.05867},
+      archivePrefix={arXiv},
+      primaryClass={cs.SE}
+}
+
+@InProceedings{10.1007/978-3-319-89963-3_10,
+author="Katis, Andreas
+and Fedyukovich, Grigory
+and Guo, Huajun
+and Gacek, Andrew
+and Backes, John
+and Gurfinkel, Arie
+and Whalen, Michael W.",
+editor="Beyer, Dirk
+and Huisman, Marieke",
+title="Validity-Guided Synthesis of Reactive Systems from Assume-Guarantee Contracts",
+booktitle="Tools and Algorithms for the Construction and Analysis of Systems",
+year="2018",
+publisher="Springer International Publishing",
+address="Cham",
+pages="176--193",
+abstract="Automated synthesis of reactive systems from specifications has been a topic of research for decades. Recently, a variety of approaches have been proposed to extend synthesis of reactive systems from propositional specifications towards specifications over rich theories. We propose a novel, completely automated approach to program synthesis which reduces the problem to deciding the validity of a set of {\$}{\$}{\backslash}forall {\backslash}exists {\$}{\$}∀∃-formulas. In spirit of IC3/PDR, our problem space is recursively refined by blocking out regions of unsafe states, aiming to discover a fixpoint that describes safe reactions. If such a fixpoint is found, we construct a witness that is directly translated into an implementation. We implemented the algorithm on top of the JKind model checker, and exercised it against contracts written using the Lustre specification language. Experimental results show how the new algorithm outperforms JKind's already existing synthesis procedure based on k-induction and addresses soundness issues in the k-inductive approach with respect to unrealizable results.",
+isbn="978-3-319-89963-3"
+}
