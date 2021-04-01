@@ -138,3 +138,60 @@ pages="176--193",
 abstract="Automated synthesis of reactive systems from specifications has been a topic of research for decades. Recently, a variety of approaches have been proposed to extend synthesis of reactive systems from propositional specifications towards specifications over rich theories. We propose a novel, completely automated approach to program synthesis which reduces the problem to deciding the validity of a set of {\$}{\$}{\backslash}forall {\backslash}exists {\$}{\$}∀∃-formulas. In spirit of IC3/PDR, our problem space is recursively refined by blocking out regions of unsafe states, aiming to discover a fixpoint that describes safe reactions. If such a fixpoint is found, we construct a witness that is directly translated into an implementation. We implemented the algorithm on top of the JKind model checker, and exercised it against contracts written using the Lustre specification language. Experimental results show how the new algorithm outperforms JKind's already existing synthesis procedure based on k-induction and addresses soundness issues in the k-inductive approach with respect to unrealizable results.",
 isbn="978-3-319-89963-3"
 }
+
+# Contracts
+@article{10.1145/583852.581484,
+author = {Findler, Robert Bruce and Felleisen, Matthias},
+title = {Contracts for Higher-Order Functions},
+year = {2002},
+issue_date = {September 2002},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {37},
+number = {9},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/583852.581484},
+doi = {10.1145/583852.581484},
+abstract = {Assertions play an important role in the construction of robust software. Their use in programming languages dates back to the 1970s. Eiffel, an object-oriented programming language, wholeheartedly adopted assertions and developed the "Design by Contract" philosophy. Indeed, the entire object-oriented community recognizes the value of assertion-based contracts on methods.In contrast, languages with higher-order functions do not support assertion-based contracts. Because predicates on functions are, in general, undecidable, specifying such predicates appears to be meaningless. Instead, the functional languages community developed type systems that statically approximate interesting predicates.In this paper, we show how to support higher-order function contracts in a theoretically well-founded and practically viable manner. Specifically, we introduce λcon, a typed lambda calculus with assertions for higher-order functions. The calculus models the assertion monitoring system that we employ in DrScheme. We establish basic properties of the model (type soundness, etc.) and illustrate the usefulness of contract checking with examples from DrScheme's code base.We believe that the development of an assertion system for higher-order functions serves two purposes. On one hand, the system has strong practical potential because existing type systems simply cannot express many assertions that programmers would like to state. On the other hand, an inspection of a large base of invariants may provide inspiration for the direction of practical future type system research.},
+journal = {SIGPLAN Not.},
+month = sep,
+pages = {48–59},
+numpages = {12},
+keywords = {behavioral specifications, solfware reliability, higher-order functions, contracts, predicate typing}
+}
+
+# Contract Monitors
+@InProceedings{10.1007/978-3-642-28869-2_11,
+author="Dimoulas, Christos
+and Tobin-Hochstadt, Sam
+and Felleisen, Matthias",
+editor="Seidl, Helmut",
+title="Complete Monitors for Behavioral Contracts",
+booktitle="Programming Languages and Systems",
+year="2012",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="214--233",
+abstract="A behavioral contract in a higher-order language may invoke methods of unknown objects. Although this expressive power allows programmers to formulate sophisticated contracts, it also poses a problem for language designers. Indeed, two distinct semantics have emerged for such method calls, dubbed lax and picky. While lax fails to protect components in certain scenarios, picky may blame an uninvolved party for a contract violation.",
+isbn="978-3-642-28869-2"
+}
+
+# Static proof for contracts
+@article{10.1145/3158139,
+author = {Nguyundefinedn, Ph\'{u}c C. and Gilray, Thomas and Tobin-Hochstadt, Sam and Van Horn, David},
+title = {Soft Contract Verification for Higher-Order Stateful Programs},
+year = {2017},
+issue_date = {January 2018},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {2},
+number = {POPL},
+url = {https://doi.org/10.1145/3158139},
+doi = {10.1145/3158139},
+abstract = {Software contracts allow programmers to state rich program properties using the full expressive power of an object language. However, since they are enforced at runtime, monitoring contracts imposes significant overhead and delays error discovery. So contract veri cation aims to guarantee all or most of these properties ahead of time, enabling valuable optimizations and yielding a more general assurance of correctness. Existing methods for static contract verification satisfy the needs of more restricted target languages, but fail to address the challenges unique to those conjoining untyped, dynamic programming, higher-order functions, modularity, and statefulness. Our approach tackles all these features at once, in the context of the full Racket system—a mature environment for stateful, higher-order, multi-paradigm programming with or with- out types. Evaluating our method using a set of both pure and stateful benchmarks, we are able to verify 99.94% of checks statically (all but 28 of 49, 861).  Stateful, higher-order functions pose significant challenges for static contract verification in particular. In the presence of these features, a modular analysis must permit code from the current module to escape permanently to an opaque context (unspecified code from outside the current module) that may be stateful and therefore store a reference to the escaped closure. Also, contracts themselves, being predicates wri en in unrestricted Racket, may exhibit stateful behavior; a sound approach must be robust to contracts which are arbitrarily expressive and interwoven with the code they monitor. In this paper, we present and evaluate our solution based on higher-order symbolic execution, explain the techniques we used to address such thorny issues, formalize a notion of behavioral approximation, and use it to provide a mechanized proof of soundness.},
+journal = {Proc. ACM Program. Lang.},
+month = dec,
+articleno = {51},
+numpages = {30},
+keywords = {symbolic execution, Higher-order contracts}
+}
