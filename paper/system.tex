@@ -1,0 +1,15 @@
+A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
+\[
+\konst{stepFn} : \mathit{inports} \times \mathit{stateVars} \to \mathit{stateVars}
+\]
+The scheduler \emph{activates} components in some order. Activating a component is defined as follows: 
+\[
+\begin{array}{ll}
+ \mathit{inportVals} & = \konst{readInputs}(); \\
+ (v_1,\ldots,v_k) & = \konst{readState}() ; \\
+ ({v_1}',\ldots,{v_k}') & = \konst{stepFn} (\mathit{inportVals},\mathit{stateVars}) ; \\
+ \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots,{v_k}');} \\
+ \multicolumn{2}{l}{\konst{writeOutputs}({v_1}',\ldots,{v_k}');} \\
+\end{array}
+\]
+It is assumed that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.

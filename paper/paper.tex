@@ -2,14 +2,45 @@
 \IEEEoverridecommandlockouts
 \usepackage{cite}
 \usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amsfonts}
 \usepackage{url}
 \hyphenation{op-tical net-works semi-conduc-tor}
+
+\newcommand{\konst}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\imp}{\Rightarrow}
+\newcommand{\lval}{\ensuremath{\mathit{lval}}}
+\newcommand{\set}[1]{\ensuremath{\{ {#1} \}}}
+\newcommand{\kstar}[1]{\ensuremath{{#1}^{*}}}
+\newcommand{\Lang}[1]{\ensuremath{{\mathcal L}({#1})}}
+\newcommand{\LangTheta}[1]{\ensuremath{{\mathcal L}_{\theta}({#1})}}
+\newcommand{\itelse}[3]{\mbox{$\mathtt{if}\ {#1}\ \mathtt{then}\ {#2}\ \mathtt{else}\ {#3}$}}
+
+% Latex trickery for infix div operator, from stackexchange
+
+\makeatletter
+\newcommand*{\bdiv}{%
+  \nonscript\mskip-\medmuskip\mkern5mu%
+  \mathbin{\operator@font div}\penalty900\mkern5mu%
+  \nonscript\mskip-\medmuskip
+}
+\makeatother
 
 \newcommand{\ie}{\textit{i.e.}}
 \newcommand{\eg}{\textit{e.g.}}
 \newcommand{\etal}{\textit{et al.}}
 \newcommand{\etc}{\textit{etc.}}
 \newcommand{\adhoc}{\textit{ad hoc}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
 
 \begin{document}
 \title{
@@ -57,6 +88,12 @@ Provo, Utah}
 
 \section{Simple Example}
 \input{example}
+
+\section{System Model and Semantics}
+\input{system}
+
+\section{Contiguity Types}
+\input{contig} 
 
 \section{Filters}
 \input{filters}

@@ -1,0 +1,190 @@
+A \emph{string} is an array of bytes. A \emph{language} is a set of strings. A \emph{recognizer} for a language determines if a string belongs to the language.  A language \emph{filter} uses a recognizer to pass an input string unchanged to the output if the string belongs to the given language; otherwise, it outputs an empty string. 
+
+Languages in this work are formally defined by \emph{contiguity types}. A contiguity type specifies data as a laid out side-by-side array of elements in a string. Every contiguity type has an associated recognizer that precisely recognizes strings in the language. 
+
+\subsection{Contiguity Types}
+
+See \cite{contiguity} for a complete discussion. Contiguity types assume that a string is the \emph{result} of a
+map from structured data. Figure \ref{contig-types} is the syntax. Contiguity types start with common base types (booleans,
+characters, signed and unsigned integers, \etc) and are closed under
+the construction of records, arrays, and unions. \footnote{We use
+the terms ``\emph{contiguity type}, \konst{contig}, and $\tau$
+interchangeably.}
+
+\begin{figure}
+\[
+\begin{array}{rcl}
+ \mathit{base} & = & \konst{bool} \mid \konst{char} \mid \konst{u8} \mid \konst{u16} \mid \konst{u32} \\
+               & \mid & \konst{u64}  \mid \konst{i16} \mid \konst{i32} \mid \konst{i64} \mid \konst{float} \mid \konst{double} \\ \\
+
+ \tau & = & \mathit{base} \\
+      & \mid & \konst{Recd}\; [ (f_1 : \tau_1) \ldots (f_n : \tau_n) ] \\
+      & \mid & \konst{Array}\; \tau \; \mathit{exp} \\
+      & \mid & \konst{Alt}\; \mathit{bexp}\; \tau_1 \; \tau_2 \\ \\
+
+\mathit{lval} & = & f \mid
+                    \mathit{lval} \, [ \mathit{exp} ] \mid
+                    \mathit{lval} . f \\ \\
+f            & = & \mathit{varName} \\ \\
+\mathit{exp} & = & \konst{Loc}\; \mathit{lval}
+              \mid \konst{nLit}\; \konst{nat}
+              \mid \mathit{constname} \\
+             & \mid & \mathit{exp} + \mathit{exp}
+                   \mid \mathit{exp} * \mathit{exp} \\ \\
+
+\mathit{bexp} & = & \konst{bLoc}\; \mathit{lval}
+              \mid  \konst{bLit}\; \konst{bool}
+              \mid  \neg \mathit{bexp}
+              \mid  \mathit{bexp} \land \mathit{bexp} \\
+              & \mid & \mathit{exp} = \mathit{exp} 
+              \mid  \mathit{exp} < \mathit{exp}
+\end{array}
+\]
+\caption{Syntax for contiguity types.}
+\label{contig-types}
+\end{figure}
+
+Arithmetic and Boolean expressions define dependent types. The expressions rely on the notion of an \emph{L-value} to reference values in previous fields.
+
+Theorem statement: the traces accepted by the specification match the traces accepted by the implementation. If we have have uninterpreted functions, then it may not be precise as the agree analysis as something may be rejected by agree but accepted by the implementation. Need to think about that carefully.
+
+An L-value denotes an \emph{offset} from the beginning of a
+data structure, plus a \emph{width}. In an R-value, an occurrence of an
+L-value is mapped to the value of the patch of memory between
+$\mathit{offset}$ and $\mathit{offset} + \mathit{width}$. For the
+purpose of specifying message formats, it may not be immediately
+obvious that a notation supporting assignment in imperative languages
+can help, but there is indeed a form of assignment lurking.
+
+The above explanation of L-values centers on indices into a byte
+buffer; in the following we will give a mild variant of this: instead
+of indices into the buffer, we lift out the designated slices. Thus,
+given environments $\theta: \mathit{lval} \mapsto \konst{string}$ (binding
+L-values to strings), $\Delta : \konst{string} \to \mathbb{N}$
+(binding constant names to numbers) and functions
+$\konst{toN}:\konst{string}\to\mathbb{N}$ and
+$\konst{toB}:\konst{string}\to\konst{bool}$ (which interpret byte
+sequences to numbers and booleans, respectively), expression
+evaluation and boolean expression evaluation have conventional
+definitions:
+
+\[
+\begin{array}{l}
+\konst{eval} \; e =
+\mathtt{case}\; e\
+ \left\{
+ \begin{array}{lcl}
+    \konst{Loc}\; \lval & \Rightarrow & \konst{toN}(\theta(\lval)) \\
+    \konst{nLit}\; n & \Rightarrow & n  \\
+    \mathit{constname} & \Rightarrow & \Delta(\mathit{constname})  \\
+    e_1 + e_2 & \Rightarrow & \konst{eval}\; e_1 + \konst{eval}\; e_2  \\
+    e_1 * e_2 & \Rightarrow & \konst{eval}\; e_1 * \konst{eval}\; e_2  \\
+  \end{array}
+ \right.
+ \\ \\
+\konst{evalB} \; b =
+\mathtt{case}\; b\
+ \left\{
+ \begin{array}{lcl}
+    \konst{bLoc}\; \lval & \Rightarrow & \konst{toB}(\theta(\lval)) \\
+    \konst{bLit}\; b & \Rightarrow & b \\
+    \neg b & \Rightarrow & \neg(\konst{evalB} \; b)  \\
+    b_1 \lor b_2 & \Rightarrow & \konst{evalB} \;b_1 \lor \konst{evalB} \;b_2   \\
+    b_1 \land b_2 & \Rightarrow & \konst{evalB} \;b_1 \land \konst{evalB} \;b_2   \\
+    e_1 = e_2 & \Rightarrow & \konst{eval} \;e_1 = \konst{eval} \;e_2   \\
+    e_1 < e_2 & \Rightarrow & \konst{eval} \;e_1 < \konst{eval} \;e_2
+  \end{array}
+ \right.
+
+\end{array}
+\]
+
+\begin{remark}[Partiality]
+Expression evaluation is partial because there is no guarantee that
+$\theta(\lval)$ is defined: an \lval{} being looked-up may not be in the
+map $\theta$. Failure in evaluation is modelled by the \konst{option}
+type, and must be handled in the semantics and the matching
+algorithm. However error handling is omitted in the presentation since
+it hampers readability. See the HOL4 formalization\footnote{
+\texttt{https://github.com/loonwerks/splat/blob/monitors/contig/abscontigScript.sml}}
+for full details.
+\end{remark}
+
+\subsection{Semantics}
+
+ We now confess to misleading the reader: in spite of the notational
+ similarity, a contiguity type is \emph{not} a type: it is a formal
+ language. A type is usually understood to represent a set, or domain,
+ of values, \eg, the type \konst{int32} represents a set of
+ integers. In contrast, the contiguity type \konst{i32} represents the
+ set of strings of width 32 bits. An element of a contiguity type can
+ be turned into an element of a type by providing interpretations for
+ all the strings at the leaves and interpreting the \konst{Recd} and
+ \konst{Array} constructors into the corresponding type constructs. (A
+ base contiguity type therefore serves mainly as a \emph{tag} to be
+ interpreted as a width and also as an intended target type.) Thus,
+ contiguity types sit---conveniently---between the types in a
+ programming language and the strings used to make messages.
+
+The semantics definition depends on a few basic notions familiar from
+language theory: language concatenation, and iterated language
+concatenation.
+
+\begin{align*}
+L_1 \cdot L_2 &= \set{w_1 w_2 \mid w_1 \in L_1 \land w_2 \in  L_2} \\
+L^0 &= \varepsilon \\
+L^{n+1} &= L \cdot L^n
+\end{align*}
+
+
+\begin{definition}[Semantics of contiguity types]
+
+ In the following, we assume given an assignment $\theta$ adequate for
+ evaluating expressions. If an expression evaluation fails, the
+ language being constructed will be empty (e.g., $\emptyset$). $\LangTheta{\tau}$ is defined recursively as
+
+\[
+% \begin{array}{l}
+%\LangTheta{\tau} =
+\mathtt{case}\; \tau\
+% \hspace*{3mm}
+ \left\{
+ \begin{array}{l}
+ \mathit{base} \Rightarrow \set{s \mid \konst{len}(s) = \konst{width}(base)} \\
+ \konst{Recd}\; [(f_1 : \tau_1) \ldots (f_n : \tau_n)]
+      \Rightarrow \\
+      \hspace*{5mm} \LangTheta{\tau_1} \cdot \ldots \cdot \LangTheta{\tau_n}
+\\
+ \konst{Array}\; \tau \; \mathit{exp} \Rightarrow  \\
+  \hspace*{5mm}
+ \left\{
+ \begin{array}{ll}
+    \LangTheta{\tau}^{\konst{eval}\;\theta\;\mathit{exp}} &
+       \mathrm{if}\ \konst{eval}\;\theta\;\mathit{exp}\ \mathrm{succeeds} \\
+    \emptyset & \text{otherwise}
+ \end{array}
+ \right.
+\\
+ \konst{Alt}\; \mathit{bexp}\;\tau_1\; \tau_2 \Rightarrow \\
+  \hspace*{5mm}
+ \left\{
+ \begin{array}{ll}
+    \LangTheta{\tau_1} & \mathrm{if}\ \konst{evalB}\;\theta\;\mathit{bexp} = \konst{true} \\
+    \LangTheta{\tau_2} & \mathrm{if}\ \konst{evalB}\;\theta\;\mathit{bexp} = \konst{false} \\
+    \emptyset          & \text{otherwise}
+ \end{array}
+ \right.
+ \\
+\end{array}
+ \right.
+%\end{array}
+\]
+\end{definition}
+
+\subsection{Recognizer Synthesis}
+
+A key result for contiguity types is that every type has a corresponding recognizer that recognizes strings belonging to the language defined by the type. In this work, the recognizer is a function \konst{match} that recursively traverses the contiguity type $\tau$ consuming the given input string $s$ as it constructs the environment $\theta$. The functions uses the environment $\theta$ to dynamically evaluate and resolve the expressions in $\tau$ during the traversal. The \konst{match} function returns a option type where $\konst{match}\; \tau\; s_1s_2\; \theta_o = \konst{SOME}(s_2, \theta)$ is a successful match having consumed $s_1$ leaving the postfix $s_2$ untouched and built the environment $\theta$ for $s_1$ according to $\tau$ from an empty initial environment $\theta_0$.
+
+\begin{theorem}[Matcher soundness] 
+$\konst{match}\; \tau\; s_1s_2\; \theta_0 = \konst{SOME}(s_2, \theta) \imp s_1 \in \LangTheta{\tau}$
+\end{theorem}
