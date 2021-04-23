@@ -202,3 +202,115 @@ keywords = {symbolic execution, Higher-order contracts}
   author={Konrad Slind},
   year={2021}
 }
+
+@article{10.1145/3140587.3062358,
+author = {Bourke, Timothy and Brun, L\'{e}lio and Dagand, Pierre-\'{E}variste and Leroy, Xavier and Pouzet, Marc and Rieg, Lionel},
+title = {A Formally Verified Compiler for Lustre},
+year = {2017},
+issue_date = {June 2017},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {52},
+number = {6},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/3140587.3062358},
+doi = {10.1145/3140587.3062358},
+abstract = { The correct compilation of block diagram languages like Lustre, Scade, and a discrete subset of Simulink is important since they are used to program critical embedded control software. We describe the specification and verification in an Interactive Theorem Prover of a compilation chain that treats the key aspects of Lustre: sampling, nodes, and delays. Building on CompCert, we show that repeated execution of the generated assembly code faithfully implements the dataflow semantics of source programs.  We resolve two key technical challenges. The first is the change from a synchronous dataflow semantics, where programs manipulate streams of values, to an imperative one, where computations manipulate memory sequentially. The second is the verified compilation of an imperative language with encapsulated state to C code where the state is realized by nested records. We also treat a standard control optimization that eliminates unnecessary conditional statements. },
+journal = {SIGPLAN Not.},
+month = jun,
+pages = {586–601},
+numpages = {16},
+keywords = {Synchronous Languages (Lustre), Interactive Theorem Proving (Coq), Verified Compilation}
+}
+
+@inproceedings{10.1145/1086228.1086261,
+author = {Cola\c{c}o, Jean-Louis and Pagano, Bruno and Pouzet, Marc},
+title = {A Conservative Extension of Synchronous Data-Flow with State Machines},
+year = {2005},
+isbn = {1595930914},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1086228.1086261},
+doi = {10.1145/1086228.1086261},
+abstract = {This paper presents an extension of a synchronous data-flow language such as Lustre with imperative features expressed in terms of powerful state machine \`{a} la SyncChart. This extension is fully conservative in the sense that all the programs from the basic language still make sense in the extended language and their semantics is preserved.From a syntactical point of view this extension consists in hierarchical state machines that may carry at each hierarchy level a bunch of equations. This proposition is an alternative to the joint use of Simulink and Stateflow but improves it by allowing a fine grain mix of both styles.The central idea of the paper is to base this extension on the use of clocks, translating imperative constructs into well clocked data-flow programs from the basic language. This clock directed approach is an easy way to define a semantics for the extension, it is light to implement in an existing compiler and experiments show that the generated code compete favorably with ad-hoc techniques. The proposed extension has been implemented in the ReLuC compiler of Scade/Lustre and in the Lucid Synchrone compiler.},
+booktitle = {Proceedings of the 5th ACM International Conference on Embedded Software},
+pages = {173–182},
+numpages = {10},
+keywords = {typing, clock calculus, compilation, heterogeneous systems, synchronous languages},
+location = {Jersey City, NJ, USA},
+series = {EMSOFT '05}
+}
+
+@InProceedings{10.1007/978-3-540-45212-6_10,
+author="Cola{\c{c}}o, Jean-Louis
+and Pouzet, Marc",
+editor="Alur, Rajeev
+and Lee, Insup",
+title="Clocks as First Class Abstract Types",
+booktitle="Embedded Software",
+year="2003",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="134--155",
+abstract="Clocks in synchronous data-flow languages are the natural way to define several time scales in reactive systems. They play a fundamental role during the specification of the system and are largely used in the compilation process to generate efficient sequential code. Based on the formulation of clocks as dependent types, the paper presents a simpler clock calculus reminiscent to ML type systems with first order abstract types {\`a} la Laufer {\&} Odersky. Not only this system provides clock inference, it shares efficient implementations of ML type systems and appears to be expressive enough for many real applications.",
+isbn="978-3-540-45212-6"
+}
+
+@inproceedings{10.1145/41625.41641,
+author = {Caspi, P. and Pilaud, D. and Halbwachs, N. and Plaice, J. A.},
+title = {LUSTRE: A Declarative Language for Real-Time Programming},
+year = {1987},
+isbn = {0897912152},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/41625.41641},
+doi = {10.1145/41625.41641},
+abstract = {LUSTRE is a synchronous data-flow language for programming systems which interact with their environments in real-time. After an informal presentation of the language, we describe its semantics by means of structural inference rules. Moreover, we show how to use this semantics in order to generate efficient sequential code, namely, a finite state automaton which represents the control of the program. Formal rules for program transformation are also presented.},
+booktitle = {Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages},
+pages = {178–188},
+numpages = {11},
+location = {Munich, West Germany},
+series = {POPL '87}
+}
+
+@ARTICLE{97300,  author={Halbwachs, N. and Caspi, P. and Raymond, P. and Pilaud, D.},  journal={Proceedings of the IEEE},   title={The synchronous data flow programming language LUSTRE},   year={1991},  volume={79},  number={9},  pages={1305-1320},  doi={10.1109/5.97300}}
+
+@article{10.1145/1379023.1375674,
+author = {Biernacki, Dariusz and Cola\c{c}o, Jean-Louis and Hamon, Gregoire and Pouzet, Marc},
+title = {Clock-Directed Modular Code Generation for Synchronous Data-Flow Languages},
+year = {2008},
+issue_date = {July 2008},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {43},
+number = {7},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/1379023.1375674},
+doi = {10.1145/1379023.1375674},
+abstract = {The compilation of synchronous block diagrams into sequential imperative code has been addressed in the early eighties and can now be considered as folklore. However, separate, or modular, code generation, though largely used in existing compilers and particularly in industrial ones, has never been precisely described or entirely formalized. Such a formalization is now fundamental in the long-term goal to develop a mathematically certified compiler for a synchronous language as well as in simplifying existing implementations.This article presents in full detail the modular compilation of synchronous block diagrams into sequential code. We consider a first-order functional language reminiscent of LUSTRE, which it extends with a general n-ary merge operator, a reset construct, and a richer notion of clocks. The clocks are used to express activation of computations in the program and are specifically taken into account during the compilation process to produce efficient imperative code. We introduce a generic machine-based intermediate language to represent transition functions, and we present a concise clock-directed translation from the source to this intermediate language. We address the target code generation phase by describing a translation from the intermediate language to JAVA and C.},
+journal = {SIGPLAN Not.},
+month = jun,
+pages = {121–130},
+numpages = {10},
+keywords = {type systems, synchronous languages, real-time systems, semantics, compilation}
+}
+
+@article{10.1145/2345141.2248426,
+author = {G\'{e}rard, L\'{e}onard and Guatto, Adrien and Pasteur, C\'{e}dric and Pouzet, Marc},
+title = {A Modular Memory Optimization for Synchronous Data-Flow Languages: Application to Arrays in a Lustre Compiler},
+year = {2012},
+issue_date = {MAY 2012},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {47},
+number = {5},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/2345141.2248426},
+doi = {10.1145/2345141.2248426},
+abstract = {The generation of efficient sequential code for synchronous data-flow languages raises two intertwined issues: control and memory optimization. While the former has been extensively studied, for instance in the compilation of Lustre and Signal, the latter has only been addressed in a restricted manner. Yet, memory optimization becomes a pressing issue when arrays are added to such languages.This article presents a two-level solution to the memory optimization problem. It combines a compile-time optimization algorithm, reminiscent of register allocation, paired with language annotations on the source given by the designer. Annotations express in-place modifications and control where allocation is performed. Moreover, they allow external functions performing in-place modifications to be safely imported. Soundness of annotations is guaranteed by a semilinear type system and additional scheduling constraints. A key feature is that annotations for well-typed programs do not change the semantics of the language: removing them may lead to less efficient code but will not alter the semantics.The method has been implemented in a new compiler for a LUSTRE-like synchronous language extended with hierarchical automata and arrays. Experiments show that the proposed approach removes most of the unnecessary array copies, resulting in faster code that uses less memory.},
+journal = {SIGPLAN Not.},
+month = jun,
+pages = {51–60},
+numpages = {10},
+keywords = {synchronous languages, real-time systems, block-diagrams, semantics, compilation, type systems, optimization}
+}

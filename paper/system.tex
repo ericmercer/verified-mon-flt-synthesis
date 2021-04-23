@@ -1,15 +1,80 @@
-A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
-\[
-\konst{stepFn} : \mathit{inports} \times \mathit{stateVars} \to \mathit{stateVars}
-\]
-The scheduler \emph{activates} components in some order. Activating a component is defined as follows: 
-\[
-\begin{array}{ll}
- \mathit{inportVals} & = \konst{readInputs}(); \\
- (v_1,\ldots,v_k) & = \konst{readState}() ; \\
- ({v_1}',\ldots,{v_k}') & = \konst{stepFn} (\mathit{inportVals},\mathit{stateVars}) ; \\
- \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots,{v_k}');} \\
- \multicolumn{2}{l}{\konst{writeOutputs}({v_1}',\ldots,{v_k}');} \\
+\begin{figure}
+  \[
+    \begin{array}{rcl}
+      \mathit{c}    & = & \konst{input}\ [(f : \tau)\ldots] \\
+                    &   & \konst{output}\ [(f : \tau)\ldots] \\
+                    &   & \konst{components}\ [(f : c)\ldots]\\ 
+                    &   & \konst{eq}\ [(\lval : \tau := exp) \dots] \\
+                    &   & \konst{assume}\ [bexp\ldots] \\
+                    &   & \konst{guarantee}\ [bexp\ldots] \\ \\
+
+      \mathit{lval} & = & f \mid \mathit{lval} \, [ \mathit{exp} ]
+                          \mid \mathit{lval} . f \\ \\
+
+      f             & = & \mathit{varName} \\ \\
+
+      \mathit{exp}  & = & \konst{Loc}\; \mathit{lval}
+                          \mid \konst{nLit}\; \konst{nat}
+                          \mid \mathit{constname} \\
+                    & | & \mathit{exp} + \mathit{exp}
+                          \mid \mathit{exp} * \mathit{exp} \\
+                    & | & (exp\ \rightarrow\ exp) \\
+                    & | & (\konst{pre}\ exp) \\
+                    & | & (\konst{ite}\ bexp\ exp\ exp)\\
+                    & | & bexp \\ \\
+                          
+      \mathit{bexp} & = & \konst{bLoc}\; \mathit{lval}
+                          \mid  \konst{bLit}\; \konst{bool}
+                          \mid  \neg \mathit{bexp}
+                          \mid  \mathit{bexp} \land \mathit{bexp} \\
+                    & | & \mathit{exp} = \mathit{exp} 
+                    \mid  \mathit{exp} < \mathit{exp}
 \end{array}
 \]
-It is assumed that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+\caption{Syntax for component specifications.}
+\label{fig:syntax}
+\end{figure}
+
+A \emph{system} in this model of computation is a \emph{component} that is defined by a specification (see \figref{fig:syntax}). A specification defines inputs, outputs, sub-components, local variables ($\konst{eq}$), assumptions for pre-conditions, and guarantees for post-conditions. A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\mathit{lval}$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the right hand side of an assignment. Alpha renaming is assumed so that every \emph{lval} is unique.
+
+An environment, $\theta: \mathit{lval} \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
+
+The semantics are synchronous data-flow defined over a sequence of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of the environment stream in \figref{fig:eval}.
+\begin{figure*}
+\[
+\begin{array}{l}
+\konst{eval}\; i\; e =
+\mathtt{case}\; e\
+ \left\{
+ \begin{array}{lcl}
+    \konst{Loc}\; \lval & \Rightarrow & \konst{toN}(\theta^i(\lval)) \\
+    \konst{nLit}\; n & \Rightarrow & n  \\
+    \mathit{constname} & \Rightarrow & \Delta(\mathit{constname})  \\
+    e_1 + e_2 & \Rightarrow & \konst{eval}\; i \; e_1 + \konst{eval}\; i \; e_2  \\
+    e_1 * e_2 & \Rightarrow & \konst{eval}\; i \; e_1 * \konst{eval}\; i \; e_2  \\
+    e_1 \rightarrow e_2 & \Rightarrow &  \mathbf{if}\; i = 0\; \mathbf{then}\; \konst{eval}\; i \; e_1\; 
+                                         \mathbf{else}\; \konst{eval}\; i \; e_2 \\
+    (\konst{pre}\; e) & \Rightarrow &  \konst{eval}\; i-1 \; e
+  \end{array}
+ \right.
+ \\ \\
+\konst{evalB}\; i \; b =
+\mathtt{case}\; b\
+ \left\{
+ \begin{array}{lcl}
+    \konst{bLoc}\; \lval & \Rightarrow & \konst{toB}(\theta^i(\lval)) \\
+    \konst{bLit}\; b & \Rightarrow & b \\
+    \neg b & \Rightarrow & \neg(\konst{evalB} \; b)  \\
+    b_1 \lor b_2 & \Rightarrow & \konst{evalB}\; i \;b_1 \lor \konst{evalB}\; i \;b_2   \\
+    b_1 \land b_2 & \Rightarrow & \konst{evalB}\; i \;b_1 \land \konst{evalB}\; i \;b_2   \\
+    e_1 = e_2 & \Rightarrow & \konst{eval} \;e_1 = \konst{eval}\; i \;e_2   \\
+    e_1 < e_2 & \Rightarrow & \konst{eval} \;e_1 < \konst{eval}\; i \;e_2
+  \end{array}
+ \right.
+\end{array}
+\]
+\caption{Expression evaluation in the context of a stream on environments.}
+\label{fig:eval}
+\end{figure*}
+
+The initial environment stream only contains mappings for primary inputs along the entire stream. Stepping the component updates the current environment. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of each component evaluation. Stepping a component is recursively defined similar to the eval functions but track the path for the environment binding.  
