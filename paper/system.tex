@@ -3,27 +3,29 @@
     \begin{array}{rcl}
       \mathit{c}    & = & \konst{input}\ [(f : \tau)\ldots] \\
                     &   & \konst{output}\ [(f : \tau)\ldots] \\
-                    &   & \konst{components}\ [(f : c)\ldots]\\ 
-                    &   & \konst{eq}\ [(\lval : \tau := exp) \dots] \\
-                    &   & \konst{assume}\ [bexp\ldots] \\
-                    &   & \konst{guarantee}\ [bexp\ldots] \\ \\
-
-      \mathit{lval} & = & f \mid \mathit{lval} \, [ \mathit{exp} ]
-                          \mid \mathit{lval} . f \\ \\
+                    &   & [\mathit{stmts}\ldots] \\
+                    &   & \konst{assume}\ [\mathit{bexp}\ldots] \\
+                    &   & \konst{guarantee}\ [\mathit{bexp}\ldots] \\ \\
+      
+      \mathit{stmts}& = & \konst{subcomp}\ \lval\dots\ c \\
+                    & | & \konst{eq}\; f : \tau := \mathit{exp} \\ \\
+                    
+      \lval & = & f \mid \lval \, [ \mathit{exp} ]
+                          \mid \lval . f \\ \\
 
       f             & = & \mathit{varName} \\ \\
 
-      \mathit{exp}  & = & \konst{Loc}\; \mathit{lval}
+      \mathit{exp}  & = & \konst{Loc}\; \lval
                           \mid \konst{nLit}\; \konst{nat}
                           \mid \mathit{constname} \\
                     & | & \mathit{exp} + \mathit{exp}
                           \mid \mathit{exp} * \mathit{exp} \\
-                    & | & (exp\ \rightarrow\ exp) \\
-                    & | & (\konst{pre}\ exp) \\
-                    & | & (\konst{ite}\ bexp\ exp\ exp)\\
-                    & | & bexp \\ \\
+                    & | & (\mathit{exp}\ \rightarrow\ \mathit{exp}) \\
+                    & | & (\konst{pre}\ \mathit{exp}) \\
+                    & | & (\konst{ite}\ \mathit{bexp}\ \mathit{exp}\ \mathit{exp})\\
+                    & | & \mathit{bexp} \\ \\
                           
-      \mathit{bexp} & = & \konst{bLoc}\; \mathit{lval}
+      \mathit{bexp} & = & \konst{bLoc}\; \lval
                           \mid  \konst{bLit}\; \konst{bool}
                           \mid  \neg \mathit{bexp}
                           \mid  \mathit{bexp} \land \mathit{bexp} \\
@@ -35,11 +37,14 @@
 \label{fig:syntax}
 \end{figure}
 
-A \emph{system} in this model of computation is a \emph{component} that is defined by a specification (see \figref{fig:syntax}). A specification defines inputs, outputs, sub-components, local variables ($\konst{eq}$), assumptions for pre-conditions, and guarantees for post-conditions. A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\mathit{lval}$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the right hand side of an assignment. Alpha renaming is assumed so that every \emph{lval} is unique.
+A \emph{system} in this model of computation is a \emph{component} that is defined by a specification (see \figref{fig:syntax}). A specification defines inputs, outputs, statements, assumptions for pre-conditions, and guarantees for post-conditions. A statement can be a subcomponent definition with its input binding or a local variable definition.
 
-An environment, $\theta: \mathit{lval} \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
+A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\lval$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the left hand side of an assignment. Alpha renaming is assumed so that every $\lval$ is unique.
 
-The semantics are synchronous data-flow defined over a sequence of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of the environment stream in \figref{fig:eval}.
+An environment, $\theta: \lval \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
+
+The semantics are synchronous data-flow on a single clock defined over a sequence of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of the environment stream in \figref{fig:eval}.
+
 \begin{figure*}
 \[
 \begin{array}{l}
@@ -77,4 +82,4 @@ The semantics are synchronous data-flow defined over a sequence of environments 
 \label{fig:eval}
 \end{figure*}
 
-The initial environment stream only contains mappings for primary inputs along the entire stream. Stepping the component updates the current environment. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of each component evaluation. Stepping a component is recursively defined similar to the eval functions but track the path for the environment binding.  
+The initial environment stream only contains mappings for primary inputs along the entire stream. Stepping the component updates the current environment. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of each component evaluation. A component step traverses the component sequentially to update the environment recursing into subcomponents after binding inputs. Assume the component is written in dependency order. 
