@@ -268,7 +268,7 @@ public
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
 			Stack_Size => 65536 bytes;
-        annex agree {**    
+        annex agree {**
             fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
                     (point.Latitude >= -90.0 and point.Latitude <= 90.0)
                 and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
@@ -322,6 +322,42 @@ public
         **};
 	end WaypointPlanManagerService.Impl;
 
+    ---------------------------------------------------------
+    --    No Alert WaypointPlanManagerService    --
+    ---------------------------------------------------------
+    thread no_alert_thr
+        features
+            alert : out event port;
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+            Stack_Size => 65536 bytes;
+        annex agree {**
+            guarantee "No alert" :
+                event(alert) = false;
+        **};
+    end no_alert_thr;
+        
+    thread implementation no_alert_thr.Impl
+    end no_alert_thr.Impl;
+    
+    process no_alert
+        features
+            alert: out event port;
+    end no_alert;
+    
+    process implementation no_alert.Impl
+        subcomponents
+            no_alert: thread no_alert_thr.Impl;
+        connections
+            c1: port no_alert.alert -> alert;
+   
+        annex agree {**
+            lift contract;
+        **};
+    end no_alert.Impl;
+    
 	---------------------
 	-- Software system --
 	---------------------
@@ -373,44 +409,33 @@ public
 			proc: processor proc.Impl;
 			UXAS: process UxAS.Impl;
 			WPM: process WaypointPlanManagerService.Impl;
-			MON_REQ: process CASE_Monitor_Req.Impl;
-			FLT_ARes: process CASE_Filter_ARes.Impl;
+			NO_ALERT: process no_alert.Impl;
 		connections
 
 	        --------------------
 			-- Primary Inputs --
 			--------------------
 			c01: port AutomationRequest -> UXAS.AutomationRequest;
-			c02: port AutomationRequest -> MON_REQ.req;
 			c03: port AirVehicleLocation -> UXAS.AirVehicleLocation;
 			c04: port AirVehicleLocation -> WPM.AirVehicleLocation;
 		
 			----------
 			-- UXAS --
 			----------
-			c05: port UXAS.AutomationResponse -> FLT_ARes.filter_in;
+			c05: port UXAS.AutomationResponse -> WPM.AutomationResponse;
 
 			---------
 			-- WPM --
 			---------
 			c06: port WPM.NextWaypoint -> NextWaypoint;
-
-			-------------
-			-- FILTERS --
-			-------------
-			c07: port FLT_ARes.filter_out -> MON_REQ.resp;
-
-			--------------
-			-- MONITORS --
-			--------------
-			c08: port MON_REQ.respOut -> WPM.AutomationResponse;
-			c09: port MON_REQ.alert -> WPM.ReturnHome;
+			
+			-- NOALERT_
+			c07: port NO_ALERT.alert -> WPM.ReturnHome;
 			
 		properties
 			Actual_Processor_Binding => (reference (proc)) applies to UXAS;
             Actual_Processor_Binding => (reference (proc)) applies to WPM;
-			Actual_Processor_Binding => (reference (proc)) applies to FLT_ARes;
-			Actual_Processor_Binding => (reference (proc)) applies to MON_REQ;
+            Actual_Processor_Binding => (reference (proc)) applies to NO_ALERT;
             
             HAMR::Default_Bit_Width => 32;
             HAMR::Default_Max_Sequence_Size => 1;
@@ -423,4 +448,59 @@ public
 
 	end SW.Impl;
     
+    
+    system implementation SW.CYBER_Impl
+        subcomponents
+            proc: processor proc.Impl;
+            UXAS: process UxAS.Impl;
+            WPM: process WaypointPlanManagerService.Impl;
+            MON_REQ: process CASE_Monitor_Req.Impl;
+            FLT_ARes: process CASE_Filter_ARes.Impl;
+        connections
+
+            --------------------
+            -- Primary Inputs --
+            --------------------
+            c01: port AutomationRequest -> UXAS.AutomationRequest;
+            c02: port AutomationRequest -> MON_REQ.req;
+            c03: port AirVehicleLocation -> UXAS.AirVehicleLocation;
+            c04: port AirVehicleLocation -> WPM.AirVehicleLocation;
+        
+            ----------
+            -- UXAS --
+            ----------
+            c05: port UXAS.AutomationResponse -> FLT_ARes.filter_in;
+
+            ---------
+            -- WPM --
+            ---------
+            c06: port WPM.NextWaypoint -> NextWaypoint;
+
+            -------------
+            -- FILTERS --
+            -------------
+            c07: port FLT_ARes.filter_out -> MON_REQ.resp;
+
+            --------------
+            -- MONITORS --
+            --------------
+            c08: port MON_REQ.respOut -> WPM.AutomationResponse;
+            c09: port MON_REQ.alert -> WPM.ReturnHome;
+            
+        properties
+            Actual_Processor_Binding => (reference (proc)) applies to UXAS;
+            Actual_Processor_Binding => (reference (proc)) applies to WPM;
+            Actual_Processor_Binding => (reference (proc)) applies to FLT_ARes;
+            Actual_Processor_Binding => (reference (proc)) applies to MON_REQ;
+            
+            HAMR::Default_Bit_Width => 32;
+            HAMR::Default_Max_Sequence_Size => 1;
+            HAMR::Max_String_Size => 256;
+            HAMR::Bit_Codec_Raw_Connections => true;
+
+        annex resolute {**
+            check HAMR_Guidelines
+        **};
+
+    end SW.CYBER_Impl;
 end SW;
