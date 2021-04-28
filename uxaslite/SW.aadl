@@ -61,6 +61,7 @@ public
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
 			Stack_Size => 65536 Bytes;
+			Source_text => ("foo");
 		annex agree {**
 		    eq wellFormedAutomationRequest : bool =
                 event(AutomationRequest) =>
@@ -90,7 +91,7 @@ public
 			AirVehicleLocation : in event data port Waypoint.i;
             AutomationResponse : out event data port AutomationResponse.i;
 		properties
-			CASE_Scheduling::Domain => 1;
+			CASE_Scheduling::Domain => 7;
 	end UxAS;
 
 	process implementation UxAS.Impl
@@ -124,6 +125,7 @@ public
 			Period => 500ms;
 			Compute_Execution_Time => 2ms .. 2ms;
 			Stack_Size => 65536 bytes;
+			Source_text => ("foo");
 		annex agree {**
             const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
             const nMonitorInvocations : int = 10;
@@ -176,7 +178,7 @@ public
 			respOut: out event data port AutomationResponse.i;
 			alert: out event port;
 		properties
-			CASE_Scheduling::Domain => 2;
+			CASE_Scheduling::Domain => 6;
 			CASE_Properties::Monitor_Latched => true;
 	end CASE_Monitor_Req;
 
@@ -209,6 +211,7 @@ public
 			Period => 500ms;
 			Compute_Execution_Time => 2ms .. 2ms;
 			Stack_Size => 65536 bytes;
+			Source_text => ("foo");
 		annex agree {**
 
             fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
@@ -246,7 +249,8 @@ public
 		connections
 			c1: port filter_in -> CASE_Filter_ARes.filter_in;
 			c2: port CASE_Filter_ARes.filter_out -> filter_out;
-
+        properties
+            CASE_Scheduling::Domain => 5;
         annex agree {**
             lift contract;
         **};
@@ -268,6 +272,7 @@ public
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
 			Stack_Size => 65536 bytes;
+			Source_text => ("foo");
         annex agree {**
             fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
                     (point.Latitude >= -90.0 and point.Latitude <= 90.0)
@@ -306,7 +311,7 @@ public
 			-- Return Home
 			ReturnHome: in event port;
 		properties
-			CASE_Scheduling::Domain => 4;		
+			CASE_Scheduling::Domain => 8;		
 	end WaypointPlanManagerService;
 
 	process implementation WaypointPlanManagerService.Impl
@@ -333,6 +338,7 @@ public
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
             Stack_Size => 65536 bytes;
+            Source_text => ("foo");
         annex agree {**
             guarantee "No alert" :
                 event(alert) = false;
@@ -352,7 +358,8 @@ public
             no_alert: thread no_alert_thr.Impl;
         connections
             c1: port no_alert.alert -> alert;
-   
+    	properties
+    		CASE_Scheduling::Domain => 9;
         annex agree {**
             lift contract;
         **};

@@ -1,0 +1,244 @@
+package SWTransform
+public
+	
+	with Base_Types;
+    renames Base_Types::all;
+    with Data_Model;
+    with HAMR;
+
+    data AutomationRequest
+    end AutomationRequest;
+    
+    data implementation AutomationRequest.i
+        subcomponents
+            TaskID: data Integer_64;
+        properties
+            HAMR::Bit_Codec_Max_Size => 128 bits;
+    end AutomationRequest.i;
+    
+    data Waypoint
+    end Waypoint;
+
+    data implementation Waypoint.i
+        subcomponents
+            Latitude: data Float_64;
+            Longitude: data Float_64;
+            Altitude: data Float_32;
+    end Waypoint.i;
+    
+    data WaypointArray
+        properties
+            Data_Model::Data_Representation => Array;
+            Data_Model::Base_Type => (classifier (Waypoint.i));
+            Data_Model::Dimension => (1);
+    end WaypointArray;
+    
+    data AutomationResponse
+    end AutomationResponse;
+    
+    data implementation AutomationResponse.i
+    	subcomponents
+    		TaskID: data Integer_64;
+            Waypoints: data WaypointArray;
+        properties
+            HAMR::Bit_Codec_Max_Size => 1664 bits;
+    end AutomationResponse.i;
+    
+	----------
+	-- AI --
+	----------
+
+	thread AI_thr
+        features
+            AutomationRequest : in event data port AutomationRequest.i;
+            AirVehicleLocation : in event data port Waypoint.i;
+            AutomationResponse : out event data port AutomationResponse.i;
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+			Stack_Size => 65536 Bytes;
+			Source_text => ("third-party");
+		annex agree {**
+            assume "Automation requests are well-formed" :
+               event(AutomationRequest) => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+            assume "Air vehicle location is well-formed" : 
+               event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+		**};
+    end AI_thr;
+
+    thread implementation AI_thr.i
+    end AI_thr.i;
+
+	----------------------
+	-- Waypoint Manager --
+	----------------------
+
+	thread WaypointManager_thr
+        features
+            AutomationResponse: in event data port AutomationResponse.i;
+            AirVehicleLocation: in event data port Waypoint.i;
+            NextWaypoint: out event data port Waypoint.i;
+            ReturnHome: in event port;
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+			Stack_Size => 65536 bytes;
+			Source_text => ("src/wpm.c");
+        annex agree {**         
+            assume "Return home and automation response are mutually exclusive" :
+                    (event(ReturnHome) => not event(AutomationResponse))
+                and (event(AutomationResponse) => not event(ReturnHome));
+            assume "Automation response is well-formed" :
+                event(AutomationResponse) => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
+            assume "Air vehicle state is well-formed" :
+                event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+
+            eq trigger : bool = event(AutomationResponse) or event(ReturnHome);
+            guarantee "A next waypoint coincides with the automation response or return home" :
+                trigger => event(NextWaypoint);
+
+            eq sawResponse : bool = trigger -> 
+                                   if trigger then true else pre(sawResponse);                
+            guarantee "Next waypoint only after an automation response" :
+                event(NextWaypoint) => sawResponse;    
+            guarantee "Next waypoint is well-formed" : 
+                event(NextWaypoint) => WELL_FORMED_WAYPOINT(NextWaypoint);
+            guarantee "Air vehicle location or automation response required for any next way point" :
+                event(NextWaypoint) => (trigger or event(AirVehicleLocation));
+        **};			
+    end WaypointManager_thr;
+
+    thread implementation WaypointManager_thr.i
+    end WaypointManager_thr.i;
+
+    ------------------------
+    --   Alert Manager    --
+    ------------------------
+    thread AlertManager_thr
+        features
+            alert : out event port;
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+            Stack_Size => 65536 bytes;
+            Source_text => ("src/AlertManager.c");
+        annex agree {**
+            guarantee "The alert manager never alerts" :
+                event(alert) = false;
+        **};
+    end AlertManager_thr;
+        
+    thread implementation AlertManager_thr.i
+    end AlertManager_thr.i;
+     
+	---------------------
+	-- Software system --
+	---------------------
+	process SW
+		features
+			AutomationRequest: in event data port AutomationRequest.i;
+			AirVehicleLocation : in event data port Waypoint.i;
+			NextWaypoint: out event data port Waypoint.i;
+		annex agree {**                
+		    assume "Automation request is well-formed" :
+                event(AutomationRequest) => 
+                WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);             
+            assume "Air vehicle location is well-formed" :
+                event(AirVehicleLocation) => 
+                WELL_FORMED_WAYPOINT(AirVehicleLocation);
+            
+            guarantee "Next way point is well-formed" : 
+                event(NextWaypoint) => 
+                WELL_FORMED_WAYPOINT(NextWaypoint);    
+           
+            eq sawRequest : bool = event(AutomationRequest) -> 
+                                   if event(AutomationRequest) then true else pre(sawRequest);                         
+            guarantee "First waypoint must be preceded by a request" :
+                event(NextWaypoint) => sawRequest; 
+                
+            const BOUND : int = 2; 
+            
+            eq counter : int = (if event(AutomationRequest) then 0 else BOUND) ->
+                               (if event(AutomationRequest) then 0 else
+                                if pre(counter) < BOUND then pre(counter) + 1 
+                                else BOUND
+                               ); 
+                               
+            eq first : bool = true -> 
+                              if event(AutomationRequest) then true else
+                              if pre(event(NextWaypoint)) then false else pre(first);
+                                               
+            guarantee "Automation response within a bounded time after the request" :
+                event(NextWaypoint) and first => counter < BOUND;
+            guarantee "Air vehicle location required with any waypoint after first" :
+                event(NextWaypoint) => (first or event(AirVehicleLocation));
+          
+  		**};
+	end SW;
+
+	process implementation SW.i
+		subcomponents
+			AI: thread AI_thr.i;
+			WM: thread WaypointManager_thr.i;
+			AM: thread AlertManager_thr.i;
+		connections
+
+	        --------------------
+			-- Primary Inputs --
+			--------------------
+			c01: port AutomationRequest -> AI.AutomationRequest;
+			c03: port AirVehicleLocation -> AI.AirVehicleLocation;
+			c04: port AirVehicleLocation -> WM.AirVehicleLocation;
+		
+			----------
+			--  AI  --
+			----------
+			c05: port AI.AutomationResponse -> WM.AutomationResponse;
+
+			---------
+			-- WM --
+			---------
+			c06: port WM.NextWaypoint -> NextWaypoint;
+			
+			-- NOALERT_
+			c07: port AM.alert -> WM.ReturnHome;
+			
+        annex resolute {**
+            check HAMR_Guidelines
+        **};
+        
+        annex agree {**
+--            assert "Automation response is well-formed" :
+--               event(AI.AutomationResponse) => WELL_FORMED_AUTOMATION_RESPONSE(AI.AutomationResponse);
+--            assert "Automation response only after request" :
+--               event(AI.AutomationResponse) => sawRequest;     
+        **};
+	end SW.i;
+    
+    annex agree {**
+        const TASK_ID : int = 42;
+        
+        fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
+                    (point.Latitude >= -90.0 and point.Latitude <= 90.0)
+                and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
+                and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);
+        
+        fun WELL_FORMED_TASK_ID(id : int) : bool =
+            (id = TASK_ID);
+            
+        fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.i) : bool =
+                    WELL_FORMED_TASK_ID(msg.TaskID);
+                
+        fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.i) : bool =
+                    (WELL_FORMED_TASK_ID(msg.TaskID))
+                and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
+                
+        fun SAME_WAYPOINT(a : Waypoint.i, b : Waypoint.i) : bool =
+                    (a.Latitude = b.Latitude)
+                and (a.Longitude = b.Longitude) 
+                and (a.Altitude = b.Altitude);
+    **};
+end SWTransform;

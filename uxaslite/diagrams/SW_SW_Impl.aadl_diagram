@@ -121,14 +121,6 @@
       <position x="502.0" y="38.0"/>
       <size width="197.0" height="60.0"/>
     </element>
-    <element uuid="43fceb71-67ea-440f-a424-cd91f84d44a4" manual="true">
-      <bo>
-        <seg>subcomponent</seg>
-        <seg>proc</seg>
-      </bo>
-      <position x="154.0" y="266.0"/>
-      <size width="79.0" height="35.0"/>
-    </element>
     <element uuid="c8f3ad03-d7d6-4001-a095-ef6f103147fa" manual="true">
       <element uuid="d129a203-2c3f-4310-8881-c8d529ee57bb" manual="true" dockArea="left">
         <bo>
