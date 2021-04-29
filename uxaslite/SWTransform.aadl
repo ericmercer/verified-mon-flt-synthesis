@@ -11,9 +11,9 @@ public
 	thread CASE_Monitor
 		features
 			Alert: out event port;
-			RespOut: out event data port AutomationResponse.i;
-			Resp: in event data port AutomationResponse.i;
-			Req: in event data port AutomationRequest.i;
+			Output: out event data port AutomationResponse.i;
+			Response: in event data port AutomationResponse.i;
+			Request: in event data port AutomationRequest.i;
 		properties
 			CASE_Properties::Monitoring => 100;
 			CASE_Properties::Component_Spec => ("CASE_Monitor_Alert");
@@ -21,55 +21,26 @@ public
         annex agree {**
                 
             const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
---            const nMonitorInvocations : int = 2;
---
---            const FAIL : int = nMonitorInvocations + 1;
---            fun Inc (x:int) : int = if x < nMonitorInvocations then x + 1 else FAIL;
---
---            eq ticks : int =
---               (if (event (Resp) and not event (Req)) then FAIL else
---               if event (Req) then 1 else 0
---               )
---              ->
---               if not (event(Req) or event(Resp)) then
---                  (if (pre(ticks) = 0) then 0 else Inc (pre(ticks)))
---               else
---               if event(Resp) then
---                 (if (1 <= pre(ticks)) then 0 else FAIL)
---               else 
---                 1;
-
-            eq FAIL : int = 2;          
-            eq counter : int = (if event(Req) and not event(Resp) then 1 else 
-                                if not event(Req) and event(Resp) then FAIL else
-                                0) ->
-                               (if event(Req) and not event(Resp) then 1 else 
-                                if not event(Req) and event(Resp) then FAIL else
-                                0); 
-                               
-            eq Policy : bool = counter < FAIL;
-           
-            -- auto-generated
+            
+            eq req : bool = event(Request);
+            eq rsp : bool = event(Response);
+            eq nothing : bool = (not req) and (not rsp);
+            eq today : bool = req and rsp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq bounded : bool = 
+                   nothing
+                or (req and rsp and (not yesterday))                       
+                or ((not req) and rsp and yesterday);
+            eq Policy : bool = bounded;
             eq alerted : bool = (not Policy) -> ((is_latched and pre(alerted)) or not Policy);
 
-            -- auto-generated
             guarantee "Alert port tracks alerted state variable" :
-                event(Alert) <=>  alerted;
-            
-            -- auto-generated
-            guarantee Req001_ReqRespMonitorData
-                "Response event if not alerted" :
-                if event(Alert) then 
-                  not (event(RespOut))
-                else if event(Resp) then
-                        (event(RespOut) and (RespOut = Resp))
-                     else
-                        not (event(RespOut));
-            
-            guarantee Req002_ReqRespMonitorData
-                "Response data is forwarded in not alerted" :
-                event(RespOut) => RespOut = Resp;
-         **};
+                event(Alert) <=> alerted;
+            guarantee "Output if not alerted" :
+                if alerted then (not event(Output)) else
+                if rsp then (event(Output) and (Output = Response))
+                else (not event(Output));
+        **};
 	end CASE_Monitor;
 
 	thread implementation CASE_Monitor.Impl
@@ -153,10 +124,13 @@ public
 			Stack_Size => 65536 Bytes;
 			Source_text => ("third-party");
 		annex agree {**
+		    eq req : bool = event(AutomationRequest);
+            eq avl : bool = event(AirVehicleLocation);
+            
             assume "Automation requests are well-formed" :
-                           event(AutomationRequest) => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+                req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
             assume "Air vehicle location is well-formed" : 
-                           event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
         **};
 	end AI_thr;
 
@@ -168,7 +142,7 @@ public
 	----------------------
 	thread WaypointManager_thr
 		features
-			ReturnHome: in event port;
+			Alert:   in event port;
 			AutomationResponse: in event data port AutomationResponse.i;
 			AirVehicleLocation: in event data port Waypoint.i;
 			NextWaypoint: out event data port Waypoint.i;
@@ -179,24 +153,26 @@ public
 			Stack_Size => 65536 bytes;
 			Source_text => ("src/wpm.c");
 		annex agree {**
-            assume "Return home and automation response are mutually exclusive" :
-                                (event(ReturnHome) => not event(AutomationResponse))
-                            and (event(AutomationResponse) => not event(ReturnHome));
-            assume "Automation response is well-formed" :
-                            event(AutomationResponse) => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
+		        
+		    eq rsp : bool = event(AutomationResponse);
+		    eq nwp : bool = event(NextWaypoint);
+		    eq avl : bool = event(AirVehicleLocation);
+		    eq alrt: bool = event(Alert);
+		    assume "Automation response is well-formed" :
+                rsp => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
             assume "Air vehicle state is well-formed" :
-                            event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation);
-            eq trigger : bool = event(AutomationResponse) or event(ReturnHome);
-            guarantee "A next waypoint coincides with the automation response or return home" :
-                            trigger => event(NextWaypoint);
-            eq sawResponse : bool = trigger -> 
-                                               if trigger then true else pre(sawResponse);
-            guarantee "Next waypoint only after an automation response" :
-                            event(NextWaypoint) => sawResponse;
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+            
+            eq once : bool = rsp -> 
+                             if rsp then true else pre(once);
+            guarantee "A response results in a next waypoint" :
+                rsp => nwp;                        
+            guarantee "A next waypoint coincides with the response or an air vehicle location if a response has been seen" :
+                nwp => (rsp or (once and avl));           
             guarantee "Next waypoint is well-formed" : 
-                            event(NextWaypoint) => WELL_FORMED_WAYPOINT(NextWaypoint);
-            guarantee "Air vehicle location or automation response required for any next way point" :
-                            event(NextWaypoint) => (trigger or event(AirVehicleLocation));
+                nwp => WELL_FORMED_WAYPOINT(NextWaypoint);
+            guarantee "No waypoints if alert" :
+                nwp => (not alrt);
         **};
 	end WaypointManager_thr;
 
@@ -232,37 +208,45 @@ public
 			AutomationRequest: in event data port AutomationRequest.i;
 			AirVehicleLocation: in event data port Waypoint.i;
 			NextWaypoint: out event data port Waypoint.i;
+			ReturnHome: out event port;
 		annex agree {**
+		        
+		    eq req : bool = event(AutomationRequest);
+            eq nwp : bool = event(NextWaypoint);
+            eq avl : bool = event(AirVehicleLocation);
+            eq rh : bool = event(ReturnHome);
+                        
             assume "Automation request is well-formed" :
-                            event(AutomationRequest) => 
-                            WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+                req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
             assume "Air vehicle location is well-formed" :
-                            event(AirVehicleLocation) => 
-                            WELL_FORMED_WAYPOINT(AirVehicleLocation);
-            guarantee "Next way point is well-formed" : 
-                            event(NextWaypoint) => 
-                            WELL_FORMED_WAYPOINT(NextWaypoint);
-            eq sawRequest : bool = event(AutomationRequest) -> 
-                                   if event(AutomationRequest) then true else pre(sawRequest);
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
             
-            eq alert : bool;
-            guarantee "First waypoint must be preceded by a request unless there is an internal alert" :
-                            event(NextWaypoint) => (sawRequest or alert);
-            
-            eq FAIL : int = 2;                
-            eq counter : int = (if event(AutomationRequest) then 0 else FAIL) ->
-                               (if event(AutomationRequest) then 0 else
-                                if pre(counter) < FAIL then pre(counter) + 1 
-                                else FAIL
-                               ); 
-                                           
             eq first : bool = true -> 
-                              if event(AutomationRequest) then true else
-                              if pre(event(NextWaypoint)) then false else pre(first);
-            guarantee "Automation response within a bounded time after the request" :
-                            (event(NextWaypoint) and first) => (alert or counter < FAIL);
---            guarantee "Air vehicle location required with any waypoint after first" :
---                            event(NextWaypoint) => (first or event(AirVehicleLocation));
+                              if req then true else
+                              if pre(nwp) then false else pre(first);
+--            eq yesterday : bool = (false -> pre(req));
+--            eq bounded : bool = (nwp and first) => (req or yesterday);
+            eq mutex : bool = not (bounded = rh);
+            eq once : bool = req -> if req then true else pre(once);
+  
+            eq nothing : bool = (not req) and (not nwp);
+            eq today : bool = req and nwp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (nwp)));
+            eq bounded : bool = 
+                   nothing
+                or (req and nwp and (not yesterday))                       
+                or ((not req) and nwp and yesterday);
+                           
+            guarantee "Next waypoints only as a result of a request" :
+                nwp => once;
+--            guarantee "First waypoint zero or one cycles from request" :
+--                bounded;
+            guarantee "Air vehicle location required with any waypoint after first" :
+                (nwp and not (first)) => event(AirVehicleLocation);
+            guarantee "Next way point is well-formed" :
+                nwp => WELL_FORMED_WAYPOINT(NextWaypoint);
+            guarantee "Bounded and return home are mutually exclusive" :
+                mutex;           
         **};
 	end SW;
 
@@ -293,7 +277,8 @@ public
 			------------
 			-- NOALERT -
 			------------
-			c07: port AM.Alert -> WM.ReturnHome;
+			c07: port AM.Alert -> ReturnHome;
+			c08: port AM.Alert -> WM.Alert;
 
 		annex resolute {**
             check HAMR_Guidelines
@@ -303,8 +288,7 @@ public
             assert "Automation response is well-formed" :
                            event(AI.AutomationResponse) => WELL_FORMED_AUTOMATION_RESPONSE(AI.AutomationResponse);
             assert "Automation response only after request" :
-                           event(AI.AutomationResponse) => sawRequest;
-            assign alert = event(AM.Alert);
+                           event(AI.AutomationResponse) => once;
         **};
 	end SW.i;
 
@@ -333,18 +317,15 @@ public
 			---------
 			c06: port WM.NextWaypoint -> NextWaypoint;
 
-			c2: port Filter.Output -> Monitor.Resp;
-			c3: port AutomationRequest -> Monitor.Req;
-			c4: port Monitor.RespOut -> WM.AutomationResponse;
-			c5: port Monitor.Alert -> WM.ReturnHome;
+			c2: port Filter.Output -> Monitor.Response;
+			c3: port AutomationRequest -> Monitor.Request;
+			c4: port Monitor.Output -> WM.AutomationResponse;
+			c5: port Monitor.Alert -> ReturnHome;
+			c6: port Monitor.Alert -> WM.Alert;
 
 		annex resolute {**
             check HAMR_Guidelines
         **};
-
-		annex agree {**
-		    assign alert = event(WM.ReturnHome);    
-		**};
 	end SW.transform_i;
 
 	annex agree {**
