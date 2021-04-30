@@ -1,513 +1,557 @@
 package SW
 public
-	
+
 	with Base_Types;
-    renames Base_Types::all;
-    with Data_Model;
-    with CASE_Scheduling;
-    with CASE_Properties;
-    with HAMR;
-    renames AGREE_PLTL::all;
-    
+	renames Base_Types::all;
+	with Data_Model;
+	with HAMR;
+	with CASE_Properties;
+	with CASE_Scheduling;
+
+    --------------
+    -- Waypoint --
+    --------------
+	data Waypoint
+	end Waypoint;
+
+	data implementation Waypoint.Impl
+		subcomponents
+			Latitude: data Float_64;
+			Longitude: data Float_64;
+			Altitude: data Float_32;
+	end Waypoint.Impl;
+
+    --------------------
+    -- Waypoint Array --
+    --------------------
+	data WaypointArray
+		properties
+			Data_Model::Data_Representation => Array;
+			Data_Model::Base_Type => (classifier (Waypoint.Impl));
+			Data_Model::Dimension => (1);
+	end WaypointArray;
+
+    ------------------------
+    -- Automation Request --
+    ------------------------
     data AutomationRequest
     end AutomationRequest;
-    
-    data implementation AutomationRequest.i
+
+    data implementation AutomationRequest.Impl
         subcomponents
             TaskID: data Integer_64;
         properties
             HAMR::Bit_Codec_Max_Size => 128 bits;
-    end AutomationRequest.i;
+    end AutomationRequest.Impl;
     
-    data Waypoint
-    end Waypoint;
+    ------------------------
+    -- AutomationResponse --
+    ------------------------
+	data AutomationResponse
+	end AutomationResponse;
 
-    data implementation Waypoint.i
-        subcomponents
-            Latitude: data Float_64;
-            Longitude: data Float_64;
-            Altitude: data Float_32;
-    end Waypoint.i;
-    
-    data WaypointArray
-        properties
-            Data_Model::Data_Representation => Array;
-            Data_Model::Base_Type => (classifier (Waypoint.i));
-            Data_Model::Dimension => (10);
-    end WaypointArray;
-    
-    data AutomationResponse
-    end AutomationResponse;
-    
-    data implementation AutomationResponse.i
-    	subcomponents
-    		TaskID: data Integer_64;
-            Waypoints: data WaypointArray;
-        properties
-            HAMR::Bit_Codec_Max_Size => 1664 bits;
-    end AutomationResponse.i;
-    
-	----------
-	-- UxAS --
-	----------
-
-	thread UxAS_thr
-        features
-            AutomationRequest : in event data port AutomationRequest.i;
-            AirVehicleLocation : in event data port Waypoint.i;
-            AutomationResponse : out event data port AutomationResponse.i;
-        properties
-            Dispatch_Protocol => Periodic;
-            Period => 500ms;
-            Compute_Execution_Time => 2ms .. 2ms;
-			Stack_Size => 65536 Bytes;
-			Source_text => ("foo");
-		annex agree {**
-		    eq wellFormedAutomationRequest : bool =
-                event(AutomationRequest) =>
-                            AutomationRequest.TaskID = 42;
-
-            assume "UXAS only receives well-formed requests" :
-                (      wellFormedAutomationRequest
-                );
-            
-             fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
-                    (point.Latitude >= -90.0 and point.Latitude <= 90.0)
-                and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
-                and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);      
-                
-            assume "UXAS only receives well-formed vehicle locations" : 
-               (      event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation)
-               );
-		**};
-    end UxAS_thr;
-
-    thread implementation UxAS_thr.Impl
-    end UxAS_thr.Impl;
-
-	process UxAS
-		features
-			AutomationRequest : in event data port AutomationRequest.i;
-			AirVehicleLocation : in event data port Waypoint.i;
-            AutomationResponse : out event data port AutomationResponse.i;
-		properties
-			CASE_Scheduling::Domain => 7;
-	end UxAS;
-
-	process implementation UxAS.Impl
+	data implementation AutomationResponse.Impl
 		subcomponents
-			UxAS: thread UxAS_thr.Impl;
-		connections
-			c0: port AutomationRequest -> UxAS.AutomationRequest;
-			c1: port AirVehicleLocation -> UxAS.AirVehicleLocation;
-			c2: port UxAS.AutomationResponse -> AutomationResponse;
-	   annex agree {**
-            lift contract;
-        **};
-	end UxAS.Impl;
-
-
-	------------------------------
-	-- Request-Response Monitor --
-	------------------------------
-
-	thread CASE_Monitor_Req_thr
-		features
-			req : in event data port AutomationRequest.i;
-			resp: in event data port AutomationResponse.i;
-			respOut: out event data port AutomationResponse.i;
-			alert: out event port;
+			TaskID: data Integer_64;
+			Waypoints: data WaypointArray;
 		properties
-			CASE_Properties::Monitoring => 100; -- marks this component as a monitor
-			CASE_Properties::Monitor_Latched => false; -- indicates if the monitor is latched
-			CASE_Properties::Component_Spec => ("Req002_ReqRespMonitorEvent"); -- monitor guarantee
-			Dispatch_Protocol => Periodic;
-			Period => 500ms;
-			Compute_Execution_Time => 2ms .. 2ms;
-			Stack_Size => 65536 bytes;
-			Source_text => ("foo");
-		annex agree {**
+			HAMR::Bit_Codec_Max_Size => 1664 bits;
+	end AutomationResponse.Impl;
+
+    ------------------------------
+    -- Bounded Response Monitor --
+    ------------------------------
+    thread CASE_Monitor_Thr
+        features
+            Response: in event data port AutomationResponse.Impl;
+            Request: in event data port AutomationRequest.Impl;
+            Alert: out event port;
+            Output: out event data port AutomationResponse.Impl;
+        properties
+            CASE_Properties::Monitoring => 100;
+            CASE_Properties::Component_Spec => ("CASE_Monitor_Alert", "CASE_Monitor_Output");
+            CASE_Properties::Monitor_Latched => true;
+        annex agree {**
             const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
-            const nMonitorInvocations : int = 10;
+            eq rsp : bool = event(Response);
+            eq req : bool = event(Request);
+            eq nothing : bool = (not req) and (not rsp);
+            eq today : bool = req and rsp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq policy : bool = nothing
+                            or (today and not yesterday)
+                            or (not today and rsp and yesterday);
+            eq alert : bool = (not policy) -> ((is_latched and pre(alert)) or not policy);
 
-            const FAIL : int = nMonitorInvocations + 1;
-            fun Inc (x:int) : int = if x < nMonitorInvocations then x + 1 else FAIL;
-
-            eq ticks : int =
-                (if event(resp) then FAIL
-                 else (if event (req) then 1 else 0))
-                ->
-                if (event(req) and event(resp)) then
-                   FAIL
-                else
-                if not (event(req) or event(resp)) then
-                   (if (pre(ticks) = 0) then 0 else Inc (pre(ticks)))
-                else
-                if event(resp) then
-                   (if (1 <= pre(ticks)) then 0 else FAIL)
-                else -- rqts set ticks to 1, so rqt.rqt.resp is fine
-                   1;
-
-            eq Policy : bool = ticks < nMonitorInvocations;
-
-            fun Once(i : bool) : bool =
-                i or (false -> pre(i));
-            
-            
-            guarantee Req001_ReqRespMonitorData
-                "Response event if not alerted" :
-                event(respOut) <=> event(resp) and not event(alert);
-            
-            guarantee Req002_ReqRespMonitorData
-                "Response data is forwarded in not alerted" :
-                event(respOut) => respOut = resp;
-             
-            guarantee Req003_ReqRespMonitorEvent
-                "alert trace property, to be proved by SPLAT" :
-                event(alert) <=>  (not Policy -> (if is_latched then Once (not Policy) else not Policy));
-         **};
-	end CASE_Monitor_Req_thr;
-
-	thread implementation CASE_Monitor_Req_thr.Impl
-	end CASE_Monitor_Req_thr.Impl;
-
-	process CASE_Monitor_Req
-		features
-			resp: in event data port AutomationResponse.i;
-			req: in event data port AutomationRequest.i;
-			respOut: out event data port AutomationResponse.i;
-			alert: out event port;
-		properties
-			CASE_Scheduling::Domain => 6;
-			CASE_Properties::Monitor_Latched => true;
-	end CASE_Monitor_Req;
-
-	process implementation CASE_Monitor_Req.Impl
-		subcomponents
-			CASE_Monitor_Req: thread CASE_Monitor_Req_thr.Impl;
-		connections
-			c01: port resp -> CASE_Monitor_Req.resp;
-			c02: port req -> CASE_Monitor_Req.req;
-			c03: port CASE_Monitor_Req.respOut -> respOut;
-			c3: port CASE_Monitor_Req.alert -> alert;
-	
-	   annex agree {**
-            lift contract;
+            guarantee "Alert port tracks alert variable" :
+                event(Alert) <=> alert;
+            guarantee "Output if not alerted" :
+                if event(Alert) then (not event(Output)) else
+                if event(Response) then (event(Output) and (Output = Response))
+                else (not event(Output));
         **};
-	end CASE_Monitor_Req.Impl;
+    end CASE_Monitor_Thr;
 
-	----------------------------------------
-	-- Automation Response message Filter --
-	----------------------------------------
-
-	thread CASE_Filter_ARes_thr
-		features
-			filter_in: in event data port AutomationResponse.i;
-			filter_out: out event data port AutomationResponse.i;
-		properties
-			CASE_Properties::Filtering => 100;
-			CASE_Properties::Component_Spec => ("Req_Filter_ARes");
-			Dispatch_Protocol => Periodic;
-			Period => 500ms;
-			Compute_Execution_Time => 2ms .. 2ms;
-			Stack_Size => 65536 bytes;
-			Source_text => ("foo");
-		annex agree {**
-
-            fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
-                    (point.Latitude >= -90.0 and point.Latitude <= 90.0)
-                and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
-                and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);		        
-        		    
-		    fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.i) : bool =
-		                (msg.TaskID = 42)
-		            and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
-                
-			guarantee Req_Filter_ARes "Well-formed Automation Response message" :
-			if (event(filter_in) and WELL_FORMED_AUTOMATION_RESPONSE(filter_in)) then
-			   (event(filter_out) and (filter_out = filter_in))
-			               else not(event (filter_out));
-		**};
-	end CASE_Filter_ARes_thr;
-
-	thread implementation CASE_Filter_ARes_thr.Impl
-		properties
-			Dispatch_Protocol => Periodic;
-	end CASE_Filter_ARes_thr.Impl;
-
-	process CASE_Filter_ARes
-		features
-			filter_in: in event data port AutomationResponse.i;
-			filter_out: out event data port AutomationResponse.i;
-		properties
-			CASE_Scheduling::Domain => 3;
-	end CASE_Filter_ARes;
-
-	process implementation CASE_Filter_ARes.Impl
-		subcomponents
-			CASE_Filter_ARes: thread CASE_Filter_ARes_thr.Impl;
-		connections
-			c1: port filter_in -> CASE_Filter_ARes.filter_in;
-			c2: port CASE_Filter_ARes.filter_out -> filter_out;
-        properties
-            CASE_Scheduling::Domain => 5;
-        annex agree {**
-            lift contract;
-        **};
-	end CASE_Filter_ARes.Impl;
-
-
-	----------------------
-	-- Waypoint Manager --
-	----------------------
-
-	thread WaypointPlanManagerService_thr
-        features
-            AutomationResponse: in event data port AutomationResponse.i;
-            AirVehicleLocation: in event data port Waypoint.i;
-            NextWaypoint: out event data port Waypoint.i;
-            ReturnHome: in event port;
-        properties
+    thread implementation CASE_Monitor_Thr.Impl
+        properties            
             Dispatch_Protocol => Periodic;
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
-			Stack_Size => 65536 bytes;
-			Source_text => ("foo");
+            Stack_Size => 65536 bytes;
+            Source_text => ("src/CASE_Monitor.c");
+    end CASE_Monitor_Thr.Impl;
+
+    process CASE_Monitor
+        features
+            Response: in event data port AutomationResponse.Impl;
+            Request: in event data port AutomationRequest.Impl;
+            Alert: out event port;
+            Output: out event data port AutomationResponse.Impl;
+   end CASE_Monitor;
+
+    process implementation CASE_Monitor.Impl
+        subcomponents
+            CASE_Monitor: thread CASE_Monitor_Thr.Impl;
+        connections
+            c01: port Response -> CASE_Monitor.Response;
+            c02: port Request -> CASE_Monitor.Request;
+            c03: port CASE_Monitor.Alert -> Alert;
+            c04: port CASE_Monitor.Output -> Output;
+        properties
+            CASE_Scheduling::Domain => 4;
         annex agree {**
-            fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
-                    (point.Latitude >= -90.0 and point.Latitude <= 90.0)
-                and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
-                and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);              
-                    
-            fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.i) : bool =
-                        (msg.TaskID = 42)
-                    and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
-                    
-            assume Req_WPM_Mutex "The Waypoint Manager return home and automation response are mutually exclusive" :
-                (     (event(ReturnHome) => not event(AutomationResponse))
-                  and (event(AutomationResponse) => not event(ReturnHome))
-                );
-            assume Req_WPM_Good_Automation_Response "The Waypoint Manager shall receive valid automation responses" :
-                event(AutomationResponse) => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
-            assume Req_WPM_Good_AirVehicle_State "The Waypoint Manager shall receive well-formed air vehicle states" :
-                event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation);
-            guarantee Req_WPM_Good_Mission_Command "The Waypoint Manager shall output valid mission commands" : 
-                event(NextWaypoint) => WELL_FORMED_WAYPOINT(NextWaypoint);
-        **};			
-    end WaypointPlanManagerService_thr;
-
-    thread implementation WaypointPlanManagerService_thr.Impl
-
-    end WaypointPlanManagerService_thr.Impl;
-
-	process WaypointPlanManagerService
-		features
-			-- Subscribed Messages
-			AutomationResponse: in event data port AutomationResponse.i;
-			AirVehicleLocation: in event data port Waypoint.i;
-			-- Sent Messages
-			NextWaypoint: out event data port Waypoint.i;
-
-			-- Return Home
-			ReturnHome: in event port;
-		properties
-			CASE_Scheduling::Domain => 8;		
-	end WaypointPlanManagerService;
-
-	process implementation WaypointPlanManagerService.Impl
-		subcomponents
-			WaypointPlanManagerService: thread WaypointPlanManagerService_thr.Impl;
-		connections
-			c1: port AutomationResponse -> WaypointPlanManagerService.AutomationResponse;
-			c2: port AirVehicleLocation -> WaypointPlanManagerService.AirVehicleLocation;
-			c3: port WaypointPlanManagerService.NextWaypoint -> NextWaypoint;
-			c4: port ReturnHome -> WaypointPlanManagerService.ReturnHome;
-		annex agree {**
             lift contract;
         **};
-	end WaypointPlanManagerService.Impl;
-
-    ---------------------------------------------------------
-    --    No Alert WaypointPlanManagerService    --
-    ---------------------------------------------------------
-    thread no_alert_thr
+    end CASE_Monitor.Impl;
+    
+    ----------------------------------------
+    -- Automation Response message Filter --
+    ----------------------------------------
+    thread CASE_Filter_Thr
         features
-            alert : out event port;
+            Input: in event data port AutomationResponse.Impl;
+            Output: out event data port AutomationResponse.Impl;
+        properties
+            CASE_Properties::Filtering => 100;
+            CASE_Properties::Component_Spec => ("CASE_Filter_Output");
+        annex agree {**
+            property CASE_Filter_policy = WELL_FORMED_AUTOMATION_RESPONSE(Input);
+            guarantee CASE_Filter_Output "The filter output shall be well-formed" :
+            if event(Input) and CASE_Filter_policy then
+            event(Output) and Output = Input
+            else
+            not event(Output);
+        **};
+    end CASE_Filter_Thr;
+
+    thread implementation CASE_Filter_Thr.Impl
         properties
             Dispatch_Protocol => Periodic;
             Period => 500ms;
             Compute_Execution_Time => 2ms .. 2ms;
             Stack_Size => 65536 bytes;
-            Source_text => ("foo");
-        annex agree {**
-            guarantee "No alert" :
-                event(alert) = false;
-        **};
-    end no_alert_thr;
-        
-    thread implementation no_alert_thr.Impl
-    end no_alert_thr.Impl;
-    
-    process no_alert
+            Source_text => ("src/CASE_Filter_Thr.c");
+    end CASE_Filter_Thr.Impl;
+  
+    process CASE_Filter
         features
-            alert: out event port;
-    end no_alert;
-    
-    process implementation no_alert.Impl
+            Input: in event data port AutomationResponse.Impl;
+            Output: out event data port AutomationResponse.Impl;
+    end CASE_Filter;
+
+    process implementation CASE_Filter.Impl
         subcomponents
-            no_alert: thread no_alert_thr.Impl;
+            CASE_Filter: thread CASE_Filter_Thr.Impl;
         connections
-            c1: port no_alert.alert -> alert;
-    	properties
-    		CASE_Scheduling::Domain => 9;
+            c1: port Input -> CASE_Filter.Input;
+            c2: port CASE_Filter.Output -> Output;
+        properties
+            CASE_Scheduling::Domain => 3;
         annex agree {**
             lift contract;
         **};
-    end no_alert.Impl;
-    
-	---------------------
-	-- Software system --
-	---------------------
+    end CASE_Filter.Impl;
+  
+	----------
+	-- AI --
+	----------
+	thread AI_Thr
+		features
+			AutomationRequest: in event data port AutomationRequest.Impl;
+			AirVehicleLocation: in event data port Waypoint.Impl;
+			AutomationResponse: out event data port AutomationResponse.Impl;
+		annex agree {**
+		    eq req : bool = event(AutomationRequest);
+            eq avl : bool = event(AirVehicleLocation);
+            
+            assume "Automation requests are well-formed" :
+                req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+            assume "Air vehicle location is well-formed" : 
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+        **};
+	end AI_Thr;
 
-	----------------------------------------------------------------------
+	thread implementation AI_Thr.Impl
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+            Stack_Size => 65536 Bytes;
+            Source_text => ("third-party");
+	end AI_Thr.Impl;
+
+    process AI
+        features
+            AutomationRequest : in event data port AutomationRequest.Impl;
+            AirVehicleLocation : in event data port Waypoint.Impl;
+            AutomationResponse : out event data port AutomationResponse.Impl;
+    end AI;
+
+    process implementation AI.Impl
+        subcomponents
+            AI: thread AI_Thr.Impl;
+        connections
+            c01: port AutomationRequest -> AI.AutomationRequest;
+            c02: port AirVehicleLocation -> AI.AirVehicleLocation;
+            c03: port AI.AutomationResponse -> AutomationResponse;
+        properties
+            CASE_Scheduling::Domain => 2;
+       annex agree {**
+            lift contract;
+        **};
+    end AI.Impl;
+    
+	----------------------
+	-- Waypoint Manager --
+	----------------------
+	thread WaypointManager_Thr
+		features
+			AutomationResponse: in event data port AutomationResponse.Impl;
+			AirVehicleLocation: in event data port Waypoint.Impl;
+			Start: out event port;
+			Waypoint: out event data port Waypoint.Impl;
+		annex agree {**
+		        
+		    eq rsp : bool = event(AutomationResponse);
+		    eq wp : bool = event(Waypoint);
+		    eq strt: bool = event(Start);
+		    eq avl : bool = event(AirVehicleLocation);
+		    
+		    assume "Automation response is well-formed" :
+                rsp => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
+            assume "Air vehicle state is well-formed" :
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+            
+            eq once : bool = rsp -> if rsp then true else pre(once);
+            
+            guarantee "Start marks each new automation response" :
+                strt <=> rsp;
+            guarantee "Waypoint coincides with a response":
+                rsp => wp;
+            guarantee "Future waypoints follow response" :
+                wp => (once and avl);                         
+            guarantee "Waypoints are well-formed" : 
+                wp => WELL_FORMED_WAYPOINT(Waypoint);
+        **};
+	end WaypointManager_Thr;
+
+	thread implementation WaypointManager_Thr.Impl
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+            Stack_Size => 65536 bytes;
+            Source_text => ("src/wpm.c");
+	end WaypointManager_Thr.Impl;
+
+    process WaypointManager
+        features
+            AutomationResponse: in event data port AutomationResponse.Impl;
+            AirVehicleLocation: in event data port Waypoint.Impl;
+            Start: out event port;
+            Waypoint: out event data port Waypoint.Impl;
+    end WaypointManager;
+
+    process implementation WaypointManager.Impl
+        subcomponents
+            WaypointManager: thread WaypointManager_Thr.Impl;
+    	connections
+            c01: port AutomationResponse -> WaypointManager.AutomationResponse;
+            c02: port AirVehicleLocation -> WaypointManager.AirVehicleLocation;
+            c03: port WaypointManager.Start -> Start;
+            c04: port WaypointManager.Waypoint -> Waypoint;
+        properties
+            CASE_Scheduling::Domain => 5;       
+        annex agree {**
+            lift contract;
+        **};
+    end WaypointManager.Impl;
+    
+	------------------------
+	--   Alert Manager    --
+	------------------------
+	thread AlertManager_Thr
+		features
+			Alert: out event port;
+		annex agree {**
+            guarantee "The alert manager never alerts" :
+                event(Alert) = false;
+        **};
+	end AlertManager_Thr;
+
+	thread implementation AlertManager_Thr.Impl
+        properties
+            Dispatch_Protocol => Periodic;
+            Period => 500ms;
+            Compute_Execution_Time => 2ms .. 2ms;
+            Stack_Size => 65536 bytes;
+            Source_text => ("src/AlertManager.c");
+	end AlertManager_Thr.Impl;
+   
+	-------------
+	-- Process --
+	-------------
+	process SW
+		features
+			AutomationRequest: in event data port AutomationRequest.Impl;
+			AirVehicleLocation: in event data port Waypoint.Impl;
+			Waypoint: out event data port Waypoint.Impl;
+			Start: out event port;
+			Alert: out event port;
+		annex agree {**        
+		    eq req : bool = event(AutomationRequest);
+            eq avl : bool = event(AirVehicleLocation);
+            eq wp : bool = event(Waypoint);
+            eq rsp: bool = event(Start);
+            eq alrt : bool = event(Alert);
+                        
+            assume "Automation request is well-formed" :
+                req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+            assume "Air vehicle location is well-formed" :
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+            
+            eq nothing : bool = (not req) and (not rsp);
+            eq today : bool = req and rsp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq policy : bool = nothing
+                            or (today and not yesterday)
+                            or (not today and rsp and yesterday);
+
+            eq since : bool = alrt or (policy and (true -> pre(since)));
+                           
+            guarantee "Start includes a waypoint" :
+                rsp => wp;
+            guarantee "Locations required for waypoints after the start waypoint" :
+                (wp and not rsp) => avl;
+            guarantee "Next way point is well-formed" :
+                wp => WELL_FORMED_WAYPOINT(Waypoint);
+            guarantee "Alert if start is not bounded relative to a request" :
+                since;           
+        **};
+	end SW;
+    
+    ----------------------------
+    -- Process Implementation --
+    ----------------------------
+	process implementation SW.Impl
+		subcomponents
+			AI: thread AI_Thr.Impl;
+			WM: thread WaypointManager_Thr.Impl;
+			AM: thread AlertManager_thr.Impl;
+		connections
+
+			--------------------
+			-- Primary Inputs --
+			--------------------
+			c01: port AutomationRequest -> AI.AutomationRequest;
+			c03: port AirVehicleLocation -> AI.AirVehicleLocation;
+			c04: port AirVehicleLocation -> WM.AirVehicleLocation;
+
+			----------
+			--  AI  --
+			----------
+			c05: port AI.AutomationResponse -> WM.AutomationResponse;
+
+			---------
+			-- WM --
+			---------
+			c06: port WM.Waypoint -> Waypoint;
+            c07: port WM.Start -> Start;
+            
+			------------
+			-- NOALERT -
+			------------
+			c08: port AM.Alert -> Alert;
+
+		annex resolute {**
+            check HAMR_Guidelines
+        **};
+	end SW.Impl;
+    
+    ------------------------------------------
+    -- Cyber-assured Process Implementation --
+    ------------------------------------------
+	process implementation SW.cyber_Impl
+		subcomponents
+			AI: thread AI_Thr.Impl;
+			WM: thread WaypointManager_thr.Impl;
+			Filter: thread CASE_Filter_Thr.Impl;
+			Monitor: thread CASE_Monitor_Thr.Impl;
+		connections
+
+			--------------------
+			-- Primary Inputs --
+			--------------------
+			c01: port AutomationRequest -> AI.AutomationRequest;
+			c03: port AirVehicleLocation -> AI.AirVehicleLocation;
+			c04: port AirVehicleLocation -> WM.AirVehicleLocation;
+
+			----------
+			--  AI  --
+			----------
+			c05: port AI.AutomationResponse -> Filter.Input;
+
+			---------
+			-- WM --
+			---------
+			c06: port WM.Waypoint -> Waypoint;
+			c07: port WM.Start -> Start;
+
+			c2: port Filter.Output -> Monitor.Response;
+			c3: port AutomationRequest -> Monitor.Request;
+			c4: port Monitor.Output -> WM.AutomationResponse;
+			c5: port Monitor.Alert -> Alert;
+	end SW.cyber_Impl;
+    
+    ------------
+    -- System --
+    ------------    
+    system SWSystem
+        features
+            AutomationRequest: in event data port AutomationRequest.Impl;
+            AirVehicleLocation: in event data port Waypoint.Impl;
+            Waypoint: out event data port Waypoint.Impl;
+            Start: out event port;
+            Alert: out event port;
+        annex agree {**        
+            eq req : bool = event(AutomationRequest);
+            eq avl : bool = event(AirVehicleLocation);
+            eq wp : bool = event(Waypoint);
+            eq rsp: bool = event(Start);
+            eq alrt : bool = event(Alert);
+                        
+            assume "Automation request is well-formed" :
+                req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+            assume "Air vehicle location is well-formed" :
+                avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+            
+            eq nothing : bool = (not req) and (not rsp);
+            eq today : bool = req and rsp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq policy : bool = nothing
+                            or (today and not yesterday)
+                            or (not today and rsp and yesterday);
+
+            eq since : bool = alrt or (policy and (true -> pre(since)));
+                           
+            guarantee "Start includes a waypoint" :
+                rsp => wp;
+            guarantee "Locations required for waypoints after the start waypoint" :
+                (wp and not rsp) => avl;
+            guarantee "Next way point is well-formed" :
+                wp => WELL_FORMED_WAYPOINT(Waypoint);
+            guarantee "Alert if start is not bounded relative to a request" :
+                since;           
+        **};
+    end SWSystem;
+    
+    -----------------------------------------
+    -- Cyber-assured System Implementation --
+    -----------------------------------------
+    
+    ----------------------------------------------------------------------
     processor proc
     end proc;
 
-    processor implementation proc.Impl
+    processor implementation Proc.Impl
         properties
             Frame_Period => 1000ms;
             Clock_Period => 2ms;
-            CASE_Scheduling::Max_Domain => 15;
-            CASE_Scheduling::Schedule_Source_Text => "UAV/behavior_code/kernel/domain_schedule.c";
-    end proc.Impl;
+            CASE_Scheduling::Max_Domain => 6;
+            CASE_Scheduling::Schedule_Source_Text => "src/domain_schedule.c";
+    end Proc.Impl;
     ----------------------------------------------------------------------
-
-	system SW
-		features
-			AutomationRequest: in event data port AutomationRequest.i;
-			AirVehicleLocation : in event data port Waypoint.i;
-			NextWaypoint: out event data port Waypoint.i;
-		annex agree {**
-	        eq wellFormedAutomationRequest : bool =
-            event(AutomationRequest) =>
-                        AutomationRequest.TaskID = 42;
-                            
-		    assume "The system only receives well-formed requests" :
-                (      wellFormedAutomationRequest
-                );
-            
-            fun WELL_FORMED_WAYPOINT(point : Waypoint.i) : bool =
-                    (point.Latitude >= -90.0 and point.Latitude <= 90.0)
-                and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
-                and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);          
-                
-            assume "The system only receives well-formed vehicle locations" :
-                (      event(AirVehicleLocation) => WELL_FORMED_WAYPOINT(AirVehicleLocation)
-                );
-             
-            guarantee "The system only outputs only well formed waypoints" : 
-                (      event(NextWaypoint) => WELL_FORMED_WAYPOINT(NextWaypoint)
-                );           
-  		**};
-	end SW;
-
-	system implementation SW.Impl
-		subcomponents
-			proc: processor proc.Impl;
-			UXAS: process UxAS.Impl;
-			WPM: process WaypointPlanManagerService.Impl;
-			NO_ALERT: process no_alert.Impl;
-		connections
-
-	        --------------------
-			-- Primary Inputs --
-			--------------------
-			c01: port AutomationRequest -> UXAS.AutomationRequest;
-			c03: port AirVehicleLocation -> UXAS.AirVehicleLocation;
-			c04: port AirVehicleLocation -> WPM.AirVehicleLocation;
-		
-			----------
-			-- UXAS --
-			----------
-			c05: port UXAS.AutomationResponse -> WPM.AutomationResponse;
-
-			---------
-			-- WPM --
-			---------
-			c06: port WPM.NextWaypoint -> NextWaypoint;
-			
-			-- NOALERT_
-			c07: port NO_ALERT.alert -> WPM.ReturnHome;
-			
-		properties
-			Actual_Processor_Binding => (reference (proc)) applies to UXAS;
-            Actual_Processor_Binding => (reference (proc)) applies to WPM;
-            Actual_Processor_Binding => (reference (proc)) applies to NO_ALERT;
-            
-            HAMR::Default_Bit_Width => 32;
-            HAMR::Default_Max_Sequence_Size => 1;
-            HAMR::Max_String_Size => 256;
-            HAMR::Bit_Codec_Raw_Connections => true;
-
-        annex resolute {**
-            check HAMR_Guidelines
-        **};
-
-	end SW.Impl;
     
-    
-    system implementation SW.CYBER_Impl
-        subcomponents
-            proc: processor proc.Impl;
-            UXAS: process UxAS.Impl;
-            WPM: process WaypointPlanManagerService.Impl;
-            MON_REQ: process CASE_Monitor_Req.Impl;
-            FLT_ARes: process CASE_Filter_ARes.Impl;
+    system implementation SWSystem.cyber_Impl
+    	subcomponents
+    		PROC: processor Proc.Impl;
+            AI: process AI.Impl;
+            WM: process WaypointManager.Impl;
+            Filter: process CASE_Filter.Impl;
+            Monitor: process CASE_Monitor.Impl;
         connections
-
             --------------------
             -- Primary Inputs --
             --------------------
-            c01: port AutomationRequest -> UXAS.AutomationRequest;
-            c02: port AutomationRequest -> MON_REQ.req;
-            c03: port AirVehicleLocation -> UXAS.AirVehicleLocation;
-            c04: port AirVehicleLocation -> WPM.AirVehicleLocation;
-        
+            c01: port AutomationRequest -> AI.AutomationRequest;
+            c02: port AutomationRequest -> Monitor.Request;
+            c03: port AirVehicleLocation -> AI.AirVehicleLocation;
+            c04: port AirVehicleLocation -> WM.AirVehicleLocation;
+
             ----------
-            -- UXAS --
+            --  AI  --
             ----------
-            c05: port UXAS.AutomationResponse -> FLT_ARes.filter_in;
+            c05: port AI.AutomationResponse -> Filter.Input;
 
             ---------
-            -- WPM --
+            -- WM --
             ---------
-            c06: port WPM.NextWaypoint -> NextWaypoint;
+            c06: port WM.Waypoint -> Waypoint;
+            c07: port WM.Start -> Start;
 
-            -------------
-            -- FILTERS --
-            -------------
-            c07: port FLT_ARes.filter_out -> MON_REQ.resp;
-
-            --------------
-            -- MONITORS --
-            --------------
-            c08: port MON_REQ.respOut -> WPM.AutomationResponse;
-            c09: port MON_REQ.alert -> WPM.ReturnHome;
+            ------------
+            -- Filter --
+            ------------
+            c08: port Filter.Output -> Monitor.Response;
             
-        properties
-            Actual_Processor_Binding => (reference (proc)) applies to UXAS;
-            Actual_Processor_Binding => (reference (proc)) applies to WPM;
-            Actual_Processor_Binding => (reference (proc)) applies to FLT_ARes;
-            Actual_Processor_Binding => (reference (proc)) applies to MON_REQ;
+            -------------
+            -- Monitor --
+            -------------
+            c09: port Monitor.Output -> WM.AutomationResponse;
+            c10: port Monitor.Alert -> Alert;
+            
+    	properties
+    		Actual_Processor_Binding => (reference (Proc)) applies to AI;
+            Actual_Processor_Binding => (reference (Proc)) applies to WM;
+            Actual_Processor_Binding => (reference (Proc)) applies to Filter;
+            Actual_Processor_Binding => (reference (Proc)) applies to Monitor;
             
             HAMR::Default_Bit_Width => 32;
             HAMR::Default_Max_Sequence_Size => 1;
             HAMR::Max_String_Size => 256;
             HAMR::Bit_Codec_Raw_Connections => true;
-
+            
         annex resolute {**
             check HAMR_Guidelines
         **};
+    end SWSystem.cyber_Impl;
+    
+    ---------------------
+    -- AGREE Functions --
+    ---------------------
+    annex agree {**
+        const TASK_ID : int = 42;
+        fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =
+                            (point.Latitude >= -90.0 and point.Latitude <= 90.0)
+                        and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
+                        and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);
+        fun WELL_FORMED_TASK_ID(id : int) : bool =
+                    (id = TASK_ID);
+        fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.Impl) : bool =
+                            WELL_FORMED_TASK_ID(msg.TaskID);
+        fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.Impl) : bool =
+                            (WELL_FORMED_TASK_ID(msg.TaskID))
+                        and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
+    **};
 
-    end SW.CYBER_Impl;
 end SW;
