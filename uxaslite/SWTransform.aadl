@@ -142,9 +142,10 @@ public
 	----------------------
 	thread WaypointManager_thr
 		features
-			Alert:   in event port;
+			Alert: in event port;
 			AutomationResponse: in event data port AutomationResponse.i;
 			AirVehicleLocation: in event data port Waypoint.i;
+			Start: out event port;
 			NextWaypoint: out event data port Waypoint.i;
 		properties
 			Dispatch_Protocol => Periodic;
@@ -156,6 +157,7 @@ public
 		        
 		    eq rsp : bool = event(AutomationResponse);
 		    eq nwp : bool = event(NextWaypoint);
+		    eq strt: bool = event(Start);
 		    eq avl : bool = event(AirVehicleLocation);
 		    eq alrt: bool = event(Alert);
 		    assume "Automation response is well-formed" :
@@ -163,16 +165,19 @@ public
             assume "Air vehicle state is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
             
-            eq once : bool = rsp -> 
-                             if rsp then true else pre(once);
+            eq once : bool = (nwp and rsp) -> 
+                             if (nwp and rsp) then true else pre(once);
             guarantee "A response results in a next waypoint" :
-                rsp => nwp;                        
-            guarantee "A next waypoint coincides with the response or an air vehicle location if a response has been seen" :
-                nwp => (rsp or (once and avl));           
+                (rsp or (once and avl)) <=> nwp;                        
+--            guarantee "A next waypoint coincides with the response or an air vehicle location if a response has been seen" :
+--                nwp => (rsp or (once and avl));           
             guarantee "Next waypoint is well-formed" : 
                 nwp => WELL_FORMED_WAYPOINT(NextWaypoint);
-            guarantee "No waypoints if alert" :
-                nwp => (not alrt);
+                
+            guarantee "Start marks each new automation response" :
+                strt <=> rsp;
+--            guarantee "No waypoints if alert" :
+--                nwp => (not alrt);
         **};
 	end WaypointManager_thr;
 
@@ -208,12 +213,14 @@ public
 			AutomationRequest: in event data port AutomationRequest.i;
 			AirVehicleLocation: in event data port Waypoint.i;
 			NextWaypoint: out event data port Waypoint.i;
+			Start: out event port;
 			ReturnHome: out event port;
 		annex agree {**
 		        
 		    eq req : bool = event(AutomationRequest);
             eq nwp : bool = event(NextWaypoint);
             eq avl : bool = event(AirVehicleLocation);
+            eq strt: bool = event(Start);
             eq rh : bool = event(ReturnHome);
                         
             assume "Automation request is well-formed" :
@@ -223,19 +230,19 @@ public
             
             eq first : bool = true -> 
                               if req then true else
-                              if pre(nwp) then false else pre(first);
---            eq yesterday : bool = (false -> pre(req));
---            eq bounded : bool = (nwp and first) => (req or yesterday);
-            eq mutex : bool = not (bounded = rh);
-            eq once : bool = req -> if req then true else pre(once);
-  
-            eq nothing : bool = (not req) and (not nwp);
-            eq today : bool = req and nwp;    
-            eq yesterday : bool = false -> (pre (req) and (not pre (nwp)));
+                              if pre(nwp) then false else pre(first);                  
+            eq rsp : bool = strt;
+            eq once : bool = req -> if req then true else pre(once);  
+            eq nothing : bool = (not req) and (not rsp);
+            eq today : bool = req and rsp;    
+            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
             eq bounded : bool = 
                    nothing
-                or (req and nwp and (not yesterday))                       
-                or ((not req) and nwp and yesterday);
+                or (req and rsp and (not yesterday))                       
+                or ((not req) and rsp and yesterday);
+            eq Policy : bool = bounded;
+
+            eq since : bool = rh or (Policy and (true -> pre(since)));
                            
             guarantee "Next waypoints only as a result of a request" :
                 nwp => once;
@@ -246,7 +253,7 @@ public
             guarantee "Next way point is well-formed" :
                 nwp => WELL_FORMED_WAYPOINT(NextWaypoint);
             guarantee "Bounded and return home are mutually exclusive" :
-                mutex;           
+                since;           
         **};
 	end SW;
 
@@ -273,12 +280,13 @@ public
 			-- WM --
 			---------
 			c06: port WM.NextWaypoint -> NextWaypoint;
-
+            c07: port WM.Start -> Start;
+            
 			------------
 			-- NOALERT -
 			------------
-			c07: port AM.Alert -> ReturnHome;
-			c08: port AM.Alert -> WM.Alert;
+			c08: port AM.Alert -> ReturnHome;
+			c09: port AM.Alert -> WM.Alert;
 
 		annex resolute {**
             check HAMR_Guidelines
@@ -316,6 +324,7 @@ public
 			-- WM --
 			---------
 			c06: port WM.NextWaypoint -> NextWaypoint;
+			c07: port WM.Start -> Start;
 
 			c2: port Filter.Output -> Monitor.Response;
 			c3: port AutomationRequest -> Monitor.Request;
