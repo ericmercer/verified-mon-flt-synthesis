@@ -3,7 +3,6 @@ public
 
 	with Base_Types;
 	renames Base_Types::all;
-	with Data_Model;
 	with HAMR;
 	with CASE_Properties;
 	with CASE_Scheduling;
@@ -20,16 +19,6 @@ public
 			Longitude: data Float_64;
 			Altitude: data Float_32;
 	end Waypoint.Impl;
-
-    --------------------
-    -- Waypoint Array --
-    --------------------
-	data WaypointArray
-		properties
-			Data_Model::Data_Representation => Array;
-			Data_Model::Base_Type => (classifier (Waypoint.Impl));
-			Data_Model::Dimension => (1);
-	end WaypointArray;
 
     ------------------------
     -- Automation Request --
@@ -53,7 +42,8 @@ public
 	data implementation AutomationResponse.Impl
 		subcomponents
 			TaskID: data Integer_64;
-			Waypoints: data WaypointArray;
+			Length: data Integer_64;
+			Waypoints: data Waypoint.Impl[3];
 		properties
 			HAMR::Bit_Codec_Max_Size => 1664 bits;
 	end AutomationResponse.Impl;
@@ -107,6 +97,8 @@ public
             Request: in event data port AutomationRequest.Impl;
             Alert: out event port;
             Output: out event data port AutomationResponse.Impl;
+        properties
+            CASE_Properties::Monitor_Latched => true;
    end CASE_Monitor;
 
     process implementation CASE_Monitor.Impl
@@ -451,7 +443,6 @@ public
             eq policy : bool = nothing
                             or (today and not yesterday)
                             or (not today and rsp and yesterday);
-
             eq since : bool = alrt or (policy and (true -> pre(since)));
                            
             guarantee "Start includes a waypoint" :
