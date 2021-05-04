@@ -65,9 +65,9 @@ public
             const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
-            eq nothing : bool = (not req) and (not rsp);
+            eq nothing : bool = true -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
-            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq yesterday : bool = false -> pre (req and not rsp);
             eq policy : bool = nothing
                             or (today and not yesterday)
                             or (not today and rsp and yesterday);
@@ -239,7 +239,7 @@ public
             guarantee "Start marks each new automation response" :
                 strt <=> rsp;
             guarantee "Waypoint coincides with a response":
-                rsp => wp;
+                strt => wp;
             guarantee "Future waypoints follow response" :
                 wp => (once and avl);                         
             guarantee "Waypoints are well-formed" : 
@@ -322,23 +322,20 @@ public
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
             
-            eq nothing : bool = (not req) and (not rsp);
+            eq nothing : bool = true -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
-            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq yesterday : bool = false -> pre (req and not rsp);
             eq policy : bool = nothing
                             or (today and not yesterday)
                             or (not today and rsp and yesterday);
-
-            eq since : bool = alrt or (policy and (true -> pre(since)));
-                           
             guarantee "Start includes a waypoint" :
                 rsp => wp;
             guarantee "Locations required for waypoints after the start waypoint" :
                 (wp and not rsp) => avl;
-            guarantee "Next way point is well-formed" :
+            guarantee "Waypoint is well-formed" :
                 wp => WELL_FORMED_WAYPOINT(Waypoint);
             guarantee "Alert if start is not bounded relative to a request" :
-                since;           
+                (not alrt) => policy;           
         **};
 	end SW;
     
@@ -437,14 +434,12 @@ public
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
             
-            eq nothing : bool = (not req) and (not rsp);
+            eq nothing : bool = true -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
-            eq yesterday : bool = false -> (pre (req) and (not pre (rsp)));
+            eq yesterday : bool = false -> pre (req and not rsp);
             eq policy : bool = nothing
                             or (today and not yesterday)
-                            or (not today and rsp and yesterday);
-            eq since : bool = alrt or (policy and (true -> pre(since)));
-                           
+                            or (not today and rsp and yesterday);                          
             guarantee "Start includes a waypoint" :
                 rsp => wp;
             guarantee "Locations required for waypoints after the start waypoint" :
@@ -452,7 +447,7 @@ public
             guarantee "Next way point is well-formed" :
                 wp => WELL_FORMED_WAYPOINT(Waypoint);
             guarantee "Alert if start is not bounded relative to a request" :
-                since;           
+                not alrt => policy;           
         **};
     end SWSystem;
     
