@@ -65,12 +65,12 @@ public
             const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
-            eq nothing : bool = true -> (not pre (req)) and (not req);
+            eq nothing : bool = (not req) -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
             eq yesterday : bool = false -> pre (req and not rsp);
-            eq policy : bool = nothing
-                            or (today and not yesterday)
-                            or (not today and rsp and yesterday);
+            property policy = nothing
+                           or (today and not yesterday)
+                           or (not today and rsp and yesterday);
             eq alert : bool = (not policy) -> ((is_latched and pre(alert)) or not policy);
 
             guarantee "Alert port tracks alert variable" :
@@ -128,7 +128,7 @@ public
             CASE_Properties::Component_Spec => ("CASE_Filter_Output");
         annex agree {**
             property CASE_Filter_policy = WELL_FORMED_AUTOMATION_RESPONSE(Input);
-            guarantee CASE_Filter_Output "The filter output shall be well-formed" :
+            guarantee CASE_Filter_Output "Filter output is well-formed" :
             if event(Input) and CASE_Filter_policy then
             event(Output) and Output = Input
             else
@@ -321,21 +321,23 @@ public
                 req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
-            
-            eq nothing : bool = true -> (not pre (req)) and (not req);
+            eq nothing : bool = (not req) -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
             eq yesterday : bool = false -> pre (req and not rsp);
             eq policy : bool = nothing
                             or (today and not yesterday)
                             or (not today and rsp and yesterday);
+            eq since : bool = (not policy and alrt) 
+                            or (alrt and (false -> pre(since)));
+
             guarantee "Start includes a waypoint" :
                 rsp => wp;
-            guarantee "Locations required for waypoints after the start waypoint" :
+            guarantee "Locations required after the start waypoint" :
                 (wp and not rsp) => avl;
             guarantee "Waypoint is well-formed" :
                 wp => WELL_FORMED_WAYPOINT(Waypoint);
             guarantee "Alert if start is not bounded relative to a request" :
-                (not alrt) => policy;           
+                (policy and not alrt) or since;
         **};
 	end SW;
     
@@ -433,21 +435,23 @@ public
                 req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
-            
-            eq nothing : bool = true -> (not pre (req)) and (not req);
+            eq nothing : bool = (not req) -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
             eq yesterday : bool = false -> pre (req and not rsp);
             eq policy : bool = nothing
                             or (today and not yesterday)
-                            or (not today and rsp and yesterday);                          
+                            or (not today and rsp and yesterday);
+            eq since : bool = (not policy and alrt)
+                           or (alrt and (false -> pre(since)));
+
             guarantee "Start includes a waypoint" :
                 rsp => wp;
-            guarantee "Locations required for waypoints after the start waypoint" :
+            guarantee "Locations required after the start waypoint" :
                 (wp and not rsp) => avl;
-            guarantee "Next way point is well-formed" :
+            guarantee "Waypoint is well-formed" :
                 wp => WELL_FORMED_WAYPOINT(Waypoint);
             guarantee "Alert if start is not bounded relative to a request" :
-                not alrt => policy;           
+                (policy and not alrt) or since;
         **};
     end SWSystem;
     

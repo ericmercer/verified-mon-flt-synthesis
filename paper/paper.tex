@@ -16,7 +16,8 @@
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 \definecolor{light-gray}{gray}{0.88}
 
-\lstset{frame=none,
+\lstdefinestyle{myML}
+{frame=none,
   basicstyle=\ttfamily,
   language=ML,
   aboveskip=3mm,
@@ -30,7 +31,26 @@
   breaklines=false,
   breakatwhitespace=true,
   tabsize=2,
-  morekeywords={function, method, then, reads, modifies, requires, ensures, var, assume, assert}
+  linewidth=2\linewidth
+}
+
+\lstdefinestyle{agree}
+{frame=none,
+  basicstyle=\ttfamily,
+  language=ML,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=false,
+  breakatwhitespace=true,
+  tabsize=2,
+  linewidth=2\linewidth,
+  morekeywords={eq, bool, guarantee, assume, true, false, pre, not, and, or, property, const}
 }
 
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -135,11 +155,11 @@ Provo, Utah}
 % \section{OSATE Integration for AADL}
 % \input{aadl-agree-osate}
 
-% \section{Related Work}
-% \input{related-work}
+\section{Related Work}
+\input{related-work}
 
-% \section{Conclusion}
-% \input{conclusion}
+\section{Conclusion}
+\input{conclusion}
 
 \section*{Acknowledgments}
 This work is funded by DARPA contract HR00111890001. The views, opinions and/or findings expressed are those of the authors and
@@ -181,8 +201,8 @@ should not be interpreted as representing the official views or policies of the 
 %\IEEEtriggercmd{\enlargethispage{-5in}}
 
 % references section
-% \bibliographystyle{IEEEtran}
-% \bibliography{paper}
+\bibliographystyle{IEEEtran}
+\bibliography{paper}
 \end{document}
 
 
