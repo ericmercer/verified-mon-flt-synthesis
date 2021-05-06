@@ -42,7 +42,7 @@ public
 	data implementation AutomationResponse.Impl
 		subcomponents
 			TaskID: data Integer_64;
-			Length: data Integer_64;
+			Length: data Unsigned_8;
 			Waypoints: data Waypoint.Impl[3];
 		properties
 			HAMR::Bit_Codec_Max_Size => 1664 bits;
