@@ -4,9 +4,9 @@
       \mathit{c}    & = & \konst{input}\ [(f : \tau)\ldots] \\
                     &   & \konst{output}\ [(f : \tau)\ldots] \\
                     &   & \konst{eq}\; [(f : \tau := \mathit{exp})\ldots] \\
-                    &   & \konst{guarantees}\ [\mathit{bexp}\ldots]\\
+                    &   & \konst{guarantee}\ [\mathit{bexp}\ldots]\\\\
       
-      \lval & = & f \mid \lval \, [ \mathit{exp} ]
+      \lval         & = & f \mid \lval \, [ \mathit{exp} ]
                           \mid \lval . f \\ \\
 
       f             & = & \mathit{varName} \\ \\
@@ -33,11 +33,23 @@
 \label{fig:syntax}
 \end{figure}
 
-The specification language for high-assurance components is in (see \figref{fig:syntax}). It is stylized contracts that defines the inputs, outputs, local values, and guarantees for each output. Each guarantee must be invariant over the input stream and define the meaning of its corresponding output under all conditions. A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\lval$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the left hand side of an assignment. Alpha renaming is assumed so that every $\lval$ is unique.
+The specification language for a high-assurance component is in \figref{fig:syntax}. A specification defines the inputs, outputs, local values, and guarantees for each output. A type $\tau$ is a contiguity type, and $(f : \tau)\ldots$ means zero or more repetition (e.g., Kleene star). An $\lval$ must eventually resolve to something that can be assigned. The expression language divides out Boolean expressions to simplify the semantics but is otherwise typical. The \konst{Loc} and \konst{bLoc} refer to the value of an $\lval$, while \konst{nLit} and \konst{bLit} indicate a literal. The language includes the initialization ($\rightarrow$), \konst{pre}, and if-then-else (\konst{ite}) operators.
+
+The semantics are only defined for \emph{well-formed} specifications. A specification is well-formed if and only if
+\begin{compactenum}
+\item Every $\lval$ is unique;
+\item the \konst{eq} list is in dependency order and the expressions are acyclic;
+\item the associated $\lval$ with each \konst{Loc} and \konst{bLoc} expression is a valid reference in the environment;
+\item the associated literal with each \konst{nLit} and \konst{bLit} has the correct type;
+\item \konst{pre} expressions do not refer past the beginning of the associated streams;
+\item the expression list from \konst{guarantee} exactly corresponds in size and order to the list from \konst{output}; and
+\item every expression in the list from \konst{guarantee} defines its corresponding output value under all input combinations.
+\end{compactenum}
+These checks are part of the synthesis but omitted to simplify the presentation.
 
 An environment, $\theta: \lval \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
 
-The semantics are synchronous data-flow on a single clock defined over a sequence of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of the environment stream in \figref{fig:eval}.
+The well-formed assumption enables the use of a single global environment for the semantics. The semantics are synchronous data-flow on a single clock defined over a sequences of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of this environment stream as shown is \figref{fig:eval}. Here, $\konst{eval}\; i\; e$ carries with it the index of the environment to be used for the expression.
 
 \begin{figure*}
 \[
@@ -76,9 +88,18 @@ The semantics are synchronous data-flow on a single clock defined over a sequenc
 \label{fig:eval}
 \end{figure*}
 
-The initial environment stream only contains mappings for the inputs along the entire stream. Stepping the component updates the current environment and checks the policies. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of the sequential evaluation of the \konst{eq}-statements in the specification, which are assumed to be in dependency order, and then the guarantees are checked for invariance. 
+
+Each environment in the stream is initially partial meaning that it only contains mappings for the inputs. \emph{Stepping} the specification updates the current environment and checks the invariance of the guarantees. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of the sequential evaluation of the \konst{eq}-statements in the specification and then the guarantees are checked for invariance. 
 
 The meaning of the specification is a set of finite environment streams where the guarantees hold at each step of the streams and the updated mappings or the \konst{eq}-statements are consistent with the statements.
+
+
+At the $i^\mathrm{th}$ step of the stream, $\theta^i$
+
+
+Each \emph{step} of the specification updates a corresponding environment in the stream making it complete at the end of the step.  
+
+The environments in the stream are partial containing only mappings for inputs.
 
 \begin{comment}
   A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
