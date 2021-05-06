@@ -148,8 +148,9 @@ fun filter_step () =
 let val () = Utils.clear_buf buffer
     val () = API.callFFI "get_input" "" buffer
     val string = Utils.buf2string buffer
+    val policy = WELL_FORMED_AUTOMATION_RESPONSE string 
 in
-    if WELL_FORMED_AUTOMATION_RESPONSE string
+    if policy
     then
         let val string = Word8Array.substring buffer 1
                          (Word8Array.length buffer - 1)
