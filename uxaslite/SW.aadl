@@ -59,26 +59,31 @@ public
             Output: out event data port AutomationResponse.Impl;
         properties
             CASE_Properties::Monitoring => 100;
-            CASE_Properties::Component_Spec => ("CASE_Monitor_Alert", "CASE_Monitor_Output");
+            CASE_Properties::Component_Spec => ("policy");
             CASE_Properties::Monitor_Latched => true;
         annex agree {**
-            const is_latched : bool = Get_Property(this, CASE_Properties::Monitor_Latched);
+            const is_latched : bool = 
+              Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
             eq nothing : bool = (not req) -> (not pre (req)) and (not req);
             eq today : bool = req and rsp;    
             eq yesterday : bool = false -> pre (req and not rsp);
-            property policy = nothing
+            eq policy: bool = nothing
                            or (today and not yesterday)
                            or (not today and rsp and yesterday);
-            eq alert : bool = (not policy) -> ((is_latched and pre(alert)) or not policy);
+            eq alert : bool = (not policy) 
+                           -> ((is_latched and pre(alert)) or not policy);
+            property Policy_Output = 
+              if event(Alert) then (not event(Output)) else
+              if event(Response) then (event(Output) and (Output = Response))
+              else (not event(Output));
+            property Policy_Alert =  event(Alert) = alert;
 
             guarantee "Alert port tracks alert variable" :
-                event(Alert) <=> alert;
+                Policy_Alert;
             guarantee "Output if not alerted" :
-                if event(Alert) then (not event(Output)) else
-                if event(Response) then (event(Output) and (Output = Response))
-                else (not event(Output));
+                Policy_Output;
         **};
     end CASE_Monitor_Thr;
 
@@ -125,14 +130,15 @@ public
             Output: out event data port AutomationResponse.Impl;
         properties
             CASE_Properties::Filtering => 100;
-            CASE_Properties::Component_Spec => ("CASE_Filter_Output");
+            CASE_Properties::Component_Spec => ("policy");
         annex agree {**
-            property CASE_Filter_policy = WELL_FORMED_AUTOMATION_RESPONSE(Input);
-            guarantee CASE_Filter_Output "Filter output is well-formed" :
-            if event(Input) and CASE_Filter_policy then
-            event(Output) and Output = Input
-            else
-            not event(Output);
+            eq policy : bool = WELL_FORMED_AUTOMATION_RESPONSE(Input);
+            property Policy_Output = 
+                  if event(Input) and policy then 
+                    event(Output) and Output = Input
+                  else not event(Output);
+            guarantee "Filter output is well-formed" :
+                Policy_Output;
         **};
     end CASE_Filter_Thr;
 

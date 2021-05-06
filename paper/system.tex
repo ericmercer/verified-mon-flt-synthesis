@@ -3,13 +3,9 @@
     \begin{array}{rcl}
       \mathit{c}    & = & \konst{input}\ [(f : \tau)\ldots] \\
                     &   & \konst{output}\ [(f : \tau)\ldots] \\
-                    &   & [\mathit{stmts}\ldots] \\
-                    &   & \konst{assume}\ [\mathit{bexp}\ldots] \\
-                    &   & \konst{guarantee}\ [\mathit{bexp}\ldots] \\ \\
+                    &   & \konst{eq}\; f : \tau := \mathit{exp} \\
+                    &   & \konst{policies}\ [\mathit{bexp}\ldots]\\
       
-      \mathit{stmts}& = & \konst{subcomp}\ \lval\dots\ c \\
-                    & | & \konst{eq}\; f : \tau := \mathit{exp} \\ \\
-                    
       \lval & = & f \mid \lval \, [ \mathit{exp} ]
                           \mid \lval . f \\ \\
 
@@ -33,13 +29,11 @@
                     \mid  \mathit{exp} < \mathit{exp}
 \end{array}
 \]
-\caption{Syntax for component specifications.}
+\caption{Syntax for high-assurance component specifications.}
 \label{fig:syntax}
 \end{figure}
 
-A \emph{system} in this model of computation is a \emph{component} that is defined by a specification (see \figref{fig:syntax}). A specification defines inputs, outputs, statements, assumptions for pre-conditions, and guarantees for post-conditions. A statement can be a subcomponent definition with its input binding or a local variable definition.
-
-A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\lval$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the left hand side of an assignment. Alpha renaming is assumed so that every $\lval$ is unique.
+The specification language for high-assurance components is in (see \figref{fig:syntax}). It is stylized contracts that defines the inputs, outputs, local values, and policies for each output. Each output policy must be invariant over the input stream and completely define the meaning of its corresponding output. A type $\tau$ is a contiguity type which is a self-describing dependent type specification (add citation). An $\lval$ is a reference to an \emph{L-value} from compiler concepts and is an expression that can appear on the left hand side of an assignment. Alpha renaming is assumed so that every $\lval$ is unique.
 
 An environment, $\theta: \lval \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
 
@@ -82,7 +76,7 @@ The semantics are synchronous data-flow on a single clock defined over a sequenc
 \label{fig:eval}
 \end{figure*}
 
-The initial environment stream only contains mappings for primary inputs along the entire stream. Stepping the component updates the current environment. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of each component evaluation. A component step traverses the component sequentially to update the environment recursing into subcomponents after binding inputs. Assume the component is written in dependency order. 
+The initial environment stream only contains mappings for the inputs along the entire stream. Stepping the component updates the current environment and checks the policies. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of the sequential evaluation of the \konst{eq}-statements in the specification, which are assumed to be in dependency order, and then the policies are checked for invariance. 
 
 \begin{comment}
   A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
