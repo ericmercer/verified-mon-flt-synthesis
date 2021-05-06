@@ -13,7 +13,7 @@
 
 \figref{fig:example} is an AADL description of an implementation of a software system for route planning and automated control for a UAV. It is loosely based on the system in the case study presented later. The system receives an automation request that is forwarded to an untrusted third-party route planner (AI) that decides the flight path of the UAV based on its current position and the requested task. The waypoint manager (WM) receives the mission command as a set of waypoints from the planner and starts the UAV flying the mission, issuing waypoints to the UAV flight controller as the UAV location changes. It is an \emph{as is} legacy component. The alert manager never raises the alert as there is no capacity in the design to know when an alert is needed.
 
-The goal is to cyber-harden the system so that it is resilient to cyber-attack. For this simple example, two attacks are considered; both attacks originating from the untrusted route-planner: first, malformed messages to disrupt the waypoint manager or UAV flight control; and second, a delayed or unrequested automation response to prevent the UAV from flying a mission or to fly the wrong mission.
+The goal is to cyber-harden the system so that it is resilient to cyber-attack. For this simple example, two attacks are considered; both attacks originating from the untrusted route-planner: first, malformed messages to disrupt the waypoint manager or UAV flight controller; and second, a delayed or unrequested automation response to prevent the UAV from flying a mission or to fly the wrong mission.
 
 \newsavebox{\sw}
 \begin{lrbox}{\sw}
@@ -28,15 +28,12 @@ assume "Automation request is well-formed" :
     req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
 assume "Air vehicle location is well-formed" :
     avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
-    
-eq nothing : bool = (not req) -> (not pre (req)) and (not req);
-eq today : bool = req and rsp;    
-eq yesterday : bool = false -> pre (req and not rsp);
-eq policy : bool = nothing
-                or (today and not yesterday)
-                or (not today and rsp and yesterday);
-eq since : bool = (alrt and (false -> pre(since))) 
-               or (not policy and alrt);
+
+eq today : bool = (req = rsp);
+eq yesterday : bool = (req and not rsp) ->
+                      pre(req and not rsp) and (not req and rsp);
+eq policy : bool = today or yesterday;
+eq since : bool =  alrt or (alrt and (false -> pre(since)));
 
 guarantee "Start includes a waypoint" :
     rsp => wp;
@@ -45,7 +42,7 @@ guarantee "Locations required after the start waypoint" :
 guarantee "Waypoint is well-formed" :
     wp => WELL_FORMED_WAYPOINT(Waypoint);
 guarantee "Alert if start is not bounded relative to a request" :
-    (policy and not alrt) or since;
+    policy or since;
 \end{lstlisting}
 \end{lrbox}
 
@@ -61,15 +58,15 @@ This work uses an assume guarantee paradigm, in the form of contracts, to model 
 
 The contract to model the SW component with its primary inputs and outputs is in \figref{fig:sw}. The contract language is a first order predicate calculus. The contract semantics are synchronous data-flow where the inputs, outputs, and expressions are characterized by data streams. The semantics are such that the contracts are evaluated in dependency order with inputs being propagated to outputs through all the contracts until they stabilize; as such, the contracts, and thereby the system model, must be acyclic. Once the contracts have stabilized, then the model takes a synchronous step to the next input data in the stream. The semantics do not model computation or communication delay. The output of one contract is seen at the input of any downstream contract in the same step of the input data stream. 
 
-The contract in \figref{fig:sw} uses \texttt{eq} statements to define variables local to the contract. For example, the \texttt{req} variable is equivalent to the \texttt{event(req)} expression. An \texttt{event} expression is true if there is data on the named AADL event port. The system contract assumes well-formed input and guarantees a set of properties about the output.
+The contract in \figref{fig:sw} uses \texttt{eq} statements to define variables local to the contract. For example, the \texttt{req} variable is equivalent to the \texttt{event(req)} expression. There is an implicit \emph{event} input (or output) associated with every named event port in a component. The semantics used here do not not buffer events so the implicit input (or output) is a boolean value. An \texttt{event} expression refers to that implicit input (or output) and is true if there is data on the named port. The system contract assumes well-formed input and guarantees a set of properties about the output.
 
 There are two requirements in the SW model, among others, related to the cyber-attacks: the first, \emph{Waypoint is well-formed} disallows malformed waypoints from being propagated; and the second, \emph{Alert if start is not bounded relative to a request}, disallows a mission being started without a request or if the start is delayed more than one step after a request. This later guarantee merits some further discussion as it illustrates the steam nature of the semantics.
 
-The guarantee is an invariant on the expression \texttt{(policy and not alrt) or since} meaning that either the policy holds and there is no alert or the alert has been sounding since the policy was first violated. The \texttt{policy} is satisfied if there is no pending request (\texttt{nothing}), a request with a response right now (\texttt{today}), or a request yesterday with its response today. The value of \texttt{nothing} and \texttt{yesterday} in the current time step rely on values from the previous time step. The \texttt{yesterday} uses the \texttt{->} operator for initialization. The left operand is the initial value of \texttt{yesterday} at the start of the system, which in this example is \texttt{false} because there is no yesterday at the start.  The right operand is the value of \texttt{yesterday} after the initial step. Here the \texttt{pre} operator refers to the value of \texttt{(req and not rsp)} in the prior time step. Intuitively, \texttt{yesterday} is true if the previous time step made a request without a matching response. 
+The guarantee is an invariant on the expression \texttt{policy or since} meaning that either the policy holds or the alert is sounding. The \texttt{policy} is satisfied if there is a request with a response or nothing in the current time step (\texttt{today}) or a request yesterday with its response today. The value of \texttt{yesterday} in the current time step relies on values from the previous time step. The \texttt{yesterday} value uses the \texttt{->} operator for initialization. The left operand is the initial value of \texttt{yesterday} at the start of the system, which in this example is \texttt{(req and not rsp)} because seeing a request with no response is inconclusive at the start.  The right operand is the value of \texttt{yesterday} after the initial step. Here the \texttt{pre} operator refers to the value of the expression \texttt{(req and not rsp)} in the prior time step. Intuitively, \texttt{yesterday} is true if the previous time step made a request without a matching response and the current time step has the matching response to that request with no new request.
 
-The value of \texttt{since} relies on its own value in the previous time step. The intuitive reading of the expression is that the alert has been true since the time when the policy first failed. The first failure sets \texttt{since} to true (i.e., \texttt{(not policy and alrt)}), and once \texttt{since} true, it persists as long as \texttt{alrt} holds. As such, the \emph{Alert if start is not bounded relative to a request} guarantee defines one behavior of a correctly implemented system. In this way, the contracts model the expected input and output of the system as a whole, and they also model the expected behavior of each component used to implement the system.
+The value of \texttt{since} relies on its own value in the previous time step. The intuitive reading of the expression is that the alert has been true since the time when it first sounded. The first \texttt{alrt} sets \texttt{since} to true, and once the value of \texttt{since} is true, that value persists as long as \texttt{alrt} holds. The \emph{Alert if start is not bounded relative to a request} guarantee defines one behavior of a correctly implemented system. Together with the other guarantees, the contract models the expected input and output of the system as a whole. Contracts also model the expected behavior of each component used to implement the system.
 
-Model checking proves whether the contract models of the components, with their connections, implement the system model in \figref{fig:sw}. The results of the model checker are in \figref{fig:example}(b). Not unexpectedly, since the model of the route planner leaves the output behavior unconstrained (i.e., the component can do anything since it is not trusted) the model checker proves that the component composition does not implement the system requirements.
+Model checking proves whether the contract models of the components, with their connections, implement the system model in \figref{fig:sw}. The results of the model checker are in \figref{fig:example}(b). The red exclamation points are properties that do not hold. Each comes with a counter-example. The result is not unexpected since the model of the route planner leaves the output behavior unconstrained (i.e., an untrusted component can do anything). The counter-example showing each vio with a counterexample that violates the policy and does not raise the alert.
 
 \begin{figure*}
   \begin{center}
@@ -100,15 +97,13 @@ guarantee Filter_Output "Filter output is well-formed" :
 \begin{lrbox}{\mntr}
 \begin{lstlisting}[style=agree]
 const is_latched : bool = 
-Get_Property(this, CASE_Properties::Monitor_Latched);
+  Get_Property(this, CASE_Properties::Monitor_Latched);
 eq rsp : bool = event(Response);
 eq req : bool = event(Request);
-eq nothing : bool = (not req) -> (not pre (req)) and (not req);
-eq today : bool = req and rsp;    
-eq yesterday : bool = false -> pre (req and not rsp);
-eq policy: bool = nothing
-               or (today and not yesterday)
-               or (not today and rsp and yesterday);
+eq today : bool = (req = rsp);
+eq yesterday : bool = (req and not rsp) ->
+                      pre(req and not rsp) and (not req and rsp);
+eq policy : bool = today or yesterday;
 eq alert : bool = (not policy) 
                -> ((is_latched and pre(alert)) or not policy);
 guarantee Monitor_Alert 
