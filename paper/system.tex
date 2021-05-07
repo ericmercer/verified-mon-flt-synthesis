@@ -47,9 +47,9 @@ The semantics are only defined for \emph{well-formed} specifications. A specific
 \end{compactenum}
 These checks are part of the synthesis but omitted to simplify the presentation.
 
-An environment, $\theta: \lval \mapsto \konst{string}$ binds L-values to strings. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
+An environment, $\theta: \lval \mapsto \konst{string}$ binds L-values to strings. 
 
-The well-formed assumption enables the use of a single global environment for the semantics. The semantics are synchronous data-flow on a single clock defined over a sequences of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of this environment stream as shown is \figref{fig:eval}. Here, $\konst{eval}\; i\; e$ carries with it the index of the environment to be used for the expression.
+The well-formed assumption enables the use of a single global environment for the semantics. The semantics are synchronous data-flow on a single clock defined over a sequences of environments where $\theta^i$ is the $i^\mathrm{th}$ environment in the stream. Expression evaluation is defined in the context of this environment stream as shown is \figref{fig:eval}. Here, $\konst{eval}\; i\; e$ carries with it the index of the environment to be used for the expression. $\Delta : \konst{string} \to \mathbb{N}$ binds constant names to numbers. Functions $\konst{toN}:\konst{string}\to\mathbb{N}$ and $\konst{toB}:\konst{string}\to\konst{bool}$ interpret byte sequences to numbers and booleans, respectively. 
 
 \begin{figure*}
 \[
@@ -88,33 +88,4 @@ The well-formed assumption enables the use of a single global environment for th
 \label{fig:eval}
 \end{figure*}
 
-
 Each environment in the stream is initially partial meaning that it only contains mappings for the inputs. \emph{Stepping} the specification updates the current environment and checks the invariance of the guarantees. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of the sequential evaluation of the \konst{eq}-statements in the specification and then the guarantees are checked for invariance. 
-
-The meaning of the specification is a set of finite environment streams where the guarantees hold at each step of the streams and the updated mappings or the \konst{eq}-statements are consistent with the statements.
-
-
-At the $i^\mathrm{th}$ step of the stream, $\theta^i$
-
-
-Each \emph{step} of the specification updates a corresponding environment in the stream making it complete at the end of the step.  
-
-The environments in the stream are partial containing only mappings for inputs.
-
-\begin{comment}
-  A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
-\[
-\konst{stepFn} : \mathit{inports} \times \mathit{stateVars} \to \mathit{stateVars}
-\]
-The scheduler \emph{activates} components in some order. Activating a component is defined as follows: 
-\[
-\begin{array}{ll}
- \mathit{inportVals} & = \konst{readInputs}(); \\
- (v_1,\ldots,v_k) & = \konst{readState}() ; \\
- ({v_1}',\ldots,{v_k}') & = \konst{stepFn} (\mathit{inportVals},\mathit{stateVars}) ; \\
- \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots,{v_k}');} \\
- \multicolumn{2}{l}{\konst{writeOutputs}({v_1}',\ldots,{v_k}');} \\
-\end{array}
-\]
-It is assumed that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
-\end{comment}
