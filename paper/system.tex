@@ -4,7 +4,7 @@
       \mathit{c}    & = & \konst{input}\ [(f : \tau)\ldots] \\
                     &   & \konst{output}\ [(f : \tau)\ldots] \\
                     &   & \konst{eq}\; [(f : \tau := \mathit{exp})\ldots] \\
-                    &   & \konst{guarantee}\ [\mathit{bexp}\ldots]\\\\
+                    &   & \konst{guarantee}\ [(\mathit{bexp})\ldots]\\\\
       
       \lval         & = & f \mid \lval \, [ \mathit{exp} ]
                           \mid \lval . f \\ \\
@@ -34,6 +34,8 @@
 \end{figure}
 
 The specification language for a high-assurance component is in \figref{fig:syntax}. A specification defines the inputs, outputs, local values, and guarantees for each output. A type $\tau$ is a contiguity type, and $(f : \tau)\ldots$ means zero or more repetition (e.g., Kleene star). An $\lval$ must eventually resolve to something that can be assigned. The expression language divides out Boolean expressions to simplify the semantics but is otherwise typical. The \konst{Loc} and \konst{bLoc} refer to the value of an $\lval$, while \konst{nLit} and \konst{bLit} indicate a literal. The language includes the initialization ($\rightarrow$), \konst{pre}, and if-then-else (\konst{ite}) operators.
+
+Change the following paragraph and preceding paragraphs to define the specification as the core language with a well defined normal form where expressions are flat, lvals are unique etc. It takes care of all the normal semantic checks related to types, dependency order, etc. Anything in the core language has normal form and is perfect.
 
 The semantics are only defined for \emph{well-formed} specifications. A specification is well-formed if and only if
 \begin{compactenum}
