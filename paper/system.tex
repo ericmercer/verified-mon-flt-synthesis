@@ -89,3 +89,5 @@ The well-formed assumption enables the use of a single global environment for th
 \end{figure*}
 
 Each environment in the stream is initially partial meaning that it only contains mappings for the inputs. \emph{Stepping} the specification updates the current environment and checks the invariance of the guarantees. In other words, at the $i^\mathrm{th}$ step, $\theta^i$ is updated with the result of the sequential evaluation of the \konst{eq}-statements in the specification and then the guarantees are checked for invariance. 
+
+The notation $(\lval \mapsto \mathit{slice}) \bullet \theta$ denotes the addition of binding $\lval \mapsto \mathit{slice}$ to $\theta$. Create an eval function for \konst{eq}-statement. Map it to the list of statements. Create a similar function for the guarantees with its map that fails if invariance does not hold. Define the language of the specification using the contiguity notation. Need to munge all the types into a single $\tau$, but the gist is the language is any finite stream possible that conform to the input specification are the result of the eq-statements, and are invariant. The set is prefix closed (trace theory).
