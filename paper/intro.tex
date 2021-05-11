@@ -2,12 +2,15 @@ In recent years, aerospace stakeholders have become aware that avionics systems 
 
 Unfortunately, systems engineers are currently given few development tools to help answer even basic questions about potential vulnerabilities and mitigations, and instead rely on process-oriented checklists and guidelines.  Cyber vulnerabilities are often discovered during penetration testing late in the development process.  Worse yet, they may be discovered after the product has been fielded, necessitating extremely expensive and time-consuming remediation. This is not a sustainable development model.
 
-The DARPA Cyber Assured Systems Engineering (CASE) program is targeted to developing design, analysis, and verification tools that enable systems engineers to {\em design-in} cyber-resiliency for complex cyber-physical systems. 
+The DARPA Cyber Assured Systems Engineering (CASE) program is targeted to developing design, analysis, and verification tools that enable systems engineers to {\em design-in} cyber-resiliency for complex cyber-physical systems.\footnote{The
+  views expressed are those of the authors and do not reflect the
+  official policy or position of the Defense Advanced
+  Research Projects Agency (DARPA) or the U.S. Government.}
 The result is a Model-Based Systems Engineering (MBSE) environment called {\em BriefCASE} which is based on the Architecture Analysis and Design Language (AADL)~\cite{aadl}.  BriefCASE extends the Open Source AADL Tool Environment (OSATE) to add new design, analysis, and code generation capabilities targeted at building cyber-resilient systems.  
 
 BriefCASE provides access to two analysis tools (GearCASE~\cite{gearcase2020} and DCRYPPS~\cite{dcrypps2019}) that can examine AADL models to detect potential cyber vulnerabilities and suggest requirements for mitigation.  
 A library of architectural transforms guides systems engineers through automated model transformations that modify the architecture to address these requirements, possibly inserting new high-assurance components into the system. 
-Implementations for these new high-assurance components are synthesized from formal specifications using the Semantic Properties for Language and Automata Theory (SPLAT) tool~\cite{slind-hcss2020}.
+Implementations for these new high-assurance components are synthesized from formal specifications using the Semantic Properties for Language and Automata Theory (SPLAT) tool~\cite{slind-hcss2020},~\cite{formal-filter-synth-langsec}.
 Formal verification that the transformed system model satisfies its cyber requirements is accomplished via model checking using the Assume Guarantee Reasoning Environment (AGREE)~\cite{agree2013}.  Cyber-resilient code implementing the verified model is automatically generated using the High Assurance Modeling and Rapid Engineering for Embedded Systems (HAMR) toolkit~\cite{hamr}.  If desired, this code can be targeted to the formally verified seL4 secure microkernel~\cite{sel4-2009}.
 
 A novel aspect of the approach is the ability to automatically transformation the model to insert high-assurance components to harden the system against potential cyber-vulnerabilities. The behavior of the model is given by contracts on components expressed in the AGREE modeling language. These contracts are modified as a result of the cyber-vulnerability analysis to assume properties on the input and and guarantee properties of the output that reflect a hardened system. In the absence of any transformation to implement the hardening, AGREE fails to prove the system cyber-hardened.
