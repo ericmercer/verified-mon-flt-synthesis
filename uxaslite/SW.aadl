@@ -66,10 +66,10 @@ public
               Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
-            eq today : bool = (req = rsp);
-            eq yesterday : bool = (req and not rsp) ->
+            eq current : bool = (req = rsp);
+            eq previous : bool = (req and not rsp) ->
                                   pre(req and not rsp) and (not req and rsp);
-            eq policy : bool = today or yesterday;
+            eq policy : bool = current or previous;
             eq alert : bool = (not policy) 
                            -> ((is_latched and pre(alert)) or not policy);
             guarantee Monitor_Alert 
@@ -286,27 +286,6 @@ public
         **};
     end WaypointManager.Impl;
     
-	------------------------
-	--   Alert Manager    --
-	------------------------
-	thread AlertManager_Thr
-		features
-			Alert: out event port;
-		annex agree {**
-            guarantee "The alert manager never alerts" :
-                event(Alert) = false;
-        **};
-	end AlertManager_Thr;
-
-	thread implementation AlertManager_Thr.Impl
-        properties
-            Dispatch_Protocol => Periodic;
-            Period => 500ms;
-            Compute_Execution_Time => 2ms .. 2ms;
-            Stack_Size => 65536 bytes;
-            Source_text => ("src/AlertManager.c");
-	end AlertManager_Thr.Impl;
-   
 	-------------
 	-- Process --
 	-------------
@@ -329,10 +308,10 @@ public
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
 
-            eq today : bool = (req = rsp);
-            eq yesterday : bool = (req and not rsp) ->
+            eq current : bool = (req = rsp);
+            eq previous : bool = (req and not rsp) ->
                                   pre(req and not rsp) and (not req and rsp);
-            eq policy : bool = today or yesterday;
+            eq policy : bool = current or previous;
             eq since : bool =  alrt or (alrt and (false -> pre(since)));
 
             guarantee "Start includes a waypoint" :
@@ -356,7 +335,6 @@ public
 		subcomponents
 			AI: thread AI_Thr.Impl;
 			WM: thread WaypointManager_Thr.Impl;
-			AM: thread AlertManager_thr.Impl;
 		connections
 
 			--------------------
@@ -376,11 +354,6 @@ public
 			---------
 			c06: port WM.Waypoint -> Waypoint;
             c07: port WM.Start -> Start;
-            
-			------------
-			-- NOALERT -
-			------------
-			c08: port AM.Alert -> Alert;
 
 		annex resolute {**
             check HAMR_Guidelines
@@ -444,10 +417,10 @@ public
             assume "Air vehicle location is well-formed" :
                 avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
 
-            eq today : bool = (req = rsp);
-            eq yesterday : bool = (req and not rsp) ->
+            eq current : bool = (req = rsp);
+            eq previous : bool = (req and not rsp) ->
                                   pre(req and not rsp) and (not req and rsp);
-            eq policy : bool = today or yesterday;
+            eq policy : bool = current or previous;
             eq since : bool =  alrt or (alrt and (false -> pre(since)));
 
             guarantee "Start includes a waypoint" :

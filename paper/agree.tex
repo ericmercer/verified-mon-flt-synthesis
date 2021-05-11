@@ -1,0 +1,99 @@
+\newsavebox{\sw}
+\begin{lrbox}{\sw}
+\begin{lstlisting}[style=agree]
+eq req : bool = event(AutomationRequest);
+eq avl : bool = event(AirVehicleLocation);
+eq wp : bool = event(Waypoint);
+eq rsp: bool = event(Start);
+eq alrt : bool = event(Alert);
+            
+assume "Automation request is well-formed" :
+    req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+assume "Air vehicle location is well-formed" :
+    avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+
+eq current : bool = (req = rsp);
+eq previous : bool = (req and not rsp) ->
+                      pre(req and not rsp) and (not req and rsp);
+eq policy : bool = current or previous;
+eq since : bool =  alrt or (alrt and (false -> pre(since)));
+
+guarantee "Start includes a waypoint" :
+    rsp => wp;
+guarantee "Locations required after the start waypoint" :
+    (wp and not rsp) => avl;
+guarantee "Waypoint is well-formed" :
+    wp => WELL_FORMED_WAYPOINT(Waypoint);
+guarantee "Alert if start is not bounded relative to a request" :
+    policy or since;
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \scalebox{0.60}{\usebox{\sw}}
+  \end{center}
+  \caption{The SW component contract.}
+  \label{fig:sw}
+\end{figure}
+
+The revised AGREE specification for the SW component with its primary inputs and outputs is in \figref{fig:sw}. Without going into too much detail, the language is a first order predicate calculus. The semantics are synchronous data-flow where the inputs, outputs, and expressions are characterized by data streams. The semantics are such that the contracts are evaluated in dependency order with inputs being propagated to outputs through all the contracts until they stabilize; as such, the contracts, and thereby the system model, must be acyclic. Once the contracts have stabilized, then the model takes a synchronous step to the next input data in the stream. The semantics do not model computation or communication delay. The output of one contract is seen at the input of any downstream contract in the same step of the input data stream. 
+
+The contract in \figref{fig:sw} uses \texttt{eq} statements to define variables local to the contract. For example, the \texttt{req} variable is equivalent to the \texttt{event(AutomationRequest)} expression. There is an implicit \emph{event} input (or output) associated with every named event port in a component. The semantics used here do not not buffer these events so the implicit input (or output) is only a boolean value. An \texttt{event} expression refers to that implicit input (or output) and is true if there is data on the named port. The system contract assumes well-formed input and guarantees a set of properties about the output.
+
+The guarantee is an invariant on the expression \texttt{policy or since} meaning that either the policy holds or the alert is sounding. The \texttt{policy} is defined by two local values: \texttt{current} and \texttt{previous}. The \texttt{current} value is asserted when in the current time step there is a request with a response, or there is no request and no response.  The value of \texttt{previous} in the current time step relies on values from the previous time step \texttt{->} operator for initialization as the previous time step is undefined in the first step of the system. The left operand is the initial value of \texttt{previous} at start, which in this example is \texttt{(req and not rsp)}, because seeing a request with no response is inconclusive in the first step of the system. The right operand is the value of \texttt{previous} after the initial step. Here the \texttt{pre} operator refers to the value of the expression \texttt{(req and not rsp)} in the prior time step. Intuitively, \texttt{previous} is true if the previous time step made a request without a matching response and the current time step has the matching response to that request with no new request.
+
+The value of \texttt{since} in \emph{Alert if start is not bounded relative to a request} relies on its own value in the previous time step. The intuitive reading of the expression is that the alert has been true since the time when it first sounded. The first \texttt{alrt} sets \texttt{since} to true, and once the value of \texttt{since} is true, that value persists as long as \texttt{alrt} holds. The \emph{Alert if start is not bounded relative to a request} guarantee defines one behavior of a correctly implemented system. Together with the other guarantees, the contract models the expected input and output of the system as a whole.
+
+\newsavebox{\flt}
+\begin{lrbox}{\flt}
+\begin{lstlisting}[style=agree]
+eq policy : bool = 
+  WELL_FORMED_AUTOMATION_RESPONSE(Input);       
+guarantee Filter_Output "Filter output is well-formed" :
+  if event(Input) and policy then 
+    event(Output) and Output = Input
+  else not event(Output);
+\end{lstlisting}
+\end{lrbox}
+
+\newsavebox{\mntr}
+\begin{lrbox}{\mntr}
+\begin{lstlisting}[style=agree]
+const is_latched : bool = 
+  Get_Property(this, CASE_Properties::Monitor_Latched);
+eq rsp : bool = event(Response);
+eq req : bool = event(Request);
+eq current : bool = (req = rsp);
+eq previous : bool = (req and not rsp) ->
+                      pre(req and not rsp) and (not req and rsp);
+eq policy : bool = current or previous;
+eq alert : bool = (not policy) 
+                -> ((is_latched and pre(alert)) or not policy);
+guarantee Monitor_Alert 
+  "Alert port tracks alert variable" :
+  event(Alert) = alert;
+guarantee Monitor_Output
+  "Output if not alerted" :
+  if event(Alert) then (not event(Output)) else
+  if event(Response) then (event(Output) and (Output = Response))
+  else (not event(Output));
+\end{lstlisting}
+\end{lrbox}
+  
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \scalebox{0.60}{\usebox{\flt}} \\
+      (a) \\
+      \scalebox{0.60}{\usebox{\mntr}} \\
+      (b)
+    \end{tabular}
+  \end{center}
+  \caption{High-assurance component contracts. (a) The filter. (b) The monitor.}
+  \label{fig:assurance}
+\end{figure}
+
+The hardened system is implemented by inserting the high-assurance components. The AGREE specifications for both are in \figref{fig:hardened}. Both are stylized for synthesis. The stylized filter form as generated by the tool is shown in \figref{fig:assurance}(a). The user must declare the meaning of the \texttt{policy} value as part of the transform on the model. In this example, \texttt{policy} is the assumption made by the waypoint manager about the automation response being well-formed. The output guarantees are automatically generated by the tool. The monitor is shown in \figref{fig:assurance}(b). The \texttt{is\_latched} value makes the alert persistent meaning that once raised always raised. The definition for \texttt{policy} is taken from the contract in \figref{fig:sw}. As before the guarantees for the outputs are autogenerated by the tool.
+
+Add text to this section that defines the meaning of the contract over streams. State the prove guarantee from AGREE is terms of the streams. The statement will be used in the synthesis section to argue correctness.
