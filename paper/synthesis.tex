@@ -9,8 +9,8 @@ input port and one output; messages on the input that the filter
 policy admits pass unchanged to the output port; all others are not
 passed on. We have explored in our work two kinds of filter. In the
 first, a relatively shallow scan of the input buffer can enforce the
-policy. For example, we have used the expressive power of contiguity
-types \cite{contig} to enforce \emph{lightweight} bounds constraints
+policy. For example, we have used the expressive power of Contiguity
+Types \cite{contiguity-types} to enforce \emph{lightweight} bounds constraints
 on GPS coordinates in UxAS messages. On the other hand, the second
 kind of filter will parse the input buffer into a data structure
 specified in AGREE and apply an user-defined \emph{well-formedness}
