@@ -1,18 +1,59 @@
-A \emph{system} is a collection of \emph{components}, \emph{connections} between components, a \emph{scheduler} to order execution, and a \emph{system environment} for primary inputs. The computation for the component in this work is defined entirely by a step function:
-\[
-\konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
-\]
-The scheduler \emph{activates} components in some order. Activating a component is defined as follows: 
-\[
-\begin{array}{ll}
- \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
- (v_1,\ldots) & = \konst{readState}() ; \\
- ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stepFn} ((i_1,\ldots),(v_1,\ldots)) ; \\
- \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
- \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
-\end{array}
-\]
-It is assumed that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+Synthesis maps from model and specifications to code. The synthesis algorithm traverses the system architecture looking
+for occurrences of filter and monitor specifications. For each such 
+occurrence it generates a CakeML program. In the following, we examine both filter and monitor synthesis. The latter is typically much more involved, and we will devote more attention to it.
+
+\subsection{Filter Generation}
+
+A filter is intended to be very simple; it is expected to have one
+input port and one output; messages on the input that the filter
+policy admits pass unchanged to the output port; all others are not
+passed on. We have explored in our work two kinds of filter. In the
+first, a relatively shallow scan of the input buffer can enforce the
+policy. For example, we have used the expressive power of contiguity
+types \cite{contig} to enforce \emph{lightweight} bounds constraints
+on GPS coordinates in UxAS messages. On the other hand, the second
+kind of filter will parse the input buffer into a data structure
+specified in AGREE and apply an user-defined \emph{well-formedness}
+property, also specified in AGREE, to the data. This allows
+arbitrarily complex well-formedness checking.
+
+The decision of a filter is made and performed within one thread
+invocation. Thus, in its given time slice, the filter does the following:
+
+\begin{enumerate}
+
+\item checks to see if there is any input available; if there is none
+then it yields control; otherwise,
+
+\item the input is read (and parsed if need be),
+
+\item the wellformedness predicate is evaluated,
+
+\item if the predicate returns \konst{true} then the input buffer
+ is copied to the output; otherwise no action is taken, and
+
+\item the filter yields control
+\end{enumerate}
+
+\begin{remark}[Partiality]
+
+The role of partiality should be emphasized: steps 2 and 3 can fail;
+the data might not be parseable or the wellformedness computation
+could be badly written and fail at run time. In such cases, the filter
+should recover and yield control without passing the input onwards. In
+these cases, the filter is behaving as it should, but there are also
+cases in which a correctly specified filter would not meet its
+specification at runtime. This situation arises when the
+filter \emph{ought} to accept a message, but lack of resources result
+in the filter failing to do so. Examples of this would be, for
+example, if the parse of a message needed more space than allocated;
+another example would be if the timeslice provided by the scheduler is
+too small for the wellformedness computation to finish.
+
+\end{remark}
+
+
+\emph{Need some discussion of filters and their step-wise propertie s in relation to their infinitary properties. Reference to Johannes' work.}
 
 \newsavebox{\cml}
 \begin{lrbox}{\cml}
@@ -20,15 +61,10 @@ It is assumed that the scheduler follows some sensible partial order of componen
 fun filter_step () =
 let val () = Utils.clear_buf buffer
     val () = API.callFFI "get_input" "" buffer
-    val string = Utils.buf2string buffer
-    val policy = WELL_FORMED_AUTOMATION_RESPONSE string 
 in
-    if policy
+    if WELL_FORMED_AUTOMATION_RESPONSE buffer
     then
-        let val string = Word8Array.substring buffer 1
-                          (Word8Array.length buffer - 1)
-        in API.callFFI "put_output" string Utils.emptybuf
-        end
+      API.callFFI "put_output" buffer Utils.emptybuf
     else print"Filter rejects message.\n"
 end
 \end{lstlisting}
@@ -41,8 +77,54 @@ end
     \end{tabular}
   \end{center}
   \caption{Synthesized CakeML for the filter.}
-  \label{fig:cakeml}
+  \label{fig:filter-cakeml}
 \end{figure}
 
-The synthesized CakeML code for the filter is shown in \figref{fig:cakeml}. The code is called at dispatch by the scheduler. The \texttt{API.callFFI} is the link to the communication fabric to capture input and provide output. The body of the function restates the filter contract to make the appropriate assignments in a way that matches the truth value of the predicate in the filter guarantee.
-The auto-generated AGREE specification raises an alert output when the relation is violated. 
+The synthesized CakeML code for the filter is shown in \figref{fig:filter-cakeml}. The code is called at dispatch by the scheduler. The \texttt{API.callFFI} is the link to the communication fabric to capture input and provide output. The body of the function restates the filter contract to make the appropriate assignments in a way that matches the truth value of the predicate in the filter guarantee.
+The auto-generated AGREE specification raises an alert output when the relation is violated.
+
+% A \emph{system} is a collection of \emph{components}, \emph{connections}
+% between components, a \emph{scheduler} to order execution, and a
+% \emph{system environment} for primary inputs.
+
+\subsection{Monitor Generation}
+
+Monitors, since they are intended to track and analyze the externally visible behavior of system components through time, require more computational features than filters. In particular, our conception of a monitor is a predicate on its input (and output) streams, being able to access the value of a stream at any earlier point in time,  if necessary. Thus monitors commonly use state to keep track of earlier values, unlike filters which are stateless. This reasoning leads us to specify the  computation for a monitor component  by a step function of the following form:
+\[
+\konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
+\]
+Thus, in its given timeslice, a monitor evaluates the \konst{stepFn} on its inputs and the current values of the state variables. In detail, it takes the following steps:
+
+\begin{enumerate}
+
+\item each available input is parsed into data of the type specified
+by the port type;
+
+\item the stateful variables in $\mathit{stateVars}$  are evaluated in dependency order.
+
+\item values of outputs are computed
+
+\item outputs are written and the new state is written
+
+\item control is yielded
+\end{enumerate}
+
+Our earlier remarks on partiality apply here too, of course.
+
+
+The scheduler \emph{activates} components in some order.It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+ Activating a monitor component takes the form of the following pseudo-code: 
+\[
+\begin{array}{ll}
+ \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
+ (v_1,\ldots) & = \konst{readState}() ; \\
+ ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stepFn} ((i_1,\ldots),(v_1,\ldots)) ; \\
+ \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
+ \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
+\end{array}
+\]
+
+\paragraph{Initialization}
+A monitor may need to make a certain minimum number of observations before being able to make a meaningful assessment of behavior. Until that threshold is attained, the monitor is essentially in a kind of \emph{initialization}. In order for correct code to be generated, monitor specifications need to spell out the values of output ports when in such initialization phases. For example, suppose a monitor does some kind of differential assessment of inputs at adjacent timeslices, alerting when (say) the measured location of a UAV at time $t$ and $t+1$ is such that the distance between the two locations is unusually large. Such a monitor needs two measurements before making its first judgement, but at the time of its first output, only one measurement will have been made. The specification for this monitor has to explicitly say what the correct first output is.
+
+
