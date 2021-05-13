@@ -131,10 +131,9 @@ The meaning of an AGREE contract specification is now defined as follows.
 %
 The meaning is the prefix closed set of finite environment streams on which the specification is invariant. Each environment in the stream is total meaning that it binds all L-values in the scope if the specification.
 
-This paper claims that a synthesized high-assurance component generates $\mathcal{L}(s)$ precisely. Let $\konst{synth}(s)$ be the CakeML synthesized component, and let $\theta^\prime = \konst{eval}\ \konst{synth}(s)\ \theta\ldots$ be a function that evaluates the synthesized component on the input stream to produce a corresponding output stream that is total in its bindings. Let $\Theta_I$ be the universe of environments that only bind the input for the specification. This paper claims the following.
+This paper claims that a synthesized high-assurance component generates $\mathcal{L}(s)$ precisely. Let $\konst{synth}(s)$ be the CakeML synthesized component, and let $\theta^\prime = \konst{eval}\ \konst{synth}(s)\ \theta\ldots$ be a function that evaluates the synthesized component on the input stream to produce a corresponding output stream that is total in its bindings. Let $I_s(\theta\ldots)$ be a function that maps an environment stream to a new environment stream that only retains the input bindings of each environment in the stream. This paper claims the following.
 %
 \[
-  \forall \theta \in \Theta_I^*\ (\konst{eval}\ \konst{synth}(s)\ \theta\ldots) \in \mathcal{L}(s)) 
+  \forall \theta\ldots \in \mathcal{L}(s)\ (\konst{eval}\ \konst{synth}(s)\ I_s(\theta\ldots) = \theta\ldots) \\
 \]
 %
-As noted previously, the semantics of the AGREE specification language are understood in terms of streams of data. 
