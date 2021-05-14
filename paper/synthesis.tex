@@ -1,23 +1,25 @@
-Synthesis maps from model and specifications to code. The synthesis algorithm traverses the system architecture looking
+Synthesis maps from model and specifications to code. Our synthesis algorithm traverses the system architecture looking
 for occurrences of filter and monitor specifications. For each such 
-occurrence it generates a CakeML program. In the following, we examine both filter and monitor synthesis. The latter is typically much more involved, and we will devote more attention to it.
+occurrence, the synthesis algorithm generates a CakeML program. In the
+following, we examine both filter and monitor synthesis. The latter is
+typically much more involved, and we will thus devote more attention to it.
 
 \subsection{Filter Generation}
 
-A filter is intended to be very simple; it is expected to have one
+A filter is intended to be very simple,  It is expected to have one
 input port and one output; messages on the input that the filter
 policy admits pass unchanged to the output port; all others are not
-passed on. We have explored in our work two kinds of filter. In the
+passed on. We have explored two kinds of filter in our work to date. In the
 first, a relatively shallow scan of the input buffer can enforce the
-policy. For example, we have used the expressive power of Contiguity
+desired policy. For example, we have used the expressive power of Contiguity
 Types \cite{contiguity-types} to enforce \emph{lightweight} bounds constraints
-on GPS coordinates in UxAS messages. On the other hand, the second
-kind of filter will parse the input buffer into a data structure
-specified in AGREE and apply an user-defined \emph{well-formedness}
+on GPS coordinates in UxAS messages.  The second
+kind of filter parses the input buffer into a data structure
+specified in AGREE and applies a user-defined \emph{well-formedness}
 property, also specified in AGREE, to the data. This allows
-arbitrarily complex well-formedness checking.
+arbitrarily complex wellformedness checking.
 
-The decision of a filter is made and performed within one thread
+A filter performs its processing and makes its decision all within one thread
 invocation. Thus, in its given time slice, the filter does the following:
 
 \begin{enumerate}
@@ -37,10 +39,10 @@ then it yields control; otherwise,
 
 \begin{remark}[Partiality]
 
-The role of partiality should be emphasized: steps 2 and 3 can fail;
+The role of partiality should be emphasized.  Steps 2 and 3 can fail;
 the data might not be parseable or the wellformedness computation
-could be badly written and fail at run time. In such cases, the filter
-should recover and yield control without passing the input onwards. In
+could fail at run time. In such cases, the filter
+should recover and yield control without passing the input to the output. In
 these cases, the filter is behaving as it should, but there are also
 cases in which a correctly specified filter would not meet its
 specification at runtime. This situation arises when the
@@ -48,7 +50,7 @@ filter \emph{ought} to accept a message, but lack of resources result
 in the filter failing to do so. Examples of this would be, for
 example, if the parse of a message needed more space than allocated;
 another example would be if the timeslice provided by the scheduler is
-too small for the wellformedness computation to finish.
+too short for the wellformedness computation to complete.
 
 \end{remark}
 
@@ -89,7 +91,11 @@ The auto-generated AGREE specification raises an alert output when the relation 
 
 \subsection{Monitor Generation}
 
-Monitors, since they are intended to track and analyze the externally visible behavior of system components through time, require more computational features than filters. In particular, our conception of a monitor is a predicate on its input (and output) streams, being able to access the value of a stream at any earlier point in time,  if necessary. Thus monitors commonly use state to keep track of earlier values, unlike filters which are stateless. This reasoning leads us to specify the  computation for a monitor component  by a step function of the following form:
+Monitors require more computational features than filters, as they are
+intended to track and analyze the externally visible behavior of
+system components through time.  Our conception of
+a monitor is a predicate on its input (and output) streams, where the
+monitor is able to access the value of a stream at any earlier point in time,  if necessary. Thus monitors commonly use state to keep track of earlier values, unlike filters which are stateless. This reasoning leads us to specify the  computation for a monitor component  by a step function of the following form:
 \[
 \konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
 \]
@@ -112,7 +118,7 @@ by the port type;
 Our earlier remarks on partiality apply here too, of course.
 
 
-The scheduler \emph{activates} components in some order.It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+The scheduler \emph{activates} components in some order.  It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
  Activating a monitor component takes the form of the following pseudo-code: 
 \[
 \begin{array}{ll}
@@ -125,6 +131,16 @@ The scheduler \emph{activates} components in some order.It is an obligation on t
 \]
 
 \paragraph{Initialization}
-A monitor may need to accumulate a certain minimum number of observations before being able to make a meaningful assessment of behavior. Until that threshold is attained, the monitor is essentially in a kind of \emph{initialization} phase. In order for correct code to be generated, monitor specifications need to spell out the values of output ports when in such initialization phases. For example, suppose a monitor does some kind of differential assessment of inputs at adjacent timeslices, alerting when (say) the measured location of a UAV at times $t$ and $t+1$ is such that the distance between the two locations is unusually large. Such a monitor needs two measurements before making its first judgement, but at the time of its first output, only one measurement will have been made. The specification has to explicitly say what the correct first output is.
-
-
+A monitor may need to accumulate a certain minimum number of
+observations before being able to make a meaningful assessment of
+behavior. Until that threshold is attained, the monitor is essentially
+in a kind of \emph{initialization} phase. In order for correct code to
+be generated, monitor specifications need to spell out the values of
+output ports when in such initialization phases. For example, suppose
+a monitor does some sort of differential assessment of inputs at
+adjacent timeslices, alerting when (say) the measured location of a
+UAV at times $t$ and $t+1$ is such that the distance between the two
+locations is unusually large. Such a monitor needs two measurements
+before making its first judgement, but at the time of its first
+output, only one measurement will have been made. In this case, the
+specification has to explicitly say what the correct first output is.
