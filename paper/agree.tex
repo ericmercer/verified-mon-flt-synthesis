@@ -180,11 +180,11 @@ true in that same step.
 We claim that a synthesized high-assurance component preserves the input to output
 relationship in the specification $s$ over every stream in $\mathcal{L}(s)$. 
 Let $\pi^\prime
-= \konst{SynthEval}\ s\ \pi$ denate a function that synthesizes $s$ and then
+= \konst{SynthEval}\ s\ \pi$ denote a function that synthesizes $s$ and then
 evaluates that synthesized component on the stream $\pi$ to create a new
 stream $\pi^\prime$ containing added output and other bindings. We
-say that two streams, $\pi_a = \pi_b$ are equivalent in regards to a
-specification $s$ if and only if the two streams are the same length and
+say that two streams are equivalent in regards to a
+specification, denoted as $\pi =_s \pi^\prime$, if and only if the two streams are the same length and
 agree on bindings for the input and output for $s$ at every step of the streams.
 We now formally state the correctness claim for synthesis.
 %
@@ -195,4 +195,4 @@ We now formally state the correctness claim for synthesis.
 where $I_s(\pi)$ returns the corresponding stream that only retains bindings
 for inputs in each step and nothing else. The claim is that the synthesized component
 generates the same output stream as the specification for any stream
-belonging to the specification that is restricted to just input binding at each step.
+belonging to the specification that is restricted to just input bindings at each step.
