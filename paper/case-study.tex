@@ -2,7 +2,9 @@ In this section, we apply the BriefCASE tool to the development of a UAV surveil
 
 We have modeled the system architecture of the UAV in AADL.  It includes a Mission Computer for communicating with the ground station and generating flight plans, and a Flight Control Computer for UAV navigation.  The Mission Computer architecture model includes hardware components such as a processor, memory, and communication devices, as well as software.
 %
-The initial software architecture model (shown in Figure~\ref{fig:sw-initial}) contains drivers for communication with the Ground Station and Flight Control Computer, a Waypoint Manager component that provides flight plan coordinates to the Flight Control Computer, and the Flight Planner.  The Flight Planner is the open-source UxAS software developed by AFRL~\cite{uxas}. For this application, UxAS accepts three types of messages.  The \textit{Operating Region} message defines where the UAV can and cannot fly.  The \textit{Line Search Task} message contains a series of waypoints that the UAV should traverse.  The waypoints typically lie along some geographical feature of interest, such as a river or railway.  Note that the UAV may not be able to directly traverse the Line Search Task waypoints due to no-fly zone constraints specified in the Operating Region message.  Anytime after receiving the Operating Region and Line Search Task messages, a ground station can transmit an \textit{Automation Request} message, which instructs UxAS to generate a flight plan that satisfies these constraints.  UxAS passes the flight plan in an \textit{Automation Response} message to the Waypoint Manager.  Because the Flight Control Computer can only process a small number of waypoints at a time, the Waypoint Manager parcels a small number of waypoints corresponding to the current UAV position, and sends them to the Flight Control Computer over a serial connection via the UART Driver.
+The initial software architecture model (shown in Figure~\ref{fig:sw-initial}) contains drivers for communication with the Ground Station and Flight Control Computer, a Waypoint Manager component that provides flight plan coordinates to the Flight Control Computer, and the Flight Planner.  The Flight Planner is the open-source UxAS software developed by AFRL~\cite{uxas}. 
+
+For this application, UxAS accepts three types of messages.  The \textit{Operating Region} message defines where the UAV can and cannot fly.  The \textit{Line Search Task} message contains a series of waypoints that the UAV should traverse.  The waypoints typically lie along some geographical feature of interest, such as a river or railway.  Note that the UAV may not be able to directly traverse the Line Search Task waypoints due to no-fly zone constraints specified in the Operating Region message.  Anytime after receiving the Operating Region and Line Search Task messages, a ground station can transmit an \textit{Automation Request} message, which instructs UxAS to generate a flight plan that satisfies these constraints.  UxAS passes the flight plan in an \textit{Automation Response} message to the Waypoint Manager.  Because the Flight Control Computer can only process a small number of waypoints at a time, the Waypoint Manager parcels a small number of waypoints corresponding to the current UAV position, and sends them to the Flight Control Computer over a serial connection via the UART Driver.
 
 \begin{figure}[h]
 	\centering
@@ -51,7 +53,8 @@ Similar to the filters, the monitor policies are specified in AGREE. The Respons
 	\label{fig:geofence-monitor} 
 \end{figure}
 
-% Describe attestation?
+% Describe attestation? virtualization?
+
 
 After transforming the model to address the cyber requirements, the software architecture now appears as shown in Figure~\ref{fig:hardened-sw}.  The components in green were added to the model by way of an automated BriefCASE transform and are critical for mitigating cyber attacks. 
 We formally verify the model with AGREE to show that all of the component contracts are satisfied, including the new contracts introduced during the model transformations.
@@ -67,6 +70,11 @@ The synthesized code is output to a directory in the build file system with the 
 \end{figure*}
 
 Once we have determined that the model is correct and satisfies its cyber requirements, and the software components in the model have been implemented, either by SPLAT or other means, the system can be built and deployed.  We run the HAMR tool to generate the component stubs and infrastructure code necessary to enable component communication and execution according to a specified schedule.
-HAMR translates the AADL system model to code that implements threading infrastructure and inter-component communication and is consistent with the AADL specification computational model. 
+HAMR translates the AADL system model to code that implements threading infrastructure and inter-component communication and is consistent with the AADL specification computational model.
 
 % Something about seL4?
+
+
+The UAV and Ground Station software were deployed on ODROID XU4 boards and communicated with each other over Ethernet.  The AMASE flight simulator, representing the Flight Contol Computer was run on a Linux machine and connected to the UAV ODROID board via serial connection.  The UxAS implementation on the UAV was modified by adding malicious code that would prevent it from responding to Automation Requests or produce flight plans that would violate the operating region constraints.  In addition, some of the Line Search Task messages transmitted from the Ground Station contained malformed messages that would modify the UxAS behavior.
+
+We performed an initial set of tests on the initial un-hardened system (Figure~\ref{fig:sw-initial}) to verify the effectiveness of the malicious code.  We repeated the tests on the hardened system and were able to demonstrate that our mitigations were successful.
