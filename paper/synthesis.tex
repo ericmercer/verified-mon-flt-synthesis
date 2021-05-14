@@ -1,21 +1,24 @@
-Synthesis maps from model and specifications to code. The synthesis algorithm traverses the system architecture looking
-for occurrences of filter and monitor specifications. For each such 
-occurrence it generates a CakeML program. In the following, we examine both filter and monitor synthesis. The latter is typically much more involved, and we will devote more attention to it.
+Synthesis maps from model and specifications to code. The synthesis
+algorithm traverses the system architecture looking for occurrences of
+filter and monitor specifications;  for each such occurrence it
+generates a CakeML program. In the following, we examine both filter
+and monitor synthesis. The latter is typically much more involved, and
+we will therefore devote more attention to it.
 
 \subsection{Filter Generation}
 
 A filter is intended to be very simple; it is expected to have one
 input port and one output; messages on the input that the filter
-policy admits pass unchanged to the output port; all others are not
-passed on. We have explored in our work two kinds of filter. In the
-first, a relatively shallow scan of the input buffer can enforce the
-policy. For example, we have used the expressive power of Contiguity
-Types \cite{contiguity-types} to enforce \emph{lightweight} bounds constraints
-on GPS coordinates in UxAS messages. On the other hand, the second
-kind of filter will parse the input buffer into a data structure
-specified in AGREE and apply an user-defined \emph{well-formedness}
-property, also specified in AGREE, to the data. This allows
-arbitrarily complex well-formedness checking.
+policy admits pass unchanged to the output port; all others are
+dropped (not passed on). We have explored in our work two kinds of
+filter. In the first, a relatively shallow scan of the input buffer
+can enforce the policy. For example, we have used the expressive power
+of Contiguity Types \cite{contiguity-types} to enforce
+\emph{lightweight} bounds constraints on GPS coordinates in UxAS
+messages. On the other hand, the second kind of filter will parse the
+input buffer into a data structure specified in AGREE and apply an
+user-defined \emph{well-formedness} property, also specified in AGREE,
+to the data. This allows arbitrarily complex well-formedness checking.
 
 The decision of a filter is made and performed within one thread
 invocation. Thus, in its given time slice, the filter does the following:
@@ -53,15 +56,47 @@ too small for the wellformedness computation to finish.
 \end{remark}
 
 
-\emph{Need some discussion of filters and their step-wise propertie s in relation to their infinitary properties. Reference to Johannes' work.}
+{\emph{Need some discussion of filters and their step-wise properties
+  in relation to their infinitary properties. Reference to Johannes'
+  work.}
+
+\newsavebox{\contig}
+\begin{lrbox}{\contig}
+\begin{lstlisting}[style=myML]
+  Waypoint =
+    {Latitude  : f64
+     Longitude : f64
+     Altitude  : f32
+     Check     : Assert
+      (~90.0 <= Latitude and Latitude <= 90.0 and
+       ~180.0 <= Longitude and Longitude <= 180.0 and
+       1000.0 <= Altitude and Altitude <= 15000.0)}
+
+  AutomationResponse =
+    {TaskID : i64
+     Length : u8
+     Waypoints : Waypoint [3]}
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \scalebox{0.60}{\usebox{\contig}}
+    \end{tabular}
+  \end{center}
+  \caption{Contiguity type specification for filter.}
+  \label{fig:filter-contig}
+\end{figure}
+
 
 \newsavebox{\cml}
 \begin{lrbox}{\cml}
 \begin{lstlisting}[style=myML]
 fun filter_step () =
-let val () = Utils.clear_buf buffer
-    val () = API.callFFI "get_input" "" buffer
-in
+ let val () = Utils.clear_buf buffer
+     val () = API.callFFI "get_input" "" buffer
+ in
     if WELL_FORMED_AUTOMATION_RESPONSE buffer
     then
       API.callFFI "put_output" buffer Utils.emptybuf
@@ -80,8 +115,15 @@ end
   \label{fig:filter-cakeml}
 \end{figure}
 
-The synthesized CakeML code for the filter is shown in \figref{fig:filter-cakeml}. The code is called at dispatch by the scheduler. The \texttt{API.callFFI} is the link to the communication fabric to capture input and provide output. The body of the function restates the filter contract to make the appropriate assignments in a way that matches the truth value of the predicate in the filter guarantee.
-The auto-generated AGREE specification raises an alert output when the relation is violated.
+The contiguity type specification for the filter is shown in
+\figref{fig:filter-contig}. The synthesized CakeML code for the filter is shown in
+\figref{fig:filter-cakeml}. The code is called at dispatch by the
+scheduler. The \texttt{API.callFFI} is the link to the communication
+fabric to capture input and provide output. The body of the function
+restates the filter contract to make the appropriate assignments in a
+way that matches the truth value of the predicate in the filter
+guarantee.  The auto-generated AGREE specification raises an alert
+output when the relation is violated.
 
 % A \emph{system} is a collection of \emph{components}, \emph{connections}
 % between components, a \emph{scheduler} to order execution, and a
@@ -89,7 +131,15 @@ The auto-generated AGREE specification raises an alert output when the relation 
 
 \subsection{Monitor Generation}
 
-Monitors, since they are intended to track and analyze the externally visible behavior of system components through time, require more computational features than filters. In particular, our conception of a monitor is a predicate on its input (and output) streams, being able to access the value of a stream at any earlier point in time,  if necessary. Thus monitors commonly use state to keep track of earlier values, unlike filters which are stateless. This reasoning leads us to specify the  computation for a monitor component  by a step function of the following form:
+Monitors, since they are intended to track and analyze the externally
+visible behavior of system components through time, require more
+computational features than filters. In particular, our conception of
+a monitor is a predicate on its input (and output) streams, being able
+to access the value of a stream at any earlier point in time, if
+necessary. Thus monitors commonly use state to keep track of earlier
+values, unlike filters which are stateless. This reasoning leads us to
+specify the computation for a monitor component by a step function of
+the following form:
 \[
 \konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
 \]
@@ -112,8 +162,11 @@ by the port type;
 Our earlier remarks on partiality apply here too, of course.
 
 
-The scheduler \emph{activates} components in some order.It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
- Activating a monitor component takes the form of the following pseudo-code: 
+The scheduler \emph{activates} components in some order.It is an
+obligation on the system that the scheduler follows some sensible
+partial order of component activation and allows each component
+sufficient time for its computation.  Activating a monitor component
+takes the form of the following pseudo-code:
 \[
 \begin{array}{ll}
  \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
@@ -125,6 +178,16 @@ The scheduler \emph{activates} components in some order.It is an obligation on t
 \]
 
 \paragraph{Initialization}
-A monitor may need to make a certain minimum number of observations before being able to make a meaningful assessment of behavior. Until that threshold is attained, the monitor is essentially in a kind of \emph{initialization}. In order for correct code to be generated, monitor specifications need to spell out the values of output ports when in such initialization phases. For example, suppose a monitor does some kind of differential assessment of inputs at adjacent timeslices, alerting when (say) the measured location of a UAV at time $t$ and $t+1$ is such that the distance between the two locations is unusually large. Such a monitor needs two measurements before making its first judgement, but at the time of its first output, only one measurement will have been made. The specification for this monitor has to explicitly say what the correct first output is.
-
-
+A monitor may need to accumulate a certain minimum number of
+observations before being able to make a meaningful assessment of
+behavior. Until that threshold is attained, the monitor is essentially
+in a kind of \emph{initialization} phase. In order for correct code to
+be generated, monitor specifications need to spell out the values of
+output ports when in an initialization phase. For example, suppose a
+monitor does some kind of differential assessment of inputs at
+adjacent timeslices, alerting when (say) the measured location of a
+UAV at times $t$ and $t+1$ is such that the distance between the two
+locations is unusually large. Such a monitor needs two measurements
+before making its first judgement, but at the time of its first
+output, only one measurement will have been made. The specification
+for must explicitly state what the correct first output is.
