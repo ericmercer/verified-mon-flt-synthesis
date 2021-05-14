@@ -25,22 +25,22 @@ depends on an underlying check specified by the contiguity type
 checking bounds on waypoints.
 
 The verdict of a filter is made and performed within one thread
-invocation. Thus, in its given time slice, the filter must complete the
-following steps:
+invocation. Thus, in its given time slice, the
+following steps must be completed:
 
 \begin{enumerate}
 
-\item checks to see if there is any input available; if there is none
-then it yields control; otherwise,
+\item The filter checks to see if there is any input available.  If there is none
+then it yields control; otherwise:
 
-\item the input is read (and parsed if need be),
+\item The input is read (and parsed if need be);
 
-\item the wellformedness predicate is evaluated on the input,
+\item The wellformedness predicate is evaluated on the input;
 
-\item if the predicate returns \konst{true} then the input buffer
- is copied to the output; otherwise no action is taken, and
+\item If the predicate returns \konst{true} then the input buffer
+ is copied to the output, otherwise no action is taken; and
 
-\item the filter yields control.
+\item The filter yields control.
 \end{enumerate}
 
 \begin{remark}[Partiality]
@@ -189,7 +189,7 @@ UAV at times $t$ and $t+1$ is such that the distance between the two
 locations is unusually large. Such a monitor needs two measurements
 before making its first judgement, but at the time of its first
 output, only one measurement will have been made. The specification
-must then explicitly state what the correct first output is.
+must then explicitly state the correct value for the first output.
 
 \subsubsection{Step function}
 
@@ -198,7 +198,7 @@ The \konst{stepFn} works as follows:
 \begin{enumerate}
 
 \item Each input is parsed into data of the type specified by the port
-  type.
+  type;
 
 \item New values for the state variables are computed, in dependency
   order. The discussion above on initialization now comes into
@@ -232,7 +232,7 @@ In all subsequent steps, the \emph{non-initialization} assignments are performed
 
 \item Outputs are written and the new state is written;
 
-\item Control is yielded.
+\item The monitor yields control.
 \end{enumerate}
 
 The \konst{stepFn} for the monitor of the example is displayed in \figref{fig:monitor-cakeml}.
