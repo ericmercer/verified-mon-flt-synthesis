@@ -250,7 +250,8 @@ let val stateVars' =
             val current = (req = rsp)
             val previous = req and not(rsp)
             val policy = current or previous
-            alert = not policy
+            val alert = not policy
+            val () = (intStep := False)
         in (req,rsp,current,previous,policy,alert)
         end
      else
@@ -259,7 +260,7 @@ let val stateVars' =
             val current = (req = rsp)
             val previous = pre(req and not rsp) and (not req and rsp)
             val policy = current or previous
-            alert = (is_latched and pre(alert)) or not(policy)
+            val alert = (is_latched and pre(alert)) or not(policy)
         in (req,rsp,current,previous,policy,alert)
         end
     val (_,rsp',_,_,_,alert') = stateVars'
@@ -286,4 +287,10 @@ end
 
 \subsection{Component Behavior}
 
-Possibly some material to add here ...
+Intutively, for monitor specification $s$, \konst{stepFn} is the
+concrete embodiment of $\konst{SynthEval}\;s$, as defined in Section
+\ref{agree-semantics}. Its correctness amounts to showing that, given
+a sequence of inputs, and an initial state meeting the initialization
+constraints, iterating \konst{stepFn} produces a $\pi \in
+\Lang{s}$. Morevover, taking the union over all input sequences and
+initial states produces $\Lang{s}$ itself.
