@@ -17,8 +17,8 @@ expressive power of Contiguity Types \cite{contiguity-types} to
 enforce \emph{lightweight} bounds constraints on GPS coordinates in
 UxAS messages. On the other hand, a filter may need to parse the input
 buffer into a data structure specified in AGREE and apply a
-user-defined \emph{well-formedness} property, also specified in AGREE,
-to the data. Arbitrarily complex well-formedness checks can be made in
+user-defined \emph{wellformedness} property, also specified in AGREE,
+to the data. Arbitrarily complex wellformedness checks can be made in
 this way. \figref{fig:filter-spec} shows a combination where the
 checking specified by {\small\verb+WELL_FORMED_AUTOMATION_RESPONSE+}
 depends on an underlying check specified by the contiguity type
@@ -55,7 +55,7 @@ must also guard against situations in which a \emph{correctly
 the filter \emph{ought} to accept a message, but lack of resources
 results in the filter failing to do so. For example, the parse of a
 message might need more space than has been allocated; another example
-could be if the timeslice provided by the scheduler is too short for
+could be if the time slice provided by the scheduler is too short for
 the wellformedness computation to finish. Thus resource bounds need to
 be included in the correctness argument.
 
@@ -125,7 +125,7 @@ end
   \label{fig:filter-cakeml}
 \end{figure}
 
-The contiguity type specification and well-formedness predicate for
+The contiguity type specification and wellformedness predicate for
 the filter are shown in \figref{fig:filter-spec} and the synthesized
 CakeML code is in \figref{fig:filter-cakeml}. The code is called at
 dispatch by the scheduler. The \texttt{API.callFFI} is the link to the
@@ -146,7 +146,7 @@ Monitors are intended to track and analyze the externally visible
 behavior of system components through time. Therefore, they require
 more extensive computational ability than filters. In particular, our
 basic notion of a monitor is that it embodies a predicate over its
-input and output streams, able to access the value of a stream at any
+input and output streams, and is able to access the value of a stream at any
 earlier point in time, if necessary. Monitors commonly use state to
 keep track of earlier values, unlike filters which, for us, are
 typically stateless components. (However, there is nothing in our
@@ -180,11 +180,11 @@ values.
 A monitor may need to accumulate a certain minimum number of
 observations before being able to make a meaningful assessment of
 behavior. Until that threshold is attained, the monitor is essentially
-in a kind of \emph{initialization} phase. In order for correct code to
+in its \emph{initialization} phase. In order for correct code to
 be generated, monitor specifications need to spell out the values of
-output ports when in an initialization phase. For example, suppose a
+output ports when in their initialization phases. For example, suppose a
 monitor does some kind of differential assessment of inputs at
-adjacent timeslices, alerting when (say) the measured location of a
+adjacent time slices, alerting when (say) the measured location of a
 UAV at times $t$ and $t+1$ is such that the distance between the two
 locations is unusually large. Such a monitor needs two measurements
 before making its first judgement, but at the time of its first
@@ -287,10 +287,10 @@ end
 
 \subsection{Component Behavior}
 
-Intutively, for monitor specification $s$, \konst{stepFn} is the
+Intuitively, for monitor specification $s$, \konst{stepFn} is the
 concrete embodiment of $\konst{SynthEval}\;s$, as defined in Section
 \ref{agree-semantics}. Its correctness amounts to showing that, given
 a sequence of inputs, and an initial state meeting the initialization
-constraints, iterating \konst{stepFn} produces a $\pi \in
-\Lang{s}$. Morevover, taking the union over all input sequences and
+constraints, iterating \konst{stepFn} produces a $\pi$ s.t. $\pi \in
+\Lang{s}$; and taking the union over all input sequences and
 initial states produces $\Lang{s}$ itself.

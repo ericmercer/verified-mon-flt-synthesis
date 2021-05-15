@@ -1,4 +1,6 @@
-In this section, we apply the BriefCASE tool to the development of a UAV surveillance system in which a UAV receives commands from a ground station to conduct surveillance over a geographical region. The on-board mission computer then generates a flight plan consisting of a series of waypoints that the UAV must traverse to complete its mission. The UAV is also given a set of \textit{keep-in} and \textit{keep-out} zones that may constrain its flight path.
+In this section, we outline the application of the BriefCASE tool towards the development of a UAV surveillance system as a part of the DARPA CASE program.
+%apply the BriefCASE tool towards the development of a UAV surveillance system in which 
+The UAV receives commands from a ground station to conduct surveillance over a geographical region. In response, the UAV's on-board mission computer generates a flight plan consisting of a series of waypoints that the UAV must traverse to complete its mission. The UAV is also given a set of \textit{keep-in} and \textit{keep-out} zones that may constrain its flight path.
 
 We have modeled the system architecture of the UAV in AADL.  The model includes a Mission Computer for communicating with the ground station and generating flight plans, and a Flight Control Computer for UAV navigation.  The Mission Computer architecture model includes hardware components such as a processor, memory, and communication devices, as well as software.
 %
@@ -16,15 +18,17 @@ For this application, UxAS accepts three types of messages.  The \textit{Operati
 Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.  We perform a formal analysis using the AGREE tool (which is integrated with the BriefCASE environment) to verify that the model satisfies the contracts.  For the initial version of our design, the verification passes.
 %
 Although we are satisfied with the results of the formal verification using AGREE, we have not yet analyzed the design for cyber-vulnerabilities.  
-In BriefCASE, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.  The tools generate a list of new requirements corresponding to cyber vulnerabilities found in the design.  To satisfy these requirements we need to mitigate the vulnerabilities discovered by the analysis by modifying the design.
+In BriefCASE, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.  The tools generate a list of new requirements corresponding to cyber vulnerabilities found in the design,
+and we need to satisfy these requirements by modifying the design.
+%  To satisfy these requirements we need to mitigate the vulnerabilities discovered by the analysis by modifying the design.
 %
-For example, because we annotated the open-source UxAS component as \texttt{uncontrolled} (colored red in \figref{fig:sw-initial}), the cyber analysis tools generate requirements for ensuring unverified or malicious code (that could potentially be embedded in the component) will not impact other processes. 
+For example, because we annotated the open-source UxAS component as \texttt{uncontrolled} (colored red in \figref{fig:sw-initial}), the cyber analysis tools generate requirements for ensuring that unverified or malicious code (which could potentially be embedded in the component) will not impact other processes. 
 
-In total, seven cyber requirements are generated and imported into our model.  These include four \textit{well-formedness} requirements, two requirements for \textit{monitoring} the behavior of the open-source UxAS component, and an \textit{attestation} requirement for ensuring the Ground Station software has not been tampered with.  Requirements are imported into the model as goals in a Resolute assurance case.  Because we can run Resolute at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
+In total, seven cyber requirements are generated and imported into our model.  These include four \textit{wellformedness} requirements, two requirements for \textit{monitoring} the behavior of the open-source UxAS component, and an \textit{attestation} requirement for ensuring the Ground Station software has not been tampered with.  Requirements are imported into the model as goals in a Resolute assurance case.  Because we can run Resolute at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
 
-The intent of the \textit{well-formedness} requirements is to prevent malformed messages from causing a buffer overrun or code injection attack.  In the UAV design, such messages are most likely to originate from a remote source or the uncontrolled UxAS component.  By placing filters on the connections upstream of mission-critical components, such attacks could be mitigated.  The Filter transform is therefore applied for each well-formedness requirement, inserting filter components on the incoming and outgoing UxAS connections.  
+The intent of the \textit{wellformedness} requirements is to prevent malformed messages from causing a buffer overrun or code injection attack.  In the UAV design, such messages are most likely to originate from a remote source or the uncontrolled UxAS component.  By placing filters on the connections upstream of mission-critical components, such attacks could be mitigated.  The Filter transform is therefore applied for each wellformedness requirement, inserting filter components on the incoming and outgoing UxAS connections.  
 
-The filter behavior for each component is specified in AGREE.  Not only does this enable formal verification within the modeling environment, but it also provides a means for synthesizing the component implementation in a provably correct manner using the SPLAT tool.  Because SPLAT is integrated with BriefCASE, the proof it emits when synthesizing component code is used as evidence in the Resolute goal for the corresponding mitigation.  When Resolute evaluates whether such a goal is supported by evidence, it checks for the existence of the synthesis proof in addition to verifying that the architecture is correct.  
+The filter behavior for each component is specified in AGREE.  This enables formal verification within the modeling environment, and also provides a means for synthesizing the component implementation in a provably correct manner using the SPLAT tool.  Because SPLAT is integrated with BriefCASE, the proof it emits when synthesizing component code is used as evidence in the Resolute goal for the corresponding mitigation.  When Resolute evaluates whether such a goal is supported by evidence, it checks for the existence of the synthesis proof in addition to verifying that the architecture is correct.  
 
 The AGREE filter policies for the four UxAS connections are similar, and check that record values contained in the messages are within appropriate ranges.  For example, the Automation Response message filter, which drops messages containing malformed flight plans, is defined as shown in \figref{fig:automation-response-filter}.  Although \texttt{Latitude}, \texttt{Longitude} and \texttt{Altitude} are defined as 64-bit floating-point values, the filter only passes messages containing waypoint values between [-90,90], [-180,180], and [0,15000], respectively. 
 
@@ -36,7 +40,7 @@ The AGREE filter policies for the four UxAS connections are similar, and check t
 \end{figure}
 
 In addition to monitoring the UxAS output for malformed messages, we must also monitor for suspicious behavior.  This requires adding components for detecting that UxAS has crashed, as well as monitoring the correctness of the flight plans it produces.  The Monitor transform is applied for this class of mitigation.  In general, monitors observe a channel and compare its contents against a reference signal or constant.  The monitor policy specifies acceptable comparisons, and if violated, the monitor sends out an alert.  A monitor can choose to \textit{gate} the observed signal, in which case it also acts as a special kind of filter and drops the message if the policy is violated.  The \textit{monitoring} requirements drive two transforms.  The first adds a \textit{response} monitor to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.  The second adds a \textit{geofence} monitor to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.  The Geofence Monitor is a gated monitor; it prevents the observed Automation Response message from reaching the Waypoint Manager. 
-
+%
 Similar to the filters, the monitor policies are specified in AGREE. For example, 
 %The Response Monitor specification is shown in \figref{fig:response-monitor}, and 
 the Geofence Monitor specification is shown in \figref{fig:geofence-monitor}. 
@@ -55,7 +59,9 @@ the Geofence Monitor specification is shown in \figref{fig:geofence-monitor}.
 	\label{fig:geofence-monitor} 
 \end{figure}
 
-The requirements that have been addressed so far mitigate vulnerabilities related to malformed messages and malicious behavior \textit{on-board} the UAV.  But we also want to protect against a compromised Ground Station that could potentially transmit well-formed, but malicious commands. The final cyber-requirement is mitigated by the Attestation transform~\cite{attestation-copland}, which adds two components to the UAV software: an Attestation Manager for evaluating remote systems like the Ground Station, and an Attestation Gate for filtering messages from sources that have not been approved by the Attestation Manager.  The Attestation Manager is implemented in CakeML and automatically inserted into the application code base by BriefCASE.  Because the Attestation Gate acts as a filter, the transform automatically generates its complete AGREE specification.%, as shown in \figref{fig:attestation}.
+So far, we have addressed requirements that 
+%The requirements that have been addressed so far
+mitigate vulnerabilities related to malformed messages and malicious behavior \textit{on-board} the UAV.  But we also want to protect against a compromised Ground Station transmitting wellformed, but malicious commands. The final cyber requirement is mitigated by the Attestation transform~\cite{attestation-copland} that adds two components to the UAV software: an Attestation Manager for evaluating remote systems like the Ground Station, and an Attestation Gate for filtering messages from sources that have not been approved by the Attestation Manager.  The Attestation Manager is implemented in CakeML and automatically inserted into the application code base by BriefCASE.  Because the Attestation Gate acts as a filter, the transform automatically generates its complete AGREE specification.%, as shown in \figref{fig:attestation}.
 
 % \begin{figure}[h]
 % 	\centering
@@ -82,23 +88,23 @@ HAMR translates the AADL system model to code that implements threading infrastr
 %
 HAMR then compiles the software to execute on seL4~\cite{sel4-2009}, a verified capability-based microkernel (accompanied by formal proof of spatial isolation properties down to the binary level).
 
-The UAV and Ground Station software were deployed on ODROID XU4 hardware, and communicate with each other over Ethernet.  The AMASE flight simulator, representing the Flight Control Computer was run on a Linux machine and connected to the UAV ODROID via a serial connection.  The UxAS implementation on the UAV was modified by adding malicious code that would prevent it from responding to Automation Requests or produce flight plans that would violate the operating region constraints.  Some of the Line Search Task messages transmitted from the Ground Station contained malformed messages that would modify the UxAS behavior. In addition, we modified the Ground Station to simulate a breach for our evaluation of the attestation transform.
+The UAV and Ground Station software were deployed on ODROID XU4 hardware, and communicated with each other over ethernet.  The AMASE flight simulator, representing the Flight Control Computer was run on a Linux machine and connected to the UAV ODROID via a serial connection.  The UxAS implementation on the UAV was modified by adding malicious code that would prevent it from responding to Automation Requests or produce flight plans that would violate the operating region constraints.  Some of the Line Search Task messages transmitted from the Ground Station contained malformed messages that would modify the UxAS behavior. In addition, we modified the Ground Station to simulate a breach for our evaluation of the attestation transform.
+%
+We performed a set of tests on the initial system (\figref{fig:sw-initial}) prior to applying our cyber-resiliency mitigations in order to verify the effectiveness of the malicious code.  
+A third party evaluator repeated the tests on the hardened system and % were able to 
+demonstrated that our mitigations were successful.
+The following scenarios were exercised (status messages from the high-assurance components in the hardened system are in \figref{fig:mitigation-output}):
 
-We first performed a set of tests on the initial system (\figref{fig:sw-initial}) prior to applying our cyber-resiliency mitigations in order to verify the effectiveness of the malicious code.  
-A third party evaluator repeated the tests on the hardened system and were able to demonstrate that our mitigations were successful.
-The following scenarios were exercised (status messages from the high-assurance components in the hardened system are shown in \figref{fig:mitigation-output}):
-
-\paragraph{Infected Ground Station} In this scenario, one of the application files is modified on the Ground Station, which sends the UAV on a trajectory that violates mission requirements. 
+\paragraph{Infected Ground Station} An application file is modified on the Ground Station, which sends the UAV on a mission-violating trajectory.
 On the hardened system, messages sent to the UAV were rejected by the Attestation Manager.  
 
-\paragraph{Malformed Line Search Task message} In this scenario, the Line Search Task message contains a waypoint with a longitude value outside the permitted range.  Such malformed messages could exploit vulnerabilities in the on-board software.  
-This vulnerability is mitigated by inserting a well-formedness filter.  The filter prevented the Line Search Task message from reaching UxAS.
+\paragraph{Malformed Line Search Task message} The Line Search Task message contained a waypoint with a longitude outside the permitted range to exploit vulnerabilities in the on-board software.  The wellformedness filter for Line Search Task messages prevented this message from reaching the UxAS.
 
-\paragraph{UxAS vulnerability exploit} In this scenario, Line Search Tasks with greater than 90 waypoints were transmitted from the Ground Station, which triggered a vulnerability that crashes UxAS.   When this occurs, UxAS is prevented from generating an Automation Response.  
-This vulnerability is mitigated by inserting a Response Monitor, which checks to see that UxAS outputs an Automation Response message shortly after receiving an Automation Request.  For this scenario, we chose for the monitor to output a status message, which would then be received by the Ground Station and an appropriate action taken.
+\paragraph{UxAS vulnerability exploit} Line Search Tasks with greater than 90 waypoints were transmitted from the Ground Station, triggering a vulnerability that crashes UxAS.   When this occurs, UxAS is unable to generate an Automation Response.  
+This vulnerability is mitigated by inserting a Response Monitor that checks to see if UxAS outputs an Automation Response message shortly after receiving an Automation Request.  For this scenario, we chose for the monitor to output a status message, which would then be received by the Ground Station and an appropriate action taken.
 
-\paragraph{UxAS trojan modifies flight plan} In this scenario, a trojan embedded in UxAS attempts to cause the UAV to fly into the specified keep-out zone by modifying the mission command waypoints in the Automation Response.  
-On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and instead returned the UAV to Home Base.
+\paragraph{UxAS trojan modifies flight plan} A trojan embedded in UxAS attempts to cause the UAV to fly into a specified keep-out zone by modifying the mission command waypoints in the Automation Response.  
+On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and returned the UAV to Home Base.
 
 
 \begin{figure}[h]
