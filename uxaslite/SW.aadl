@@ -59,11 +59,11 @@ public
             Output: out event data port AutomationResponse.Impl;
         properties
             CASE_Properties::Monitoring => 100;
-            CASE_Properties::Component_Spec => ("Monitor_Alert, Monitor_Output");
+            CASE_Properties::Component_Spec => ("Monitor_Alert", "Monitor_Output");
             CASE_Properties::Monitor_Latched => true;
         annex agree {**
-            const is_latched : bool = 
-              Get_Property(this, CASE_Properties::Monitor_Latched);
+            const is_latched : bool = true;
+--              Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
             eq current : bool = (req = rsp);
@@ -75,11 +75,13 @@ public
             guarantee Monitor_Alert 
               "Alert port tracks alert variable" :
               event(Alert) = alert;
-            guarantee Monitor_Output
+              
+         guarantee Monitor_Output
               "Output if not alerted" :
-              if event(Alert) then (not event(Output)) else
-              if event(Response) then (event(Output) and (Output = Response))
-              else (not event(Output));
+              if not(alert) and event(Response) then
+                   event(Output) and (Output = Response)
+              else
+                   not (event(Output));
         **};
     end CASE_Monitor_Thr;
 
