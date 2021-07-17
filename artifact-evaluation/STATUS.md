@@ -1,0 +1,1 @@
+BriefCASE is in an advanced prototype stage where it is being applied to industrial scale designs within Collins Aerospace. The release artifact described in this distribution is the same being used in those prototypes and delivered to DARPA for evaluation. 
