@@ -4,7 +4,7 @@
 
 Thank for your the thoughtful reviews.
 
-Regarding 1) The before and after tool chains have been compared showing that the real value is in the synthesized CakeML code from the AGREE specification. Before BriefCASE, the process was fully manual requiring domain expertise in AADL, AGREE, and CakeML. It additionally required manual inspection and code review to argue the correctnees of the implementation. The new approch in the paper is near push-button to synthesize from the AGREE specification the CakeML implementation. That implementation is proved correct thus removing any need for code review or manual argument of correctness in the implementation.
+Regarding 1) The before and after tool chains have been compared showing that there is great value in the synthesized CakeML code from the AGREE specification. Before BriefCASE, the process was fully manual requiring domain expertise in AADL, AGREE, and CakeML. It additionally required manual inspection and code review of the CakeML to argue the correctness of the implementation. The new approach in the paper is near push-button to synthesize from the AGREE specification the CakeML implementation. That implementation is proved correct automatically thus removing any need for code review or manual argument of correctness in the implementation.
 
 Regarding 2) See 1.
 
@@ -12,7 +12,7 @@ Regarding 3) The developers must write and debug the policies used in the model 
 
 Regarding 4) The approach is well-suited to detecting attacks that fuzz data or impersonate communication. More sophisticated attacks that require a temporal sequence of events are more difficult to express in the specification language and soon become very complex to reason about. The same is true about attacks that manipulate complex data-structures such as trees and lists. An example is a monitor that detects non-regular movement of aircraft in real-time. The messages formats and complex computations yield a complicated specification that is hard to manually reason about. The synthesis is guaranteed correct, but it is hard to know if the specification is correct. So this work solves the problem of creating a correct implementation from a specification where correct means it exactly preserves the meaning of the specification, but whether or not the specification captures the desired intent is an open problem. 
 
-Regarding 5) Yes. These are derived with Black-box input partitioning applied to the specifications for the high-assurance components and in consultation with the system engineers. Effectively these are system level tests with expected unit level outcomes to exercise each filter and monitor in the system so that each accepts, blocks, or alarms as appropriate.
+Regarding 5) Yes. The tests are derived with Black-box input partitioning applied to the specifications for the high-assurance components and in consultation with the system engineers. Effectively these are system level tests with expected unit level outcomes to exercise each filter and monitor in the system so that each accepts, blocks, or alarms as appropriate.
 
 # Reviewers Most Important Questions
 
