@@ -1,3 +1,22 @@
+# Notes
+
+(sentence in the introduction) CASE was scoped to address the more common cyber-vulnerabilities that programmers introduce such as overflow and lack of input validation, supply-chain issues, identity verification and not things such as side-channel and denial of service vulnerabilities.
+
+Not inventing any new type of filter are monitor in terms of capability. Here we are giving a way to synthesize such things from a formal specification. Provide a means from a specification to code and a way to show it is correct. 
+
+Doing it in a way that enable rapid evaluation and early synthesis targeting VM or Linux for early feedback before the full system is fielded for test. Early validation is key here.
+
+Case-study motivation: showcase the tool chain in an industrial scale problem to see if the technology works. Some anecdotal information about impact on engineers. In the end though, a manual process now has tool support for early validation. So it went from nothing to something and provides early information about cyber-vulnerabilities and effectiveness of intervention. Take UXAS message format on board, complex real-world message format, and it works in the tool. The tool handles these complex message types. Existing real world example with a lot of complexity. Validates the utility, capability, of the tool. <== Real motivation.
+
+For the case study, shift the focus to be more specific to the filter and monitor, and more passing on the other things that are part of BriefCASE. Weave in the above discussion on the tool.
+
+## Summary of Changes
+
+  * Add sentence about limitations
+  * Rework case-study to focus on filter and monitor
+  * Add discussion about what case-study needs to accomplish
+  * Update figures on slat synthesized code.
+   
 # Response to Reviewer Questions
 
 **Limit:** 500 words
@@ -28,7 +47,7 @@ Please focus your response to address the following questions and concerns raise
 
 There needs to be a discussion of the limitations of the approach including what types of attacks can and cannot by mitigated as well as the guarantees that can or cannot be made before and after the transformations. 
 
-The case study needs to be revised to make clear the research questions it is tryng to answer and how it will answer those questions. It also needs some discussion of life before and after the tool vis a vis the system engineers.
+The case study needs to be revised to make clear the research questions it is trying to answer and how it will answer those questions. It also needs some discussion of life before and after the tool vis a vis the system engineers.
 
 # Review 1
 
