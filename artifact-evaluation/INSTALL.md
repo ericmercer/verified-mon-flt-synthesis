@@ -39,6 +39,12 @@ Open the `SW.aadl` file and navigate to the `SW.Impl` process implementation. Cl
 
 ## Running SPLAT Synthesis
  
-Open the `SW.aadl` file and click anywhere in the file. Right click to get the context menu, select `BriefCASE`. Then select `CyberResiliency`. Then select `Synthesis Tools`. And finally select `Run SPLAT`. The console reports where the synthesized files are located and reports that `SPLAT completed successfully`.
+Open the `SW.aadl` file and click anywhere in the file. Right click to get the context menu, select `BriefCASE`. Then select `Cyber Resiliency`. Then select `Synthesis Tools`. And finally select `Run SPLAT`. The console reports where the synthesized files are located and reports that `SPLAT completed successfully`.
 
 Each synthesized component is placed in its own directory. The file with the `.cml` extension in the synthesized CakeML. For the filter example here, the file is named `SW_CASE_Filter_Thr.cml`. The other files are related to `seL4` integration and outside the scope of the paper and artifact evaluation.
+
+## Model Transforms
+
+BriefCASE is able to transform the model to automatically insert cyber-resilient filters and monitors. To add a **filter**, open the `SW.aadl` file and navigate to the `SW.Impl` process implementation. Click on connection `c05` so the cursor is anywhere in that label. The selected connection indicates *where* in the model the filter is to be added. Right-click to get the pop-up menu and select `Cyber Resiliency`, `Model Transformations`, and then `Add Filter...`. Complete the various field as desired. It is okay to leave the `Filter Policy` unspecified and define it later with an `AGREE` contract later as is done in the example system; otherwise, the policy can be specified with a regular expression. Click `OK`. After a moment, the `SW.aadl` file will reload with the added component in `SW.Impl`, and the component is also added to the file with the indicated name.
+
+The process to add a monitor is the same as that to add a filter. Select the `Add Monitor...` option instead. The dialogue is more complicated for the monitor since it is able to reason over several inputs. Complete the dialogue and click `OK`. Again, after a brief moment, the `SW.aadl` file is refreshed showing the added component and connections. As before, the actual monitor policy then needs to be specified with an `AGREE` contract.
