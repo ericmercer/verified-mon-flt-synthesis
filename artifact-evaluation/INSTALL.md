@@ -2,7 +2,11 @@ This guide assumes basic knowledge of the Linux environment and command-line. It
 
 # FMIDE 
 
-The `fmide.sh` script downloads OSATE and adds to OSATE the BriefCASE tools. The script takes a single argument to indicate the install directory. **WARNING**: the script **deletes** and **recreates** the named directory so be sure it does not contain other useful items. The following command runs the script and installs the tools in an `fmide` directory that it creates in the same directory where the script is located.
+If downloading the archived release, then once it is expanded, move to the **Example Walk Through**.
+
+[![DOI](https://zenodo.org/badge/349156584.svg)](https://zenodo.org/badge/latestdoi/349156584)
+
+Otherwise, the `fmide.sh` script downloads OSATE and adds to OSATE the BriefCASE tools. The script takes a single argument to indicate the install directory. **WARNING**: the script **deletes** and **recreates** the named directory so be sure it does not contain other useful items. The following command runs the script and installs the tools in an `fmide` directory that it creates in the same directory where the script is located.
 
 ```sh
 $ ./fmide.sh fmide

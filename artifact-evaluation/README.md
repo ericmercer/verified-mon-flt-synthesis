@@ -6,6 +6,12 @@ All the BriefCASE tools are open source. See the [Formal Methods Workbench](http
 
 All these tools are downloaded by the `fmide.sh` script (see INSTALL.md) and are publicly hosted on Github.
 
+The versions of the tools used in this paper have been snapshot and archived for independent review:
+
+[![DOI](https://zenodo.org/badge/349156584.svg)](https://zenodo.org/badge/latestdoi/349156584)
+
+The release includes a full binary version of OSATE2 with the BriefCASE tool set already installed. If using that version for evaluation, then skip to the tool usage examples in INSTALL.md.
+
 # Included Files
 
   * README.md (overview)
