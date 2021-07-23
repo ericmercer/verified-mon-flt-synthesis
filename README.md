@@ -8,7 +8,7 @@ Here is the [pre-release](https://github.com/ericmercer/verified-mon-flt-synthes
 The DOI is below:
 
 [![DOI](https://zenodo.org/badge/349156584.svg)](https://zenodo.org/badge/latestdoi/349156584)
-reStructedText
+
 
 
 
