@@ -43,7 +43,7 @@ Open the `SW.aadl` file and navigate to the `SW.Impl` process implementation. Cl
 
 ## Running SPLAT Synthesis
  
-Open the `SW.aadl` file and click anywhere in the file. Right click to get the context menu, select `BriefCASE`. Then select `Cyber Resiliency`. Then select `Synthesis Tools`. And finally select `Run SPLAT`. The console reports where the synthesized files are located and reports that `SPLAT completed successfully`.
+Open the `SW.aadl` file and click anywhere in the file. Right click to get the context menu, select `BriefCASE`. Then select `Cyber Resiliency`. Then select `Synthesis Tools`. And finally select `Run SPLAT`. The console reports where the synthesized files are located and reports that `SPLAT completed successfully`. Some users have reported that the first time `SPLAT` runs it crashes with no console output, but runs as expected in the second attempt. 
 
 Each synthesized component is placed in its own directory. The file with the `.cml` extension in the synthesized CakeML. For the filter example here, the file is named `SW_CASE_Filter_Thr.cml`. The other files are related to `seL4` integration and outside the scope of the paper and artifact evaluation.
 
