@@ -1,8 +1,8 @@
 In this section, we outline the application of the BriefCASE tool towards the development of a UAV surveillance system as a part of the DARPA CASE program.
-The motivation here was to showcase the toolchain on an industrial scale problem, to see if the technology works, i.e. provides engineers with early validation of their model; provides early information about cyber-vulnerabilities and in the effectiveness of related mitigations; to show that the tool can handle the UXAS message format (a complex, real-world message format); and to validate the utility and capability of the toolchain.
+The motivation was to showcase the toolchain on an industrial scale problem, to see if the technology works, i.e. provides engineers with early validation of their model; provides early information about cyber-vulnerabilities and in the effectiveness of related mitigations; to show that the tool can handle the UXAS message format (a complex, real-world message format); and to validate the utility and capability of the toolchain.
 
 %apply the BriefCASE tool towards the development of a UAV surveillance system in which 
-The UAV receives commands from a ground station to conduct surveillance over a geographical region. In response, the UAV's on-board mission computer generates a flight plan consisting of a series of waypoints that the UAV must traverse to complete its mission. The UAV is also given a set of \textit{keep-in} and \textit{keep-out} zones that may constrain its flight path.
+In this surveillance system, the UAV receives commands from a ground station to conduct surveillance over a geographical region. In response, the UAV's on-board mission computer generates a flight plan consisting of a series of waypoints that the UAV must traverse to complete its mission. The UAV is also given a set of \textit{keep-in} and \textit{keep-out} zones that may constrain its flight path.
 
 We have modeled the system architecture of the UAV in AADL.  The model includes a Mission Computer for communicating with the ground station and generating flight plans, and a Flight Control Computer for UAV navigation.  The Mission Computer architecture model includes hardware components such as a processor, memory, and communication devices, as well as software.
 %
@@ -95,7 +95,8 @@ The UAV and Ground Station software were deployed on ODROID XU4 hardware, and co
 We performed a set of tests on the initial system (\figref{fig:sw-initial}) prior to applying our cyber-resiliency mitigations in order to verify the effectiveness of the malicious code.  
 A third party evaluator repeated the tests on the hardened system and % were able to 
 demonstrated that our mitigations were successful.
-The following scenarios were exercised (status messages from the high-assurance components in the hardened system are in \figref{fig:mitigation-output}):
+%The following scenarios were exercised (status messages from the high-assurance components in the hardened system are in \figref{fig:mitigation-output}):
+The following scenarios were exercised:
 
 \paragraph{Infected Ground Station} An application file is modified on the Ground Station, which sends the UAV on a mission-violating trajectory.
 On the hardened system, messages sent to the UAV were rejected by the Attestation Manager.  
@@ -109,10 +110,10 @@ This vulnerability is mitigated by inserting a Response Monitor that checks to s
 On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and returned the UAV to Home Base.
 
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.8\columnwidth]{figs/mitigation-output.png}
-	\caption{Cyber-resilient system response.} 
-	\label{fig:mitigation-output} 
-\end{figure}
+% \begin{figure}[h]
+% 	\centering
+% 	\includegraphics[width=0.8\columnwidth]{figs/mitigation-output.png}
+% 	\caption{Cyber-resilient system response.} 
+% 	\label{fig:mitigation-output} 
+% \end{figure}
 
