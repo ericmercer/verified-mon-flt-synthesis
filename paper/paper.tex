@@ -12,6 +12,21 @@
 \usepackage{listings}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{flushend}
+\usepackage{hyperref}
+\usepackage[firstpage]{draftwatermark}
+
+\SetWatermarkAngle{0}
+\SetWatermarkFontSize{8pt}
+\SetWatermarkText{\raisebox{\textheight}{%
+\begin{minipage}{\textwidth}%
+\vspace{-18pt}\hfill%
+\href{http://doi.org/10.5281/zenodo.5129276}{% REPLACE WITH YOUR ARTIFACT DOI
+\includegraphics[width=0.6in, height=0.6in]{reusable}% IF REUSABLE BADGE GRANTED
+\includegraphics[width=0.6in, height=0.6in]{available}% IF AVAILABLE BADGE GRANTED
+}
+\end{minipage}%
+}}
+
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -95,7 +110,8 @@
 
 \begin{document}
 \title{
-  Synthesizing Verified Components for Cyber Assured Systems Engineering 
+  Synthesizing Verified Components~~~\\
+  for Cyber Assured Systems Engineering~
   \thanks{DISTRIBUTION STATEMENT A.  Approved for public release.}
 }
 
