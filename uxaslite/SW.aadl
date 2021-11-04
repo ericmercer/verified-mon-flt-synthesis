@@ -68,14 +68,13 @@ public
 --              Get_Property(this, CASE_Properties::Monitor_Latched);
             eq rsp : bool = event(Response);
             eq req : bool = event(Request);
-            eq update : int = if ((req && rsp) || (!req && !rsp)) 0 else if req then 1 else -1;
-            eq pending : int = update -> update + pre(pending);
             eq current : bool = (req = rsp);
             eq previous : bool = (req and not rsp) ->
                                   pre(req and not rsp) and (not req and rsp);
             eq policy : bool = current or previous;
             eq alert : bool = (not policy) 
                            -> ((is_latched and pre(alert)) or not policy);
+                             
             guarantee Monitor_Alert 
               "Alert port tracks alert variable" :
               event(Alert) = alert;
@@ -511,6 +510,44 @@ public
         **};
     end SWSystem.cyber_Impl;
     
+    ------------------------------------------------------------
+	-- EQUIVALENT AGREE SEMANTICS FOR COMPONONT SPECIFICATION --
+	------------------------------------------------------------
+	process SWMonitor
+		features
+			Response: in event data port AutomationResponse.Impl;
+            Request: in event data port AutomationRequest.Impl;
+            Alert: out event port;
+            Output: out event data port AutomationResponse.Impl;
+		annex agree {**
+			eq req : bool = event(Request);
+			eq rsp : bool = event(Response);      
+		    eq update : int = if req <=> rsp then 0 else (if req then 1 else -1);
+            eq pending : int = update -> update + pre(pending);
+              
+            guarantee Bounded_Response 
+              "Bounded response or alert" :
+              (0 <= pending and pending <= 1) or event(Alert);
+        **};
+	end SWMonitor;
+	
+	process implementation SWMonitor.Impl
+		subcomponents
+			Monitor: thread CASE_Monitor_Thr.Impl;
+		connections
+			--------------------
+			-- Primary Inputs --
+			--------------------
+			c01: port Response -> Monitor.Response;
+			c02: port Request -> Monitor.Request;
+			
+			-------------
+			-- Monitor --
+			-------------
+			c03: port Monitor.Output -> Output;
+			c04: port Monitor.Alert -> Alert;
+	end SWMonitor.Impl;
+	
     ---------------------
     -- AGREE Functions --
     ---------------------
