@@ -1,8 +1,9 @@
-\documentclass[conference]{IEEEtran}
-\IEEEoverridecommandlockouts
+% TODO: add in the referee tag for the submission
+%\documentclass[global,twocolumn,referee]{svjour}
+\documentclass[global,twocolumn]{svjour}
 \usepackage{cite}
 \usepackage{amsmath}
-\usepackage{amsthm}
+% \usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{url}
 \usepackage{comment}
@@ -14,19 +15,6 @@
 \usepackage{flushend}
 \usepackage{hyperref}
 \usepackage[firstpage]{draftwatermark}
-
-\SetWatermarkAngle{0}
-\SetWatermarkFontSize{8pt}
-\SetWatermarkText{\raisebox{\textheight}{%
-\begin{minipage}{\textwidth}%
-\vspace{-18pt}\hfill%
-\href{http://doi.org/10.5281/zenodo.5129276}{% REPLACE WITH YOUR ARTIFACT DOI
-\includegraphics[width=0.6in, height=0.6in]{reusable}% IF REUSABLE BADGE GRANTED
-\includegraphics[width=0.6in, height=0.6in]{available}% IF AVAILABLE BADGE GRANTED
-}
-\end{minipage}%
-}}
-
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -98,50 +86,45 @@
 \newcommand{\etc}{\textit{etc.}}
 \newcommand{\adhoc}{\textit{ad hoc}}
 
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
+% \theoremstyle{plain}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
+% \theoremstyle{definition}
+% \newtheorem{definition}{Definition}
 
-\theoremstyle{remark}
-\newtheorem{remark}{Remark}
+% \theoremstyle{remark}
+% \newtheorem{remark}{Remark}
+
+\journalname{Software and Systems Modeling}
 
 \begin{document}
 \title{
-  Synthesizing Verified Components~~~\\
-  for Cyber Assured Systems Engineering~
+  Synthesizing Verified Components for Cyber Assured Systems Engineering
   \thanks{DISTRIBUTION STATEMENT A.  Approved for public release.}
 }
 
-% author names and affiliations
-% use a multiple column layout for up to three different
-% affiliations
 \author{
-\IEEEauthorblockN{Eric Mercer}
-\IEEEauthorblockA{Department of Computer Science\\
-Brigham Young University\\
-Provo, Utah}
-\and
-\IEEEauthorblockN{
-Konrad Slind, Isaac Amundson, Darren Cofer}
-\IEEEauthorblockA{
-Applied Research and Technology\\
-Collins Aerospace\\
-Minneapolis, Minnesota}
-\and
-\IEEEauthorblockN{
-Junaid Babar, David Hardin}
-\IEEEauthorblockA{
-Applied Research and Technology\\
-Collins Aerospace\\
-Cedar Rapids, Iowa}
+  Eric Mercer\inst{1}    \and 
+  Konrad Slind\inst{2}   \and
+  Isaac Amundson\inst{2} \and
+  Darren Cofer\inst{2}   \and
+  Junaid Babar\inst{3}   \and
+  David Hardin\inst{3}
 }
-% conference papers do not typically use \thanks and this command
-% is locked out in conference mode. If really needed, such as for
-% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
-% after \documentclass
+
+\institute{
+  Brigham Young University        \\
+  Provo, Utah                     \and
+  Applied Research and Technology \\ 
+  Collins Aerospace               \\
+  Minneapolis, Minnesota          \and
+  Applied Research and Technology \\ 
+  Collins Aerospace               \\
+  Cedar Rapids, Iowa
+}
+
+\date{Received: date / Revised version: date}
 
 \maketitle
 
@@ -149,11 +132,33 @@ Cedar Rapids, Iowa}
 \input{abstract}
 \end{abstract}
 
-\IEEEpeerreviewmaketitle
-
 \section{Introduction} \label{sec:intro}
 \input{intro}
+\subsection{SOSYM Journal Details}
+The submission must have 30\% new material over what was published in MODELS 2021.
+There is no page limit.
+The article will go through a full review cycle.
+The due date is \textbf{March} $1^\mathrm{st}$, \textbf{2022}.
 
+\noindent The summary of the discussion regarding how the MODELS publication might be extended is given below.
+\begin{compactitem}
+  \item Expand the case study with the TA6 models
+  \item Expand the case study with an actual full AGREE specification
+  \item AGREE formal semantics summary including the uninterpreted functions
+  \item Strengthen the assurance argument from AGREE to binary by way of CakeML
+  \item Expand related work (add recent work published after 2018). 
+  \item Respond more fully to the reviews from MODELS (see below).
+\end{compactitem}
+
+\noindent The summary of items from the MODELS reviews.
+\begin{compactitem}
+  \item Add recent work published after 2018
+  \item Add discussion on the limitation of the approach: what attacks can and cannot be covered, can valid messages be rejected, etc.
+  \item Expand the role of Briefcase in the case study with input examples to provide more proof of the proposed model's effectiveness on the hardened system (e.g., show a malformed line search task, it's filter, and why it works) 
+  \item Clarify research questions answered by the case study and make the figures bigger
+  \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
+  \item Without verifying the correctness of the transformations, can prevention of certain attacks be guaranteed?
+\end{compactitem}
 \section{Simple Example} \label{sec:example}
 \input{example}
 
@@ -172,48 +177,8 @@ Cedar Rapids, Iowa}
 \section{Conclusion} \label{sec:conclusion}
 \input{conclusion}
 
-%\section*{Acknowledgments}
-%This work was sponsored in part by the Defense Advanced Research
-%Projects Agency (DARPA).
-
-% An example of a double column floating figure using two subfigures.
-% (The subfig.sty package must be loaded for this to work.)
-% The subfigure \label commands are set within each subfloat command,
-% and the \label for the overall figure must come after \caption.
-% \hfil is used as a separator to get equal spacing.
-% Watch out that the combined width of all the subfigures on a 
-% line do not exceed the text width or a line break will occur.
-%
-%\begin{figure*}[!t]
-%\centering
-%\subfloat[Case I]{\includegraphics[width=2.5in]{box}%
-%\label{fig_first_case}}
-%\hfil
-%\subfloat[Case II]{\includegraphics[width=2.5in]{box}%
-%\label{fig_second_case}}
-%\caption{Simulation results for the network.}
-%\label{fig_sim}
-%\end{figure*}
-%
-% Note that often IEEE papers with subfigures do not employ subfigure
-% captions (using the optional argument to \subfloat[]), but instead will
-% reference/describe all of them (a), (b), etc., within the main caption.
-% Be aware that for subfig.sty to generate the (a), (b), etc., subfigure
-% labels, the optional argument to \subfloat must be present. If a
-% subcaption is not desired, just leave its contents blank,
-% e.g., \subfloat[].
-
-% trigger a \newpage just before the given reference
-% number - used to balance the columns on the last page
-% adjust value as needed - may need to be readjusted if
-% the document is modified later
-%\IEEEtriggeratref{8}
-% The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
-
-% references section
 \clearpage
-\bibliographystyle{IEEEtran}
+\bibliographystyle{plain}
 \bibliography{paper}
 
 % \appendix
