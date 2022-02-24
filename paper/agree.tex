@@ -46,13 +46,57 @@ guarantee "Alert if start is not bounded relative to a request" :
   \label{fig:sw}
 \end{figure}
 
-The AGREE specification for the SW component in the example of Section~\ref{sec:example} with the added cyber requirements is given in \figref{fig:sw}. The AGREE specification language is a first-order predicate calculus that uses stream concepts, and operators, from the Lustre language \cite{10.1145/41625.41641}. As with Lustre, the semantics are synchronous data-flow where the inputs, outputs, and expressions are characterized by data streams that comply with the input assumptions. The semantics are such that the contracts are evaluated in dependency order with inputs being propagated to outputs through all the contracts until they stabilize; as such, the contracts, and thereby the top-level model, must be acyclic. Once the contracts have stabilized, the model takes a synchronous step to the next input data in the stream. The semantics do not model computation or communication delay. The output of one contract is seen at the input of any downstream contract in the same step of the input data stream.
+The AGREE specification for the SW component in the example of
+Section~\ref{sec:example} with the added cyber requirements is given
+in \figref{fig:sw}. The AGREE specification language is a first-order
+predicate calculus that uses stream concepts, and operators, from the
+Lustre language \cite{10.1145/41625.41641}. As with Lustre, the
+semantics are synchronous dataflow where the inputs, outputs, and
+expressions are data streams that comply with the input
+assumptions. Contracts are evaluated in dependency order with inputs
+being propagated to outputs through all contracts until they
+stabilize; as such, the contracts, and thereby the top-level model,
+must be acyclic.\footnote{An apparent syntactic cycle, where a
+component is linked back to itself, may be broken temporally by
+inserting delay elements.} Once the contracts have stabilized, the
+model takes a synchronous step to the next input data in the
+stream. The semantics do not model computation or communication
+delay. The output of one contract is seen at the input of any
+downstream contract in the same step of the input data stream.
 
-The AGREE model checker attempts to prove several properties of the top-level model being verified. The first is that the output guarantees of each component implementing the system are strong enough to validate the input assumptions of any downstream component as well as to satisfy the guarantees of the output of the top-level component being verified (i.e., the system composition meets input assumptions at each input as well as the guarantees on the system output). These properties are reported in the expanded lists in \figref{fig:example}(b) and \figref{fig:hardened}(b).  The next set of properties prove that the contract specifications for each component are self-consistent (i.e, a contract does not contradict itself). These are the unexpanded results at the bottom of the figures.
+The AGREE model checker attempts to prove several properties of the
+top-level model being verified. The first is that the output
+guarantees of each component implementing the system are strong enough
+to validate the input assumptions of any downstream component as well
+as to satisfy the guarantees of the output of the top-level component
+being verified (\ie, the system composition meets input assumptions
+at each input as well as the guarantees on the system output). These
+properties are reported in the expanded lists
+in \figref{fig:example}(b) and \figref{fig:hardened}(b).  The next set
+of properties prove that the contract specifications for each
+component are \emph{self-consistent} \ie, a contract does not contradict
+itself. These are the unexpanded results at the bottom of the
+figures.
 
-Returning back to the contract in \figref{fig:sw}, it uses \texttt{eq} statements to define variables local to the contract specification. For example, the \texttt{req} variable is equivalent to the \texttt{event(AutomationRequest)} expression. In the AGREE semantics, there is an implicit \emph{event} input (or output) associated with every named event port in a component. The semantics used here do not buffer these events so the implicit input (or output) is only a boolean value. An \texttt{event} expression refers to that implicit input (or output) and is true when data is placed on the named port. The system contract here states assumptions on well-formed input, followed by guarantees on properties about the output.
+Returning back to the contract of \figref{fig:sw}, it uses \texttt{eq}
+statements to define variables local to the contract
+specification. For example, the \texttt{req} variable is equivalent to
+the \texttt{event(AutomationRequest)} expression. In the AGREE
+semantics, there is an implicit \emph{event} input (or output)
+associated with every named event port in a component. The semantics
+used here do not buffer these events so the implicit input (or output)
+is only a boolean value. An \texttt{event} expression refers to that
+implicit input (or output) and is true when data is placed on the
+named port. The system contract here states assumptions on well-formed
+input, followed by guarantees on properties about the output.
 
-The \emph{Alert if start is not bounded relative to a request} guarantee is an invariant on the expression \texttt{policy or since}, meaning that either the policy holds or the alert is sounding. The \texttt{policy} is defined by two local values: \texttt{current} and \texttt{previous}. The \texttt{current} value is asserted when in the current time step there is a request with a response, or there is no request and no response.
+The \emph{Alert if start is not bounded relative to a request}
+guarantee is an invariant on the expression \texttt{policy or since},
+meaning that either the policy holds or the alert is
+sounding. The \texttt{policy} is defined by two local
+values: \texttt{current} and \texttt{previous}. The \texttt{current}
+value is asserted when in the current time step there is a request
+with a response, or there is no request and no response.
 
 The value of \texttt{previous} in the current time step relies on values from the previous time step. The \texttt{->} operator designates initialization, as the previous time step is undefined in the first step of the system. The left operand to the operator is the initial value of \texttt{previous} at start, which in this example is \texttt{(req and not rsp)}, because seeing a request with no response is inconclusive in the first step of the system. The right operand is the value of \texttt{previous} after the initial step. Here the \texttt{pre} operator refers to the value of the expression \texttt{(req and not rsp)} in the prior time step, \texttt{previous} is true if the previous time step made a request without a matching response and the current time step has the matching response to that request with no new request.
 
@@ -125,21 +169,22 @@ The AGREE contract specification generated by the transform is shown in \figref{
 %A similar dialogue exist for inserting monitors that allows the system designer to add and remove inputs as needed.
 The resulting AGREE specification for the monitor in this example is shown in \figref{fig:assurance}(b). The \texttt{is\_latched} value makes the alert persistent, meaning that once the alert is raised, it is always raised.  This behavior is one of the several options available in the dialogue. The definition for \texttt{policy} is taken by the system developer from the contract in \figref{fig:sw}. As before, the guarantees for the outputs are autogenerated by the tool and completely define each output under every possible input.
 
-\subsection{Brief Semantics Definition}
+\subsection{AGREE Semantics}
 \label{agree-semantics}
-Here the formal semantics of the AGREE contract specification are briefly
-presented to make clear the meaning of a high-assurance component.
-These semantics are used in the next section to argue that the synthesis
-preserves the same input to output behavior as the AGREE specification.
 
-Assume that all data is in its raw form which is a contiguous sequence of bytes
-representing exactly what is sent over a wire by the communication fabric, so a
-datum is given by a \konst{string}. This assumption is important to the
-correctness argument in the next section. An \emph{environment},
-$\theta: \lval \mapsto \konst{string}$, binds \emph{L-values} to strings where
-an L-value is anything that can appear on the left-hand side of an assignment
-such as a named port, a field in a record, a entry in an array, a local
-value defined by an eq-statement etc.
+Here the formal semantics of the AGREE contract specification are
+briefly presented to make clear the meaning of a high-assurance
+component.  These semantics are the basis of proofs showing that a
+synthesized component has input to output behavior specified by its
+contract.
+
+Assume that all data flowing between components is in the form of byte
+arrays, thus input and output is modelled at the level of what is
+passed ``over the wire'' by the communication fabric. An \emph{environment},
+$\theta: \lval \mapsto \konst{string}$, binds \emph{L-values} to
+strings where an L-value is anything that can appear on the left-hand
+side of an assignment such as a named port, a field in a record, a
+entry in an array, a local value defined by an eq-statement etc.
 
 Let $s$ be an AGREE contract specification for some high-assurance
 component. The notation $\theta_s$ is used to denote the environment that
