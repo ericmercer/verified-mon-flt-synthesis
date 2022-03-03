@@ -559,6 +559,129 @@ with CASE_Scheduling;
     **};
   end SWSystem.cyber_Impl;
     
+  process should_doNothing_when_noInput
+    features
+      Response: in event data port AutomationResponse.Impl;
+      Request: in event data port AutomationRequest.Impl;
+      Alert: out event port;
+      Output: out event data port AutomationResponse.Impl;
+    annex agree {**
+      assume "No Response" :
+      	event(Response) = false;
+      assume "No Request" :
+      	event(Request) = false;
+      	
+      guarantee "Not Alert" :
+      	not event(Alert);
+      guarantee "Not Output" :
+      	not event(Output);
+    **};
+  end should_doNothing_when_noInput;
+  
+  process Implementation should_doNothing_when_noInput.test
+  	subcomponents
+  	  Monitor: thread CASE_Monitor_Thr.Impl;
+  	connections
+  	  c00: port Response -> Monitor.Response;
+  	  c01: port Request -> Monitor.Request;
+  	  c02: port Monitor.Alert -> Alert;
+  	  c03: port Monitor.Output -> Output;
+  end should_doNothing_when_noInput.test;
+  
+  process should_alertAndNotOutput_when_responseWithoutRequest
+    features
+      Response: in event data port AutomationResponse.Impl;
+      Request: in event data port AutomationRequest.Impl;
+      Alert: out event port;
+      Output: out event data port AutomationResponse.Impl;
+    annex agree {**
+      assume "No Response" :
+      	event(Response) = true ->
+      	event(Response) = false;
+      assume "Request" :
+      	event(Request) = false;
+      	
+      guarantee "Alert" :
+      	event(Alert);
+      guarantee "Not Output" :
+      	not event(Output);
+    **};
+  end should_alertAndNotOutput_when_responseWithoutRequest;
+  
+  process Implementation should_alertAndNotOutput_when_responseWithoutRequest.test
+  	subcomponents
+  	  Monitor: thread CASE_Monitor_Thr.Impl;
+  	connections
+  	  c00: port Response -> Monitor.Response;
+  	  c01: port Request -> Monitor.Request;
+  	  c02: port Monitor.Alert -> Alert;
+  	  c03: port Monitor.Output -> Output;
+  end should_alertAndNotOutput_when_responseWithoutRequest.test;
+  
+  process should_notAlertAndOutput_when_responseAndRequest
+    features
+      Response: in event data port AutomationResponse.Impl;
+      Request: in event data port AutomationRequest.Impl;
+      Alert: out event port;
+      Output: out event data port AutomationResponse.Impl;
+    annex agree {**
+      assume "Response" :
+      	event(Response) = true ->
+      	event(Response) = false;
+      assume "Request" :
+      	event(Request) = true ->
+      	event(Request) = false;
+      	
+      guarantee "Not Alert" :
+      	not event(Alert);
+      guarantee "Output" :
+      	(event(Output) and Output = Response) ->
+      	not event(Output);
+    **};
+  end should_notAlertAndOutput_when_responseAndRequest;
+  
+  process Implementation should_notAlertAndOutput_when_responseAndRequest.test
+  	subcomponents
+  	  Monitor: thread CASE_Monitor_Thr.Impl;
+  	connections
+  	  c00: port Response -> Monitor.Response;
+  	  c01: port Request -> Monitor.Request;
+  	  c02: port Monitor.Alert -> Alert;
+  	  c03: port Monitor.Output -> Output;
+  end should_notAlertAndOutput_when_responseAndRequest.test;
+  
+   process should_notAlertAndOutput_when_responseOneStepAfterRequest
+    features
+      Response: in event data port AutomationResponse.Impl;
+      Request: in event data port AutomationRequest.Impl;
+      Alert: out event port;
+      Output: out event data port AutomationResponse.Impl;
+    annex agree {**
+      assume "Response One Step After" :
+      	event(Response) = false ->
+      	pre(event(Response) = true -> event(Response) = false);
+      assume "Request" :
+      	event(Request) = true ->
+      	event(Request) = false;
+      	
+      guarantee "Not Alert" :
+      	not event(Alert);
+      guarantee "Output One Step After" :
+      	not event(Output) ->
+      	pre((event(Output) and Output = Response) ->
+      		not event(Output));
+    **};
+  end should_notAlertAndOutput_when_responseOneStepAfterRequest;
+  
+  process Implementation should_notAlertAndOutput_when_responseOneStepAfterRequest.test
+  	subcomponents
+  	  Monitor: thread CASE_Monitor_Thr.Impl;
+  	connections
+  	  c00: port Response -> Monitor.Response;
+  	  c01: port Request -> Monitor.Request;
+  	  c02: port Monitor.Alert -> Alert;
+  	  c03: port Monitor.Output -> Output;
+  end should_notAlertAndOutput_when_responseOneStepAfterRequest.test;
   ---------------------
   -- AGREE Functions --
   ---------------------
