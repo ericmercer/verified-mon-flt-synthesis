@@ -232,15 +232,17 @@ module SW {
       requires Request.Some? ==> !isPending
 
       modifies `isPending
-      // request triggers not response
+      // request TRIGGERS (not response)
       ensures isPending == (Response.None? && (Request.Some? || old(isPending)))
-
+      
       modifies `latency
-      ensures latency == (if Request.Some? then 0 else old(latency) + 1)
+      ensures latency == (if Request.Some? then 1 else old(latency) + 1)
 
       modifies `policy
-      ensures policy == (isPending ==> isBounded(latency))
-      
+      // deponds on input assumption to not reset latency _before_ it is checked
+      ensures policy == (    (old(isPending) ==> isBounded(latency))
+                          && (Response.Some? ==> (old(isPending) || Request.Some?)))
+ 
       modifies `alert
       ensures alert == (!policy || (is_latched && old(alert)))
 
@@ -250,128 +252,193 @@ module SW {
           Response
         else
           EventDataPort<AutomationResponse>.None
-      ensures Alert == EventPort.None
   }
 
-  method test() {
-    var waypoint : Waypoint := Waypoint(-91.0, 42.0, 42.0);
-    assert (!waypoint.WELL_FORMED_WAYPOINT());
+  method {:test} should_doNothing_when_noInput() {
+    var monitor : Monitor := new Monitor();
+    var alert : EventPort;
+    var output : EventDataPort<AutomationResponse>;
+    assert !monitor.isPending;
+    assert monitor.policy;
+    assert !monitor.alert;
+    alert, output := monitor.step(
+      EventDataPort<AutomationResponse>.None, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.None?;
+    assert output.None?;
+  }
+
+  method {:test} should_alertAndNotOutput_when_responseWithoutRequest() {
+    var waypoint : Waypoint := Waypoint(42.0, 42.0, 42.0);
     var value : AutomationResponse := AutomationResponse(42, 1, [waypoint]);
-    assert (!value.WELL_FORMED_AUTOMATION_RESPONSE());
     var automationResponse : EventDataPort<AutomationResponse> := 
       EventDataPort<AutomationResponse>.Some(value);
-    assert automationResponse.Some?;
-    assert !automationResponse.value.WELL_FORMED_AUTOMATION_RESPONSE();
-    automationResponse := Filter.step(automationResponse);
-    assert automationResponse.None?;
-
-    waypoint := Waypoint(-90.0, 42.0, 42.0);
-    value := AutomationResponse(42, 1, [waypoint]);
-    automationResponse := EventDataPort<AutomationResponse>.Some(value);
-    var automationRequest : EventDataPort<AutomationRequest> := 
-      EventDataPort<AutomationRequest>.Some(AutomationRequest(TASK_ID));
-    assert automationRequest.Some?;
 
     var monitor : Monitor := new Monitor();
     var alert : EventPort;
     var output : EventDataPort<AutomationResponse>;
-
-    // No input events
-    assert (automationRequest.Some?);
-    alert, output := monitor.step(EventDataPort<AutomationResponse>.None, EventDataPort<AutomationRequest>.None);
-    assert !monitor.isPending;
-    assert monitor.policy;
-    // assert monitor.historicallyNotRequest;
-    // assert monitor.notRequestSinceResponse;
-
-    // Both input events
-    alert, output := monitor.step(automationResponse, automationRequest);
-    assert !monitor.isPending;
-    assert monitor.policy;
-    // assert !monitor.historicallyNotRequest;
-    // assert monitor.notRequestSinceResponse;
-
-    // Another response
-    alert, output := monitor.step(automationResponse, EventDataPort<AutomationRequest>.None);
-    assert !monitor.isPending;
-    assert !monitor.policy;
-
-    // assert !monitor.historicallyNotRequest;
-    // assert monitor.notRequestSinceResponse;
-
-    // Two requests in a row with no response
-    monitor := new Monitor();
-    alert, output := monitor.step(EventDataPort<AutomationResponse>.None, automationRequest);
-    assert monitor.isPending;
-    // assert !monitor.historicallyNotRequest;
-    // assert !monitor.notRequestSinceResponse;
-    alert, output := monitor.step(EventDataPort<AutomationResponse>.None, EventDataPort<AutomationRequest>.None);
-    assert monitor.isPending;
-    // assert !monitor.historicallyNotRequest;
-    // assert !monitor.notRequestSinceResponse;
-    alert, output := monitor.step(automationResponse, EventDataPort<AutomationRequest>.None);
-    assert !monitor.isPending;
-    // assert !monitor.historicallyNotRequest;
-    // assert monitor.notRequestSinceResponse;
-    alert, output := monitor.step(EventDataPort<AutomationResponse>.None, automationRequest);
+    alert, output := monitor.step(
+      automationResponse, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.Some?;
+    assert output.None?;
   }
 
-  // class SWCyber {
-  //   const MAX_LATENCY := 1
+  method {:test} should_notAlertAndOutput_when_responseAndRequest() {
+    var waypoint : Waypoint := Waypoint(42.0, 42.0, 42.0);
+    var value : AutomationResponse := AutomationResponse(42, 1, [waypoint]);
+    var automationResponse : EventDataPort<AutomationResponse> := 
+      EventDataPort<AutomationResponse>.Some(value);
+    var automationRequest : EventDataPort<AutomationRequest> := 
+      EventDataPort<AutomationRequest>.Some(AutomationRequest(TASK_ID));
+    
+    var monitor : Monitor := new Monitor();
+    var alert : EventPort;
+    var output : EventDataPort<AutomationResponse>;
+    alert, output := monitor.step(automationResponse, automationRequest);
+    assert alert.None?;
+    assert output.Some?;
+    assert (output == automationResponse);
+  }
 
-  //   ghost var isPending : bool;
-  //   ghost var latency : int;
-  //   ghost var alertPersistent : bool;
+  method {:test} should_notAlertAndOutput_when_responseOneStepAfterRequest() {
+    var waypoint : Waypoint := Waypoint(42.0, 42.0, 42.0);
+    var value : AutomationResponse := AutomationResponse(42, 1, [waypoint]);
+    var automationResponse : EventDataPort<AutomationResponse> := 
+      EventDataPort<AutomationResponse>.Some(value);
+    var automationRequest : EventDataPort<AutomationRequest> := 
+      EventDataPort<AutomationRequest>.Some(AutomationRequest(TASK_ID));
+    
+    var monitor : Monitor := new Monitor();
+    var alert : EventPort;
+    var output : EventDataPort<AutomationResponse>;
+    alert, output := monitor.step(
+      EventDataPort<AutomationResponse>.None, 
+      automationRequest);
+    assert alert.None?;
+    assert output.None?;
+    alert, output := monitor.step(
+      automationResponse, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.Some?;
+    assert output.None?;
+  }
 
-  //   var Monitor : Monitor;
+  method {:test} should_alertAndNotOutput_when_noResponseTwoStepsAfterRequest() {
+    var waypoint : Waypoint := Waypoint(42.0, 42.0, 42.0);
+    var value : AutomationResponse := AutomationResponse(42, 1, [waypoint]);
+    var automationResponse : EventDataPort<AutomationResponse> := 
+      EventDataPort<AutomationResponse>.Some(value);
+    var automationRequest : EventDataPort<AutomationRequest> := 
+      EventDataPort<AutomationRequest>.Some(AutomationRequest(TASK_ID));
+    
+    var monitor : Monitor := new Monitor();
+    var alert : EventPort;
+    var output : EventDataPort<AutomationResponse>;
+    alert, output := monitor.step(
+      EventDataPort<AutomationResponse>.None, 
+      automationRequest);
+    assert alert.None?;
+    assert output.None?;
+    alert, output := monitor.step(
+      EventDataPort<AutomationResponse>.None, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.Some?;
+    assert output.None?;
+  }
 
-  //   predicate isBounded(latency : int) {
-  //     (0 <= latency && latency <= MAX_LATENCY)
-  //   }
+  method {:test} should_alwaysAlert_when_onceAlerted() {
+    var waypoint : Waypoint := Waypoint(42.0, 42.0, 42.0);
+    var value : AutomationResponse := AutomationResponse(42, 1, [waypoint]);
+    var automationResponse : EventDataPort<AutomationResponse> := 
+      EventDataPort<AutomationResponse>.Some(value);
+    var automationRequest : EventDataPort<AutomationRequest> := 
+      EventDataPort<AutomationRequest>.Some(AutomationRequest(TASK_ID));
+    
+    var monitor : Monitor := new Monitor();
+    var alert : EventPort;
+    var output : EventDataPort<AutomationResponse>;
+    alert, output := monitor.step(
+      automationResponse, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.Some?;
+    assert output.None?;
+    alert, output := monitor.step(
+      automationResponse, 
+      automationRequest);
+    assert alert.Some?;
+    assert output.None?;
+    alert, output := monitor.step(
+      EventDataPort<AutomationResponse>.None, 
+      EventDataPort<AutomationRequest>.None);
+    assert alert.Some?;
+    assert output.None?;
+  }
 
-  //   constructor ()
-  //     ensures fresh(Monitor)
-  //   {
-  //     Monitor := new Monitor();
-  //   }
+  class SWCyber {
+    const MAX_LATENCY := 1
 
-  //   method step(AutomationRequest : EventDataPort<AutomationRequest>,
-  //               AirVehicleLocation : EventDataPort<Waypoint>)
-  //               returns (Waypoint : EventDataPort<Waypoint>,
-  //                        Start : EventPort,
-  //                        Alert : EventPort)
-  //     requires AutomationRequest.Some? ==> 
-  //       AutomationRequest.value.WELL_FORMED_AUTOMATION_REQUEST()
-  //     requires AirVehicleLocation.Some? ==> 
-  //       AirVehicleLocation.value.WELL_FORMED_WAYPOINT()
-  //     requires AutomationRequest.Some? ==> !isPending
+    ghost var alert : bool;
+    ghost var isPending : bool;  
+    ghost var latency : int;
 
-  //     modifies `isPending, `latency, `alertPersistent
-  //     // ensures isPending <==> (   (AutomationRequest.Some? && Start.None?) 
-  //     //                         || old(isPending))
-  //     ensures latency == (if AutomationRequest.Some? then 0 else old(latency) + 1)
-  //     // ensures alertPersistent <==> Alert.None? || (Alert.Some? && old(alertPersistent))
+    var Monitor : Monitor;
 
-  //     ensures Waypoint.Some? ==> AirVehicleLocation.Some?
-  //     ensures Waypoint.Some? ==> Waypoint.value.WELL_FORMED_WAYPOINT()
+    predicate isBounded(latency : int) {
+      (0 <= latency && latency <= MAX_LATENCY)
+    }
 
-  //     ensures Start.Some? ==> Waypoint.Some?
-  //     ensures Start.Some? ==> isBounded(latency)
+    constructor ()
+      ensures alert == false
+      ensures isPending == false
+      ensures latency == 0
+      ensures fresh(Monitor)
+    {
+      alert := false;
+      isPending := false;
+      latency := 0;
+      Monitor := new Monitor();
+    }
 
-  //     // ensures (isPending && !isBounded(latency)) ==> Alert.Some?
-  //     // ensures alertPersistent 
-  //   {
-  //     // isPending := (   (AutomationRequest.Some? && Start.None?) 
-  //     //               || isPending);
-  //     latency := (if AutomationRequest.Some? then 0 else latency + 1);
-  //     // alertPersistent := Alert.None? || (Alert.Some? && alertPersistent);
+    method step(AutomationRequest : EventDataPort<AutomationRequest>,
+                AirVehicleLocation : EventDataPort<Waypoint>)
+                returns (Waypoint : EventDataPort<Waypoint>,
+                         Start : EventPort,
+                         Alert : EventPort)
+      requires AutomationRequest.Some? ==> 
+        AutomationRequest.value.WELL_FORMED_AUTOMATION_REQUEST()
+      requires AirVehicleLocation.Some? ==> 
+        AirVehicleLocation.value.WELL_FORMED_WAYPOINT()
+      requires AutomationRequest.Some? ==> !isPending
 
-  //     var AutomationResponse : EventDataPort<AutomationResponse> := 
-  //       AI.step(AutomationRequest, AirVehicleLocation);
-  //     AutomationResponse := Filter.step(AutomationResponse);
-  //     assert(AutomationResponse.None? || AutomationResponse.value.WELL_FORMED_AUTOMATION_RESPONSE());
-  //     Alert, AutomationResponse := Monitor.step(AutomationResponse, AutomationRequest);
-  //     Start, Waypoint := WaypointManager.step(AutomationResponse, AirVehicleLocation);
-  //   }
-  // }
+      modifies `alert;
+      ensures alert == (Alert.Some? || old(alert))
+
+      modifies `isPending
+      ensures isPending == (Start.None? && (AutomationRequest.Some? || old(isPending)))
+      
+      modifies `latency
+      ensures latency == (if AutomationRequest.Some? then 1 else old(latency) + 1)
+
+      ensures Waypoint.Some? ==> AirVehicleLocation.Some?
+      ensures Waypoint.Some? ==> Waypoint.value.WELL_FORMED_WAYPOINT()
+
+      ensures Start.Some? ==> Waypoint.Some?
+      ensures Start.Some? ==> isBounded(latency)
+    
+      ensures alert ==> Alert.Some?
+      
+      modifies Monitor
+      requires AutomationRequest.Some? ==> !Monitor.isPending;
+    {
+      var AutomationResponse : EventDataPort<AutomationResponse> := 
+        AI.step(AutomationRequest, AirVehicleLocation);
+      AutomationResponse := Filter.step(AutomationResponse);
+      Alert, AutomationResponse := Monitor.step(AutomationResponse, AutomationRequest);
+      Start, Waypoint := WaypointManager.step(AutomationResponse, AirVehicleLocation);
+      alert := (Alert.Some? || old(alert));
+      latency := (if AutomationRequest.Some? then 1 else old(latency) + 1);
+      isPending := (Start.None? && (AutomationRequest.Some? || old(isPending)));
+    }
+  }
 }
