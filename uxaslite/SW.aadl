@@ -10,15 +10,15 @@ with CASE_Scheduling;
   --------------
   -- Waypoint --
   --------------
-data Waypoint
-end Waypoint;
+  data Waypoint
+  end Waypoint;
 
-data implementation Waypoint.Impl
-  subcomponents
-    Latitude: data Float_64;
-    Longitude: data Float_64;
-    Altitude: data Float_32;
-end Waypoint.Impl;
+  data implementation Waypoint.Impl
+    subcomponents
+      Latitude: data Float_64;
+      Longitude: data Float_64;
+      Altitude: data Float_32;
+  end Waypoint.Impl;
 
   ------------------------
   -- Automation Request --
@@ -36,17 +36,17 @@ end Waypoint.Impl;
   ------------------------
   -- AutomationResponse --
   ------------------------
-data AutomationResponse
-end AutomationResponse;
+  data AutomationResponse
+  end AutomationResponse;
 
-data implementation AutomationResponse.Impl
-  subcomponents
-    TaskID: data Integer_64;
-    Length: data Unsigned_8;
-    Waypoints: data Waypoint.Impl[3];
-  properties
-    HAMR::Bit_Codec_Max_Size => 1664 bits;
-end AutomationResponse.Impl;
+  data implementation AutomationResponse.Impl
+    subcomponents
+      TaskID: data Integer_64;
+      Length: data Unsigned_8;
+      Waypoints: data Waypoint.Impl[3];
+    properties
+      HAMR::Bit_Codec_Max_Size => 1664 bits;
+  end AutomationResponse.Impl;
 
   ------------------------------
   -- Bounded Response Monitor --
@@ -71,8 +71,8 @@ end AutomationResponse.Impl;
       				  		(not rsp and (req or pre(isPending)));
       eq latency : int = 1 -> (if req then 1 else pre(latency) + 1);
       
-	  fun isBounded(latency : int) : bool =
-	  	(0 <= latency and latency < MAX_LATENCY);
+	    fun isBounded(latency : int) : bool =
+	  	  (0 <= latency and latency < MAX_LATENCY);
 	  	
       eq policy : bool = (rsp => req) ->
                          (    (pre(isPending) => isBounded(latency))
@@ -391,17 +391,17 @@ end AutomationResponse.Impl;
       c07: port WM.Start -> Start;
 
       ----------
-	  -- ALRT --
-	  ----------
---	  c08: port ALRT.Output -> Alert;
+	    -- ALRT --
+	    ----------
+	    c08: port ALRT.Output -> Alert;
     annex resolute {**
       check HAMR_Guidelines
     **};
   end SW.Impl;
     
-    ------------------------------------------
-    -- Cyber-assured Process Implementation --
-    ------------------------------------------
+  ------------------------------------------
+  -- Cyber-assured Process Implementation --
+  ------------------------------------------
   process implementation SW.cyber_Impl
     subcomponents
       AI: thread AI_Thr.Impl;
@@ -434,9 +434,9 @@ end AutomationResponse.Impl;
       c5: port Monitor.Alert -> Alert;
   end SW.cyber_Impl;
     
-    ------------
-    -- System --
-    ------------    
+  ------------
+  -- System --
+  ------------    
   system SWSystem
     features
       AutomationRequest: in event data port AutomationRequest.Impl;
@@ -462,8 +462,8 @@ end AutomationResponse.Impl;
       eq onceAlertedAlwaysAlerted : bool = 
         (not alrt) or (alrt and (true -> pre(onceAlertedAlwaysAlerted)));
         
-	  fun isBounded(latency : int) : bool =
-	  	(0 <= latency and latency < MAX_LATENCY);
+	    fun isBounded(latency : int) : bool =
+	  	  (0 <= latency and latency < MAX_LATENCY);
 	  	
       assume "Automation request is well-formed" :
         req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
@@ -543,7 +543,6 @@ end AutomationResponse.Impl;
       -------------
       c09: port Monitor.Output -> WM.AutomationResponse;
       c10: port Monitor.Alert -> Alert;
-      
     properties
       Actual_Processor_Binding => (reference (Proc)) applies to AI;
       Actual_Processor_Binding => (reference (Proc)) applies to WM;
@@ -564,17 +563,17 @@ end AutomationResponse.Impl;
   -- AGREE Functions --
   ---------------------
   annex agree {**
-      const TASK_ID : int = 42;
-      fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =
-                          (point.Latitude >= -90.0 and point.Latitude <= 90.0)
-                      and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
-                      and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);
-      fun WELL_FORMED_TASK_ID(id : int) : bool =
-                  (id = TASK_ID);
-      fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.Impl) : bool =
-                          WELL_FORMED_TASK_ID(msg.TaskID);
-      fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.Impl) : bool =
-                          (WELL_FORMED_TASK_ID(msg.TaskID))
-                      and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
+    const TASK_ID : int = 42;
+    fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =
+                        (point.Latitude >= -90.0 and point.Latitude <= 90.0)
+                    and (point.Longitude >= -180.0 and point.Longitude <= 180.0) 
+                    and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);
+    fun WELL_FORMED_TASK_ID(id : int) : bool =
+                (id = TASK_ID);
+    fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.Impl) : bool =
+                        WELL_FORMED_TASK_ID(msg.TaskID);
+    fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.Impl) : bool =
+                        (WELL_FORMED_TASK_ID(msg.TaskID))
+                    and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));
   **};
 end SW;
