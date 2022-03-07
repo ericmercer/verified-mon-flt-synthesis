@@ -426,7 +426,7 @@ module SW {
       ensures Start.Some? ==> Waypoint.Some?
       ensures Start.Some? ==> isBounded(latency)
     
-      ensures alert ==> Alert.Some?
+      // ensures alert ==> Alert.Some?
       
       modifies Monitor
       requires AutomationRequest.Some? ==> !Monitor.isPending;
@@ -436,9 +436,19 @@ module SW {
       AutomationResponse := Filter.step(AutomationResponse);
       Alert, AutomationResponse := Monitor.step(AutomationResponse, AutomationRequest);
       Start, Waypoint := WaypointManager.step(AutomationResponse, AirVehicleLocation);
+      assert AutomationResponse.Some? <==> Start.Some?;
       alert := (Alert.Some? || old(alert));
       latency := (if AutomationRequest.Some? then 1 else old(latency) + 1);
       isPending := (Start.None? && (AutomationRequest.Some? || old(isPending)));
+      if (AutomationRequest.Some?) {
+        assert Monitor.latency == 1;
+        assert latency == 1;
+        assert Monitor.latency == latency;
+      } else {
+        assert Monitor.latency == old(Monitor.latency) + 1;
+        assert latency == old(latency) + 1;
+        // assert Monitor.latency == latency;
+      }
     }
   }
 }

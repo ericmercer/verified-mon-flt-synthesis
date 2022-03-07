@@ -354,9 +354,7 @@ with CASE_Scheduling;
       guarantee "Start within MAX_LATENCY of request" :
         strt => isBounded(latency);
       guarantee "Alert if no request or outside latency bound" :
-        ((strt and not req) ->
-        (   (pre(isPending) and not isBounded(latency))
-         or (not pre(isPending) and strt and not req))) => alrt;   
+        shouldAlert => alrt;   
       guarantee "Once alerted always alerted" :
         onceAlertedAlwaysAlerted;
     **};
@@ -595,10 +593,10 @@ with CASE_Scheduling;
       Alert: out event port;
       Output: out event data port AutomationResponse.Impl;
     annex agree {**
-      assume "No Response" :
+      assume "Response" :
       	event(Response) = true ->
       	event(Response) = false;
-      assume "Request" :
+      assume "Not Request" :
       	event(Request) = false;
       	
       guarantee "Alert" :
