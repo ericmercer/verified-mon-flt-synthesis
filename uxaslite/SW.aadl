@@ -346,7 +346,7 @@ renames AGREE_PLTL::all;
       guarantee "Starts occur within one cycle of requests if not alerting" :
         (strt => ((not alrt) and req)) -> 
         (strt => ((not alrt) and (req or pre(req))));
-      guarantee "Will alert if not started within one cycle of requests" :
+      guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
         not alrt or (Once(alrt) and alrt);
@@ -458,7 +458,7 @@ renames AGREE_PLTL::all;
       guarantee "Starts occur within one cycle of requests if not alerting" :
         (strt => ((not alrt) and req)) -> 
         (strt => ((not alrt) and (req or pre(req))));
-      guarantee "Will alert if not started within one cycle of requests" :
+      guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
         not alrt or (Once(alrt) and alrt);
