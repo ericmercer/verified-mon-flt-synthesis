@@ -49,3 +49,29 @@ The high-assurance components are automatically synthesized by SPLAT from the AG
 A similar proof is given for the synthesis of the contract model for a high-assurance component to CakeML. A high-assurance component contract has a precise meaning in terms of data streams, and the synthesis exactly preserves that meaning in the generated code. In other words, for any set of input streams that meet the component's contract assumptions, the output streams produced from the synthesized CakeML exactly match the output streams from the high-assurance component's contract. 
 
 Preserving the input/output relationship of streams between the two models lifts the contract verification results to the deployed system. If the contract model verification succeeds, then the meaning of those results hold for the deployed system, given that all other components implement their contracts, an appropriate schedule exists that follows the dependent data-flow, and the communication fabric works as expected.
+
+\subsection{Revisions}
+Add a background section for AGREE and how it works hierarchically to verify a system implements its contract specification.
+
+Move example to its own repository as a staging ground for archiving the files as an artifact
+
+Reformat text to put single sentence on each line.
+
+Revise example to state the system is initially designed assuming all components behave as expected: inputs and outputs are well-formed and timing is obeyed.
+The cyber analysis reveals the potential of the supple chain vulnerability with the AI.
+The designer encodes the vulnerability in contracts by making assumptions about input and output behavior for trusted components.
+Only input integrity is assumed for the untrusted component.
+All other behavior is unconstrained.
+
+Make clear the properties added:
+\begin{compactitem}
+  \item Assume at the system level that a new automation request is not sent unless the prior request, if any, is acknowledged
+  \item Assume at all levels input messages are well-formed
+  \item Guarantee at all levels that waypoint outputs coincide with air vehicle location messages
+  \item Guarantee that a start from the waypoint manager coincides with an automation response
+  \item Guarantee for all trusted components that outputs are well-formed.
+\end{compactitem}
+
+Add in the AGREE specification for the system.
+The figures should not change.
+The AGREE results should changes with new property names (make short enough to fit summary format in figure).

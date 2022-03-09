@@ -61,7 +61,7 @@ renames AGREE_PLTL::all;
       Output: out event data port AutomationResponse.Impl;
     properties
       CASE_Properties::Monitoring => 100;
-      CASE_Properties::Component_Spec => ("Monitor_Alert", "Monitor_Output");
+      CASE_Properties::Component_Spec => ("Alert", "Output");
       CASE_Properties::Monitor_Latched => true;
     annex agree {**
       const is_latched : bool = true;
@@ -73,8 +73,8 @@ renames AGREE_PLTL::all;
       eq isPending : bool = Weak_Trigger(req, not rsp);
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
       
-	  fun isBounded(latency : int) : bool =
-	  	(0 <= latency and latency < MAX_LATENCY);
+	    fun isBounded(latency : int) : bool =
+	  	  (0 <= latency and latency < MAX_LATENCY);
 	  	
       eq policy : bool = (rsp => req) ->
                          (    (pre(isPending) => isBounded(latency))
@@ -82,7 +82,7 @@ renames AGREE_PLTL::all;
       eq alert : bool = (not policy) -> 
                         ((is_latched and pre(alert)) or not policy);
       
-      assume "One outstanding request at a time (request TRIGGERS not response)" :
+      assume "One outstanding request at a time" :
       	(true -> (req => not pre(isPending))); 
       	                        
       guarantee "Alert port tracks alert variable" :
@@ -138,10 +138,11 @@ renames AGREE_PLTL::all;
       Output: out event data port AutomationResponse.Impl;
     properties
       CASE_Properties::Filtering => 100;
-      CASE_Properties::Component_Spec => ("Filter_Output");
+      CASE_Properties::Component_Spec => ("Output");
     annex agree {**
       eq policy : bool = 
-        WELL_FORMED_AUTOMATION_RESPONSE(Input);       
+        WELL_FORMED_AUTOMATION_RESPONSE(Input);
+     
       guarantee Filter_Output
         "Filter output is well-formed" :
         if event(Input) and policy then 
@@ -188,13 +189,13 @@ renames AGREE_PLTL::all;
       AutomationResponse: out event data port AutomationResponse.Impl;
     annex agree {**
       eq req : bool = event(AutomationRequest);
-          eq avl : bool = event(AirVehicleLocation);
-          eq rsp : bool = event(AutomationResponse);
+      eq avl : bool = event(AirVehicleLocation);
+      eq rsp : bool = event(AutomationResponse);
           
-          assume "Automation requests are well-formed" :
-              req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
-          assume "Air vehicle location is well-formed" : 
-              avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+      assume "Automation requests are well-formed" :
+          req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+      assume "Air vehicle locations are well-formed" : 
+          avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
     **};
   end AI_Thr;
 
@@ -243,16 +244,16 @@ renames AGREE_PLTL::all;
       eq strt: bool = event(Start);
       eq avl : bool = event(AirVehicleLocation);
       
-      assume "Automation response is well-formed" :
+      assume "Automation responses are well-formed" :
         rsp => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);
-      assume "Air vehicle state is well-formed" :
+      assume "Air vehicle locations are well-formed" :
         avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
                   
-      guarantee "Waypoint coincides with air vehicle location":
+      guarantee "Waypoints coincide with air vehicle locations":
         wp => avl;
-      guarantee "Start marks each new automation response" :
+      guarantee "Starts mark new automation responses" :
         strt <=> rsp;
-      guarantee "Start includes a new waypoint" :
+      guarantee "Starts include a new waypoint" :
         strt => wp;
       guarantee "Waypoints are well-formed" : 
         wp => WELL_FORMED_WAYPOINT(Waypoint);
@@ -290,14 +291,17 @@ renames AGREE_PLTL::all;
       lift contract;
     **};
   end WaypointManager.Impl;
-    
+  
+  ---------------
+  -- No Output --
+  ---------------
   thread noOutput
   	features
   	  Output: out event port;
-  	 annex agree {**
-  	   guarantee "Never output" :
-  	     not event(Output);
-  	 **};
+  	annex agree {**
+  	  guarantee "Never output" :
+        not event(Output);
+  	**};
   end noOutput;
   
   thread implementation noOutput.Impl
@@ -326,25 +330,23 @@ renames AGREE_PLTL::all;
       eq strt: bool = event(Start);
       eq alrt : bool = event(Alert);
       
-      assume "Automation request is well-formed" :
+      assume "Automation requests are well-formed" :
         req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
-      assume "Air vehicle location is well-formed" :
+      assume "Air vehicle locations are well-formed" :
         avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    
       assume "One automation request in flight at a time" :
       	true -> (req => pre(Historically(not req) or Since(not req, strt)));
-      
-      eq isBounded : bool = (strt => req) -> (strt => (req or pre(req)));
            
-      guarantee "Waypoint coincides with air vehicle location":
+      guarantee "Waypoints coincide with air vehicle locations":
         wp => avl;
-      guarantee "Start includes a new waypoint" :
+      guarantee "Starts include a new waypoint" :
         strt => wp;
       guarantee "Waypoints are well-formed" : 
         wp => WELL_FORMED_WAYPOINT(Waypoint);
-      guarantee "May start within one cycle of request if no alert" :
+      guarantee "Starts occur within one cycle of requests if not alerting" :
         (strt => ((not alrt) and req)) -> 
         (strt => ((not alrt) and (req or pre(req))));
-      guarantee "Will alert if outside latency bound" :
+      guarantee "Will alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
         not alrt or (Once(alrt) and alrt);
@@ -434,31 +436,29 @@ renames AGREE_PLTL::all;
       Start: out event port;
       Alert: out event port;
     annex agree {**   
-          eq req : bool = event(AutomationRequest);
+      eq req : bool = event(AutomationRequest);
       eq avl : bool = event(AirVehicleLocation);
       eq wp : bool = event(Waypoint);
       eq strt: bool = event(Start);
       eq alrt : bool = event(Alert);
       
-      assume "Automation request is well-formed" :
+      assume "Automation requests are well-formed" :
         req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
-      assume "Air vehicle location is well-formed" :
+      assume "Air vehicle locations are well-formed" :
         avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    
       assume "One automation request in flight at a time" :
       	true -> (req => pre(Historically(not req) or Since(not req, strt)));
-      
-      eq isBounded : bool = (strt => req) -> (strt => (req or pre(req)));
            
-      guarantee "Waypoint coincides with air vehicle location":
+      guarantee "Waypoints coincide with air vehicle locations":
         wp => avl;
-      guarantee "Start includes a new waypoint" :
+      guarantee "Starts include a new waypoint" :
         strt => wp;
       guarantee "Waypoints are well-formed" : 
         wp => WELL_FORMED_WAYPOINT(Waypoint);
-      guarantee "May start within one cycle of request if no alert" :
+      guarantee "Starts occur within one cycle of requests if not alerting" :
         (strt => ((not alrt) and req)) -> 
         (strt => ((not alrt) and (req or pre(req))));
-      guarantee "Will alert if outside latency bound" :
+      guarantee "Will alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
         not alrt or (Once(alrt) and alrt);
@@ -694,9 +694,9 @@ renames AGREE_PLTL::all;
   ---------------------
   annex agree {**	
     node Weak_Trigger(a: bool, b: bool) returns (o: bool);
-    let
-	  o = b and (a or (false -> pre(o)));
-	tel;
+      let
+	      o = b and (a or (false -> pre(o)));
+	    tel;
 	  
     const TASK_ID : int = 42;
     fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =
