@@ -70,7 +70,7 @@ renames AGREE_PLTL::all;
       eq rsp : bool = event(Response);
       eq req : bool = event(Request);
       
-      eq isPending : bool = Strong_Trigger(req, not rsp); -- Since(req and not rsp, not rsp)
+      eq isPending : bool = Since(not rsp, req and not rsp);
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
       
       eq policy : bool = (rsp => req) ->
@@ -690,11 +690,6 @@ renames AGREE_PLTL::all;
   -- AGREE Functions --
   ---------------------
   annex agree {**	
-    node Strong_Trigger(a: bool, b: bool) returns (o: bool);
-      let
-	      o = b and (a or (false -> pre(o)));
-	    tel;
-	  
     const TASK_ID : int = 42;
     fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =
                         (point.Latitude >= -90.0 and point.Latitude <= 90.0)
