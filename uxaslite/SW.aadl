@@ -630,9 +630,12 @@ renames AGREE_PLTL::all;
       Alert: out event port;
       Output: out event data port AutomationResponse.Impl;
     annex agree {**
+      eq index : int = prev(index + 1, 0);
+      
       assume "Response One Step After" :
-      	(event(Response) = false) ->
-      	pre((event(Response) = true) -> (event(Response) = false));
+      	    ((index = 0) => not event(Response))
+      	and ((index = 1) => event(Response))
+      	and ((index >= 2) => not event(Response));
       assume "Request" :
       	(event(Request) = true) ->
       	(event(Request) = false);
@@ -640,9 +643,9 @@ renames AGREE_PLTL::all;
       guarantee "Not Alert" :
       	not event(Alert);
       guarantee "Output One Step After" :
-      	(not event(Output)) ->
-      	pre((event(Output) and Output = Response) ->
-      		(not event(Output)));
+      	    ((index = 0) => not event(Output))
+      	and ((index = 1) => (event(Output) and Output = Response))
+      	and ((index >= 2) => not event(Output));
     **};
   end should_notAlertAndOutput_when_responseOneStepAfterRequest;
   

@@ -1,8 +1,6 @@
 {
   "project": "uxaslite",
-  "implementation": "SW::SWSystem.cyber_Impl",
-  "date": 1646702392551,
-  "hash": "2�\u001e���=\r�L�S`��m",
+  "date": 1646954251700,
   "modelUnits": [
     {
       "name": "SW",
@@ -190,11 +188,11 @@
                   "value": [
                     {
                       "kind": "StringLiteral",
-                      "value": "Monitor_Alert"
+                      "value": "Alert"
                     },
                     {
                       "kind": "StringLiteral",
-                      "value": "Monitor_Output"
+                      "value": "Output"
                     }
                   ]
                 }
@@ -291,14 +289,10 @@
                         "kind": "CallExpr",
                         "function": {
                           "kind": "DoubleDotRef",
-                          "packageName": "SW",
-                          "name": "Weak_Trigger"
+                          "packageName": "AGREE_PLTL",
+                          "name": "Since"
                         },
                         "args": [
-                          {
-                            "kind": "NamedElmExpr",
-                            "name": "req"
-                          },
                           {
                             "kind": "UnaryExpr",
                             "operand": {
@@ -306,6 +300,22 @@
                               "name": "rsp"
                             },
                             "op": "not"
+                          },
+                          {
+                            "kind": "BinaryExpr",
+                            "left": {
+                              "kind": "NamedElmExpr",
+                              "name": "req"
+                            },
+                            "op": "and",
+                            "right": {
+                              "kind": "UnaryExpr",
+                              "operand": {
+                                "kind": "NamedElmExpr",
+                                "name": "rsp"
+                              },
+                              "op": "not"
+                            }
                           }
                         ]
                       }
@@ -357,51 +367,6 @@
                       }
                     },
                     {
-                      "kind": "FnDef",
-                      "name": "isBounded",
-                      "args": [
-                        {
-                          "name": "latency",
-                          "type": {
-                            "kind": "PrimType",
-                            "primType": "int"
-                          }
-                        }
-                      ],
-                      "type": {
-                        "kind": "PrimType",
-                        "primType": "bool"
-                      },
-                      "expr": {
-                        "kind": "BinaryExpr",
-                        "left": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "IntLitExpr",
-                            "value": "0"
-                          },
-                          "op": "<=",
-                          "right": {
-                            "kind": "NamedElmExpr",
-                            "name": "latency"
-                          }
-                        },
-                        "op": "and",
-                        "right": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "latency"
-                          },
-                          "op": "<",
-                          "right": {
-                            "kind": "NamedElmExpr",
-                            "name": "MAX_LATENCY"
-                          }
-                        }
-                      }
-                    },
-                    {
                       "kind": "EqStatement",
                       "left": [
                         {
@@ -432,25 +397,21 @@
                           "left": {
                             "kind": "BinaryExpr",
                             "left": {
-                              "kind": "PreExpr",
-                              "expr": {
-                                "kind": "NamedElmExpr",
-                                "name": "isPending"
-                              }
+                              "kind": "NamedElmExpr",
+                              "name": "isPending"
                             },
                             "op": "=>",
                             "right": {
-                              "kind": "CallExpr",
-                              "function": {
-                                "kind": "DoubleDotRef",
-                                "name": "isBounded"
+                              "kind": "BinaryExpr",
+                              "left": {
+                                "kind": "NamedElmExpr",
+                                "name": "latency"
                               },
-                              "args": [
-                                {
-                                  "kind": "NamedElmExpr",
-                                  "name": "latency"
-                                }
-                              ]
+                              "op": "<",
+                              "right": {
+                                "kind": "NamedElmExpr",
+                                "name": "MAX_LATENCY"
+                              }
                             }
                           },
                           "op": "and",
@@ -533,7 +494,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "One outstanding request at a time (request TRIGGERS not response)",
+                      "label": "One outstanding request at a time",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -640,7 +601,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**\n      const is_latched : bool = true;\n      const MAX_LATENCY : int = 1;\n      \n      eq rsp : bool = event(Response);\n      eq req : bool = event(Request);\n      \n      eq isPending : bool = Weak_Trigger(req, not rsp);\n      eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);\n      \n\t  fun isBounded(latency : int) : bool =\n\t  \t(0 <= latency and latency < MAX_LATENCY);\n\t  \t\n      eq policy : bool = (rsp => req) ->\n                         (    (pre(isPending) => isBounded(latency))\n                          and (rsp => (req or pre(isPending))));\n      eq alert : bool = (not policy) -> \n                        ((is_latched and pre(alert)) or not policy);\n      \n      assume \\\"One outstanding request at a time (request TRIGGERS not response)\\\" :\n      \t(true -> (req => not pre(isPending))); \n      \t                        \n      guarantee \\\"Alert port tracks alert variable\\\" :\n        event(Alert) = alert;\n      guarantee \\\"Output if not alerted\\\" :\n        if (not(alert) and rsp) then\n          event(Output) and (Output = Response)\n        else\n          not (event(Output));    \n    **}"
+                "sourceText": "{**\n      const is_latched : bool = true;\n      const MAX_LATENCY : int = 1;\n      \n      eq rsp : bool = event(Response);\n      eq req : bool = event(Request);\n      \n      eq isPending : bool = Since(not rsp, req and not rsp);\n      eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);\n      \n      eq policy : bool = (rsp => req) ->\n                         (    (isPending => latency < MAX_LATENCY)   \n                          and (rsp => (req or pre(isPending))));\n      eq alert : bool = (not policy) -> \n                        ((is_latched and pre(alert)) or not policy);\n      \n      assume \\\"One outstanding request at a time\\\" :\n      \t(true -> (req => not pre(isPending))); \n      \t                        \n      guarantee \\\"Alert port tracks alert variable\\\" :\n        event(Alert) = alert;\n      guarantee \\\"Output if not alerted\\\" :\n        if (not(alert) and rsp) then\n          event(Output) and (Output = Response)\n        else\n          not (event(Output));    \n    **}"
               }
             ]
           },
@@ -814,7 +775,7 @@
                 "kind": "AnnexSubclause",
                 "parsedAnnexSubclause": {
                   "statements": [
-                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@6399f21b"
+                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@2db6efe2"
                   ]
                 },
                 "sourceText": "{**\n      lift contract;\n    **}"
@@ -858,7 +819,7 @@
                   "value": [
                     {
                       "kind": "StringLiteral",
-                      "value": "Filter_Output"
+                      "value": "Output"
                     }
                   ]
                 }
@@ -955,7 +916,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**\n      eq policy : bool = \n        WELL_FORMED_AUTOMATION_RESPONSE(Input);       \n      guarantee Filter_Output\n        \\\"Filter output is well-formed\\\" :\n        if event(Input) and policy then \n          event(Output) and Output = Input\n        else not event(Output);\n    **}"
+                "sourceText": "{**\n      eq policy : bool = \n        WELL_FORMED_AUTOMATION_RESPONSE(Input);\n     \n      guarantee Filter_Output\n        \\\"Filter output is well-formed\\\" :\n        if event(Input) and policy then \n          event(Output) and Output = Input\n        else not event(Output);\n    **}"
               }
             ]
           },
@@ -1093,7 +1054,7 @@
                 "kind": "AnnexSubclause",
                 "parsedAnnexSubclause": {
                   "statements": [
-                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@45b6c964"
+                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@1246946f"
                   ]
                 },
                 "sourceText": "{**\n      lift contract;\n    **}"
@@ -1216,7 +1177,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Air vehicle location is well-formed",
+                      "label": "Air vehicle locations are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1242,7 +1203,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**\n      eq req : bool = event(AutomationRequest);\n          eq avl : bool = event(AirVehicleLocation);\n          eq rsp : bool = event(AutomationResponse);\n          \n          assume \\\"Automation requests are well-formed\\\" :\n              req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n          assume \\\"Air vehicle location is well-formed\\\" : \n              avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);\n    **}"
+                "sourceText": "{**\n      eq req : bool = event(AutomationRequest);\n      eq avl : bool = event(AirVehicleLocation);\n      eq rsp : bool = event(AutomationResponse);\n          \n      assume \\\"Automation requests are well-formed\\\" :\n          req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n      assume \\\"Air vehicle locations are well-formed\\\" : \n          avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);\n    **}"
               }
             ]
           },
@@ -1393,7 +1354,7 @@
                 "kind": "AnnexSubclause",
                 "parsedAnnexSubclause": {
                   "statements": [
-                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@4d5728df"
+                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@48115d5d"
                   ]
                 },
                 "sourceText": "{**\n      lift contract;\n    **}"
@@ -1515,7 +1476,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Automation response is well-formed",
+                      "label": "Automation responses are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1541,7 +1502,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Air vehicle state is well-formed",
+                      "label": "Air vehicle locations are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1567,7 +1528,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Waypoint coincides with air vehicle location",
+                      "label": "Waypoints coincide with air vehicle locations",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1583,7 +1544,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Start marks each new automation response",
+                      "label": "Starts mark new automation responses",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1599,7 +1560,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Start includes a new waypoint",
+                      "label": "Starts include a new waypoint",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -1641,7 +1602,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**     \n      eq rsp : bool = event(AutomationResponse);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq avl : bool = event(AirVehicleLocation);\n      \n      assume \\\"Automation response is well-formed\\\" :\n        rsp => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);\n      assume \\\"Air vehicle state is well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);\n                  \n      guarantee \\\"Waypoint coincides with air vehicle location\\\":\n        wp => avl;\n      guarantee \\\"Start marks each new automation response\\\" :\n        strt <=> rsp;\n      guarantee \\\"Start includes a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      **}"
+                "sourceText": "{**     \n      eq rsp : bool = event(AutomationResponse);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq avl : bool = event(AirVehicleLocation);\n      \n      assume \\\"Automation responses are well-formed\\\" :\n        rsp => WELL_FORMED_AUTOMATION_RESPONSE(AutomationResponse);\n      assume \\\"Air vehicle locations are well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);\n                  \n      guarantee \\\"Waypoints coincide with air vehicle locations\\\":\n        wp => avl;\n      guarantee \\\"Starts mark new automation responses\\\" :\n        strt <=> rsp;\n      guarantee \\\"Starts include a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      **}"
               }
             ]
           },
@@ -1805,7 +1766,7 @@
                 "kind": "AnnexSubclause",
                 "parsedAnnexSubclause": {
                   "statements": [
-                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@21f64189"
+                    "new_case/genSpecStatement/com.rockwellcollins.atc.agree.agree.impl.LiftContractStatementImpl@39ecf6aa"
                   ]
                 },
                 "sourceText": "{**\n      lift contract;\n    **}"
@@ -1848,7 +1809,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**\n  \t   guarantee \\\"Never output\\\" :\n  \t     not event(Output);\n  \t **}"
+                "sourceText": "{**\n  \t  guarantee \\\"Never output\\\" :\n        not event(Output);\n  \t**}"
               }
             ]
           },
@@ -2059,7 +2020,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Automation request is well-formed",
+                      "label": "Automation requests are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2085,7 +2046,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Air vehicle location is well-formed",
+                      "label": "Air vehicle locations are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2177,59 +2138,8 @@
                       }
                     },
                     {
-                      "kind": "EqStatement",
-                      "left": [
-                        {
-                          "name": "isBounded",
-                          "type": {
-                            "kind": "PrimType",
-                            "primType": "bool"
-                          }
-                        }
-                      ],
-                      "expr": {
-                        "kind": "BinaryExpr",
-                        "left": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "strt"
-                          },
-                          "op": "=>",
-                          "right": {
-                            "kind": "NamedElmExpr",
-                            "name": "req"
-                          }
-                        },
-                        "op": "->",
-                        "right": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "strt"
-                          },
-                          "op": "=>",
-                          "right": {
-                            "kind": "BinaryExpr",
-                            "left": {
-                              "kind": "NamedElmExpr",
-                              "name": "req"
-                            },
-                            "op": "or",
-                            "right": {
-                              "kind": "PreExpr",
-                              "expr": {
-                                "kind": "NamedElmExpr",
-                                "name": "req"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
                       "kind": "GuaranteeStatement",
-                      "label": "Waypoint coincides with air vehicle location",
+                      "label": "Waypoints coincide with air vehicle locations",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2245,7 +2155,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Start includes a new waypoint",
+                      "label": "Starts include a new waypoint",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2287,7 +2197,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "May start within one cycle of request if no alert",
+                      "label": "Starts occur within one cycle of requests if not alerting",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2354,7 +2264,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Will alert if outside latency bound",
+                      "label": "Alert if not started within one cycle of requests",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2443,7 +2353,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**            \n      eq req : bool = event(AutomationRequest);\n      eq avl : bool = event(AirVehicleLocation);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq alrt : bool = event(Alert);\n      \n      assume \\\"Automation request is well-formed\\\" :\n        req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n      assume \\\"Air vehicle location is well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    \n      assume \\\"One automation request in flight at a time\\\" :\n      \ttrue -> (req => pre(Historically(not req) or Since(not req, strt)));\n      \n      eq isBounded : bool = (strt => req) -> (strt => (req or pre(req)));\n           \n      guarantee \\\"Waypoint coincides with air vehicle location\\\":\n        wp => avl;\n      guarantee \\\"Start includes a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      guarantee \\\"May start within one cycle of request if no alert\\\" :\n        (strt => ((not alrt) and req)) -> \n        (strt => ((not alrt) and (req or pre(req))));\n      guarantee \\\"Will alert if outside latency bound\\\" :\n       \ttrue -> ((pre(req and not strt) and not strt) => alrt);\n      guarantee \\\"Once alerted always alerted\\\" :\n        not alrt or (Once(alrt) and alrt);\n    **}"
+                "sourceText": "{**            \n      eq req : bool = event(AutomationRequest);\n      eq avl : bool = event(AirVehicleLocation);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq alrt : bool = event(Alert);\n      \n      assume \\\"Automation requests are well-formed\\\" :\n        req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n      assume \\\"Air vehicle locations are well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    \n      assume \\\"One automation request in flight at a time\\\" :\n      \ttrue -> (req => pre(Historically(not req) or Since(not req, strt)));\n           \n      guarantee \\\"Waypoints coincide with air vehicle locations\\\":\n        wp => avl;\n      guarantee \\\"Starts include a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      guarantee \\\"Starts occur within one cycle of requests if not alerting\\\" :\n        (strt => ((not alrt) and req)) -> \n        (strt => ((not alrt) and (req or pre(req))));\n      guarantee \\\"Alert if not started within one cycle of requests\\\" :\n       \ttrue -> ((pre(req and not strt) and not strt) => alrt);\n      guarantee \\\"Once alerted always alerted\\\" :\n        not alrt or (Once(alrt) and alrt);\n    **}"
               }
             ]
           },
@@ -2777,7 +2687,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Automation request is well-formed",
+                      "label": "Automation requests are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2803,7 +2713,7 @@
                     },
                     {
                       "kind": "AssumeStatement",
-                      "label": "Air vehicle location is well-formed",
+                      "label": "Air vehicle locations are well-formed",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2895,59 +2805,8 @@
                       }
                     },
                     {
-                      "kind": "EqStatement",
-                      "left": [
-                        {
-                          "name": "isBounded",
-                          "type": {
-                            "kind": "PrimType",
-                            "primType": "bool"
-                          }
-                        }
-                      ],
-                      "expr": {
-                        "kind": "BinaryExpr",
-                        "left": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "strt"
-                          },
-                          "op": "=>",
-                          "right": {
-                            "kind": "NamedElmExpr",
-                            "name": "req"
-                          }
-                        },
-                        "op": "->",
-                        "right": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "strt"
-                          },
-                          "op": "=>",
-                          "right": {
-                            "kind": "BinaryExpr",
-                            "left": {
-                              "kind": "NamedElmExpr",
-                              "name": "req"
-                            },
-                            "op": "or",
-                            "right": {
-                              "kind": "PreExpr",
-                              "expr": {
-                                "kind": "NamedElmExpr",
-                                "name": "req"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
                       "kind": "GuaranteeStatement",
-                      "label": "Waypoint coincides with air vehicle location",
+                      "label": "Waypoints coincide with air vehicle locations",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -2963,7 +2822,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Start includes a new waypoint",
+                      "label": "Starts include a new waypoint",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -3005,7 +2864,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "May start within one cycle of request if no alert",
+                      "label": "Starts occur within one cycle of requests if not alerting",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -3072,7 +2931,7 @@
                     },
                     {
                       "kind": "GuaranteeStatement",
-                      "label": "Will alert if outside latency bound",
+                      "label": "Alert if not started within one cycle of requests",
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
@@ -3161,7 +3020,7 @@
                     }
                   ]
                 },
-                "sourceText": "{**   \n          eq req : bool = event(AutomationRequest);\n      eq avl : bool = event(AirVehicleLocation);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq alrt : bool = event(Alert);\n      \n      assume \\\"Automation request is well-formed\\\" :\n        req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n      assume \\\"Air vehicle location is well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    \n      assume \\\"One automation request in flight at a time\\\" :\n      \ttrue -> (req => pre(Historically(not req) or Since(not req, strt)));\n      \n      eq isBounded : bool = (strt => req) -> (strt => (req or pre(req)));\n           \n      guarantee \\\"Waypoint coincides with air vehicle location\\\":\n        wp => avl;\n      guarantee \\\"Start includes a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      guarantee \\\"May start within one cycle of request if no alert\\\" :\n        (strt => ((not alrt) and req)) -> \n        (strt => ((not alrt) and (req or pre(req))));\n      guarantee \\\"Will alert if outside latency bound\\\" :\n       \ttrue -> ((pre(req and not strt) and not strt) => alrt);\n      guarantee \\\"Once alerted always alerted\\\" :\n        not alrt or (Once(alrt) and alrt);\n    **}"
+                "sourceText": "{**   \n      eq req : bool = event(AutomationRequest);\n      eq avl : bool = event(AirVehicleLocation);\n      eq wp : bool = event(Waypoint);\n      eq strt: bool = event(Start);\n      eq alrt : bool = event(Alert);\n      \n      assume \\\"Automation requests are well-formed\\\" :\n        req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);\n      assume \\\"Air vehicle locations are well-formed\\\" :\n        avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    \n      assume \\\"One automation request in flight at a time\\\" :\n      \ttrue -> (req => pre(Historically(not req) or Since(not req, strt)));\n           \n      guarantee \\\"Waypoints coincide with air vehicle locations\\\":\n        wp => avl;\n      guarantee \\\"Starts include a new waypoint\\\" :\n        strt => wp;\n      guarantee \\\"Waypoints are well-formed\\\" : \n        wp => WELL_FORMED_WAYPOINT(Waypoint);\n      guarantee \\\"Starts occur within one cycle of requests if not alerting\\\" :\n        (strt => ((not alrt) and req)) -> \n        (strt => ((not alrt) and (req or pre(req))));\n      guarantee \\\"Alert if not started within one cycle of requests\\\" :\n       \ttrue -> ((pre(req and not strt) and not strt) => alrt);\n      guarantee \\\"Once alerted always alerted\\\" :\n        not alrt or (Once(alrt) and alrt);\n    **}"
               }
             ]
           },
@@ -4020,6 +3879,37 @@
                 "parsedAnnexSubclause": {
                   "statements": [
                     {
+                      "kind": "EqStatement",
+                      "left": [
+                        {
+                          "name": "index",
+                          "type": {
+                            "kind": "PrimType",
+                            "primType": "int"
+                          }
+                        }
+                      ],
+                      "expr": {
+                        "kind": "PrevExpr",
+                        "delay": {
+                          "kind": "BinaryExpr",
+                          "left": {
+                            "kind": "NamedElmExpr",
+                            "name": "index"
+                          },
+                          "op": "+",
+                          "right": {
+                            "kind": "IntLitExpr",
+                            "value": "1"
+                          }
+                        },
+                        "init": {
+                          "kind": "IntLitExpr",
+                          "value": "0"
+                        }
+                      }
+                    },
+                    {
                       "kind": "AssumeStatement",
                       "label": "Response One Step After",
                       "expr": {
@@ -4027,54 +3917,83 @@
                         "left": {
                           "kind": "BinaryExpr",
                           "left": {
-                            "kind": "EventExpr",
-                            "id": {
-                              "kind": "NamedElmExpr",
-                              "name": "Response"
-                            }
-                          },
-                          "op": "=",
-                          "right": {
-                            "kind": "BoolLitExpr",
-                            "value": "false"
-                          }
-                        },
-                        "op": "->",
-                        "right": {
-                          "kind": "PreExpr",
-                          "expr": {
                             "kind": "BinaryExpr",
                             "left": {
                               "kind": "BinaryExpr",
                               "left": {
-                                "kind": "EventExpr",
-                                "id": {
-                                  "kind": "NamedElmExpr",
-                                  "name": "Response"
-                                }
+                                "kind": "NamedElmExpr",
+                                "name": "index"
                               },
                               "op": "=",
                               "right": {
-                                "kind": "BoolLitExpr",
-                                "value": "true"
+                                "kind": "IntLitExpr",
+                                "value": "0"
                               }
                             },
-                            "op": "->",
+                            "op": "=>",
                             "right": {
-                              "kind": "BinaryExpr",
-                              "left": {
+                              "kind": "UnaryExpr",
+                              "operand": {
                                 "kind": "EventExpr",
                                 "id": {
                                   "kind": "NamedElmExpr",
                                   "name": "Response"
                                 }
                               },
+                              "op": "not"
+                            }
+                          },
+                          "op": "and",
+                          "right": {
+                            "kind": "BinaryExpr",
+                            "left": {
+                              "kind": "BinaryExpr",
+                              "left": {
+                                "kind": "NamedElmExpr",
+                                "name": "index"
+                              },
                               "op": "=",
                               "right": {
-                                "kind": "BoolLitExpr",
-                                "value": "false"
+                                "kind": "IntLitExpr",
+                                "value": "1"
+                              }
+                            },
+                            "op": "=>",
+                            "right": {
+                              "kind": "EventExpr",
+                              "id": {
+                                "kind": "NamedElmExpr",
+                                "name": "Response"
                               }
                             }
+                          }
+                        },
+                        "op": "and",
+                        "right": {
+                          "kind": "BinaryExpr",
+                          "left": {
+                            "kind": "BinaryExpr",
+                            "left": {
+                              "kind": "NamedElmExpr",
+                              "name": "index"
+                            },
+                            "op": ">=",
+                            "right": {
+                              "kind": "IntLitExpr",
+                              "value": "2"
+                            }
+                          },
+                          "op": "=>",
+                          "right": {
+                            "kind": "UnaryExpr",
+                            "operand": {
+                              "kind": "EventExpr",
+                              "id": {
+                                "kind": "NamedElmExpr",
+                                "name": "Response"
+                              }
+                            },
+                            "op": "not"
                           }
                         }
                       }
@@ -4138,22 +4057,51 @@
                       "expr": {
                         "kind": "BinaryExpr",
                         "left": {
-                          "kind": "UnaryExpr",
-                          "operand": {
-                            "kind": "EventExpr",
-                            "id": {
-                              "kind": "NamedElmExpr",
-                              "name": "Output"
-                            }
-                          },
-                          "op": "not"
-                        },
-                        "op": "->",
-                        "right": {
-                          "kind": "PreExpr",
-                          "expr": {
+                          "kind": "BinaryExpr",
+                          "left": {
                             "kind": "BinaryExpr",
                             "left": {
+                              "kind": "BinaryExpr",
+                              "left": {
+                                "kind": "NamedElmExpr",
+                                "name": "index"
+                              },
+                              "op": "=",
+                              "right": {
+                                "kind": "IntLitExpr",
+                                "value": "0"
+                              }
+                            },
+                            "op": "=>",
+                            "right": {
+                              "kind": "UnaryExpr",
+                              "operand": {
+                                "kind": "EventExpr",
+                                "id": {
+                                  "kind": "NamedElmExpr",
+                                  "name": "Output"
+                                }
+                              },
+                              "op": "not"
+                            }
+                          },
+                          "op": "and",
+                          "right": {
+                            "kind": "BinaryExpr",
+                            "left": {
+                              "kind": "BinaryExpr",
+                              "left": {
+                                "kind": "NamedElmExpr",
+                                "name": "index"
+                              },
+                              "op": "=",
+                              "right": {
+                                "kind": "IntLitExpr",
+                                "value": "1"
+                              }
+                            },
+                            "op": "=>",
+                            "right": {
                               "kind": "BinaryExpr",
                               "left": {
                                 "kind": "EventExpr",
@@ -4175,26 +4123,42 @@
                                   "name": "Response"
                                 }
                               }
-                            },
-                            "op": "->",
-                            "right": {
-                              "kind": "UnaryExpr",
-                              "operand": {
-                                "kind": "EventExpr",
-                                "id": {
-                                  "kind": "NamedElmExpr",
-                                  "name": "Output"
-                                }
-                              },
-                              "op": "not"
                             }
+                          }
+                        },
+                        "op": "and",
+                        "right": {
+                          "kind": "BinaryExpr",
+                          "left": {
+                            "kind": "BinaryExpr",
+                            "left": {
+                              "kind": "NamedElmExpr",
+                              "name": "index"
+                            },
+                            "op": ">=",
+                            "right": {
+                              "kind": "IntLitExpr",
+                              "value": "2"
+                            }
+                          },
+                          "op": "=>",
+                          "right": {
+                            "kind": "UnaryExpr",
+                            "operand": {
+                              "kind": "EventExpr",
+                              "id": {
+                                "kind": "NamedElmExpr",
+                                "name": "Output"
+                              }
+                            },
+                            "op": "not"
                           }
                         }
                       }
                     }
                   ]
                 },
-                "sourceText": "{**\n      assume \\\"Response One Step After\\\" :\n      \t(event(Response) = false) ->\n      \tpre((event(Response) = true) -> (event(Response) = false));\n      assume \\\"Request\\\" :\n      \t(event(Request) = true) ->\n      \t(event(Request) = false);\n      \n      guarantee \\\"Not Alert\\\" :\n      \tnot event(Alert);\n      guarantee \\\"Output One Step After\\\" :\n      \t(not event(Output)) ->\n      \tpre((event(Output) and Output = Response) ->\n      \t\t(not event(Output)));\n    **}"
+                "sourceText": "{**\n      eq index : int = prev(index + 1, 0);\n      \n      assume \\\"Response One Step After\\\" :\n      \t    ((index = 0) => not event(Response))\n      \tand ((index = 1) => event(Response))\n      \tand ((index >= 2) => not event(Response));\n      assume \\\"Request\\\" :\n      \t(event(Request) = true) ->\n      \t(event(Request) = false);\n      \n      guarantee \\\"Not Alert\\\" :\n      \tnot event(Alert);\n      guarantee \\\"Output One Step After\\\" :\n      \t    ((index = 0) => not event(Output))\n      \tand ((index = 1) => (event(Output) and Output = Response))\n      \tand ((index >= 2) => not event(Output));\n    **}"
               }
             ]
           },
@@ -4436,80 +4400,6 @@
             "kind": "AnnexLibrary",
             "parsedAnnexLibrary": {
               "statements": [
-                {
-                  "kind": "NodeDef",
-                  "name": "Weak_Trigger",
-                  "args": [
-                    {
-                      "name": "a",
-                      "type": {
-                        "kind": "PrimType",
-                        "primType": "bool"
-                      }
-                    },
-                    {
-                      "name": "b",
-                      "type": {
-                        "kind": "PrimType",
-                        "primType": "bool"
-                      }
-                    }
-                  ],
-                  "returns": [
-                    {
-                      "name": "o",
-                      "type": {
-                        "kind": "PrimType",
-                        "primType": "bool"
-                      }
-                    }
-                  ],
-                  "body": [
-                    {
-                      "kind": "NodeEq",
-                      "left": [
-                        {
-                          "name": "o",
-                          "type": {
-                            "kind": "PrimType",
-                            "primType": "bool"
-                          }
-                        }
-                      ],
-                      "expr": {
-                        "kind": "BinaryExpr",
-                        "left": {
-                          "kind": "NamedElmExpr",
-                          "name": "b"
-                        },
-                        "op": "and",
-                        "right": {
-                          "kind": "BinaryExpr",
-                          "left": {
-                            "kind": "NamedElmExpr",
-                            "name": "a"
-                          },
-                          "op": "or",
-                          "right": {
-                            "kind": "BinaryExpr",
-                            "left": {
-                              "kind": "BoolLitExpr",
-                              "value": "false"
-                            },
-                            "op": "->",
-                            "right": {
-                              "kind": "PreExpr",
-                              "expr": {
-                                "kind": "NamedElmExpr",
-                                "name": "o"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                },
                 {
                   "kind": "ConstStatement",
                   "name": "TASK_ID",
@@ -4798,7 +4688,7 @@
                 }
               ]
             },
-            "sourceText": "{**\t\n    node Weak_Trigger(a: bool, b: bool) returns (o: bool);\n    let\n\t  o = b and (a or (false -> pre(o)));\n\ttel;\n\t  \n    const TASK_ID : int = 42;\n    fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =\n                        (point.Latitude >= -90.0 and point.Latitude <= 90.0)\n                    and (point.Longitude >= -180.0 and point.Longitude <= 180.0) \n                    and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);\n    fun WELL_FORMED_TASK_ID(id : int) : bool =\n                (id = TASK_ID);\n    fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.Impl) : bool =\n                        WELL_FORMED_TASK_ID(msg.TaskID);\n    fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.Impl) : bool =\n                        (WELL_FORMED_TASK_ID(msg.TaskID))\n                    and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));\n  **}"
+            "sourceText": "{**\t\n    const TASK_ID : int = 42;\n    fun WELL_FORMED_WAYPOINT(point : Waypoint.Impl) : bool =\n                        (point.Latitude >= -90.0 and point.Latitude <= 90.0)\n                    and (point.Longitude >= -180.0 and point.Longitude <= 180.0) \n                    and (point.Altitude >= 10000.0 and point.Altitude <= 15000.0);\n    fun WELL_FORMED_TASK_ID(id : int) : bool =\n                (id = TASK_ID);\n    fun WELL_FORMED_AUTOMATION_REQUEST(msg : AutomationRequest.Impl) : bool =\n                        WELL_FORMED_TASK_ID(msg.TaskID);\n    fun WELL_FORMED_AUTOMATION_RESPONSE(msg : AutomationResponse.Impl) : bool =\n                        (WELL_FORMED_TASK_ID(msg.TaskID))\n                    and (forall waypoint in msg.Waypoints, WELL_FORMED_WAYPOINT(waypoint));\n  **}"
           }
         ]
       }
