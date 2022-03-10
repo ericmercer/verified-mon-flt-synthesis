@@ -70,14 +70,11 @@ renames AGREE_PLTL::all;
       eq rsp : bool = event(Response);
       eq req : bool = event(Request);
       
-      eq isPending : bool = Strong_Trigger(req, not rsp);
+      eq isPending : bool = Strong_Trigger(req, not rsp); -- Since(req and not rsp, not rsp)
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
       
-	    fun isBounded(latency : int) : bool =
-	  	  (0 <= latency and latency < MAX_LATENCY);
-	  	
       eq policy : bool = (rsp => req) ->
-                         (    (pre(isPending) => isBounded(latency))
+                         (    (isPending => latency < MAX_LATENCY)   
                           and (rsp => (req or pre(isPending))));
       eq alert : bool = (not policy) -> 
                         ((is_latched and pre(alert)) or not policy);
