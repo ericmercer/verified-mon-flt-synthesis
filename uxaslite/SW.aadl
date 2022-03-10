@@ -70,7 +70,7 @@ renames AGREE_PLTL::all;
       eq rsp : bool = event(Response);
       eq req : bool = event(Request);
       
-      eq isPending : bool = Weak_Trigger(req, not rsp);
+      eq isPending : bool = Strong_Trigger(req, not rsp);
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
       
 	    fun isBounded(latency : int) : bool =
@@ -693,7 +693,7 @@ renames AGREE_PLTL::all;
   -- AGREE Functions --
   ---------------------
   annex agree {**	
-    node Weak_Trigger(a: bool, b: bool) returns (o: bool);
+    node Strong_Trigger(a: bool, b: bool) returns (o: bool);
       let
 	      o = b and (a or (false -> pre(o)));
 	    tel;
