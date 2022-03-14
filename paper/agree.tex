@@ -180,11 +180,18 @@ contract.
 
 Assume that all data flowing between components is in the form of byte
 arrays, thus input and output is modelled at the level of what is
-passed ``over the wire'' by the communication fabric. An \emph{environment},
-$\theta: \lval \mapsto \konst{string}$, binds \emph{L-values} to
-strings where an L-value is anything that can appear on the left-hand
-side of an assignment such as a named port, a field in a record, a
-entry in an array, a local value defined by an eq-statement etc.
+passed ``over the wire'' by the communication fabric. However, AGREE
+specifies behavior at a higher level, with variables holding (at the
+very least) numeric and boolean values. Thus we
+include \emph{encoders} and \emph{decoders} to parse input buffers
+into high-level and to serialize high-level data back into bytes array
+format.
+
+An \emph{environment}, $\theta: \lval \mapsto \konst{string}$,
+binds \emph{L-values} to strings where an L-value is anything that can
+appear on the left-hand side of an assignment such as a named port, a
+field in a record, a entry in an array, a local value defined by an
+eq-statement etc.
 
 Let $s$ be an AGREE contract specification for some high-assurance
 component. The notation $\theta_s$ is used to denote the environment that
