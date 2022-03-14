@@ -1,0 +1,88 @@
+Brief, high-level overview, of the AGREE semantics for component synthesis.
+These semantics are those defined in HOL.
+The component is defined by its state.
+The state is its internal state and current output.
+Input streams are constrained to obey the assumptions.
+At each input, the \textbf{eq}-statements are evaluated, in order, to update the internal state and outputs.
+After the \textbf{eq}-statements are evaluated, guarantees are checked.
+The section should define clearly what it means for a component to be \emph{well-formed}. 
+The section should conclude by stating the \emph{Component Correct} definition.
+
+The correctness, and structure, of the synthesized CakeML code is based on these semantics.
+
+\subsection{Old AGREE Semantics}
+\label{agree-semantics}
+
+Here the formal semantics of the AGREE contract specification are
+briefly presented to make clear the meaning of a high-assurance
+component.  These semantics are the basis of proofs showing that a
+synthesized component has input to output behavior specified by its
+contract.
+
+Assume that all data flowing between components is in the form of byte
+arrays, thus input and output is modelled at the level of what is
+passed ``over the wire'' by the communication fabric. An \emph{environment},
+$\theta: \lval \mapsto \konst{string}$, binds \emph{L-values} to
+strings where an L-value is anything that can appear on the left-hand
+side of an assignment such as a named port, a field in a record, a
+entry in an array, a local value defined by an eq-statement etc.
+
+Let $s$ be an AGREE contract specification for some high-assurance
+component. The notation $\theta_s$ is used to denote the environment that
+contains a binding for any L-value in the scope of $s$ and nothing else, and
+the notation $\Theta_s$ denotes the universe of all such environments. The
+semantics of $s$ are defined over streams, $\pi = \theta_1, \theta_2, \ldots$, which
+are finite sequences of environments, $\pi \in \Theta_s^*$.
+
+%% \begin{comment}
+%% [\emph{So basically $\theta$ covers the inputs and the state, i.e. we can
+%% generate a contig type for the inputs plus state vars.} ]
+
+%% [Question: what is a \emph{total} environment? One that supplies at
+%% least the bindings in $\theta$ needed to evaluate the spec?]
+%% \end{comment}
+
+The function $\konst{eval}\; s\; \pi$ evaluates $s$ on the stream,
+$\pi$, and returns \konst{true} if $s$ is invariant along the entire
+stream and \konst{false} otherwise. A guarantee $\mathcal{G}$ in $s$
+is \emph{invariant} if $\mathcal{G}$ is true for each prefix of $\pi$,
+while an eq-statement in $s$ is invariant if its binding in the
+context of every step is equivalent to the computed value of its
+associated expression in that same context. All guarantees and
+eq-statements must be invariant in the stream for the function to
+return \konst{true}.
+
+The meaning of an AGREE contract specification is now defined as the
+set of environment streams on which it is invariant.
+%
+\[
+  \Lang{s} = \set{\pi \in \Theta_s^* \mid \konst{eval}\ s\ \pi = \konst{true}}
+\]
+%
+\noindent Intuitively, any stream $\pi \in \mathcal{L}(s)$, at each step, binds
+the L-values in the eq-statements in a way that is consistent with
+their associated expressions and the guarantees are all true in that
+same step.
+
+We claim that a synthesized high-assurance component preserves the
+input to output relationship in the specification $s$ over every
+stream in $\Lang{s}$.  Let $\pi^\prime = \konst{SynthEval}\;
+s\; \pi$ denote a function that synthesizes $s$ and then evaluates that
+synthesized component on the stream $\pi$ to create a new stream
+$\pi^\prime$ containing added output and other bindings. We say that
+two streams are equivalent in regards to a specification, denoted as
+$\pi =_s \pi^\prime$, if and only if the two streams are the same
+length and agree on bindings for the input and output for $s$ at every
+step of the streams.  We now formally state the correctness claim for
+synthesis.
+%
+\[
+  \forall \pi \in \Lang{s}.\; (\konst{SynthEval}\; s\; I_s(\pi)) =_s \pi\\
+\]
+%
+where $I_s(\pi)$ returns the corresponding stream that only retains
+bindings for inputs in each step and nothing else. The claim is that
+the synthesized component generates the same output stream as the
+specification for any stream belonging to the specification that is
+restricted to just input bindings at each step.
+
