@@ -46,7 +46,6 @@ These initial specifications pass AGREE verification meaning that the contract c
 A cyber-vulnerability analysis, however, identifies the potential of a supply chain attack through the AI route planner that is provided by a third-party vendor without source code.
 The component is marked as \emph{untrusted} after the analysis, and its contract is modified by removing all guarantees on its outputs to reflect its untrusted status.
 The AI output is now unconstrained in the assume-guarantee reasoning of AGREE and is able to generate any value on its output stream at anytime.
-AGREE must consider all possible output streams from the AI in proving the correctness of the component implementation of the automated UAV route planning system.
 
 The output from the AGREE analysis using the untrusted AI specification is shown in \figref{fig:example-certificate}.
 The red exclamation points designate component assumptions or system output guarantees that do not hold, and each failure comes with a corresponding counter-example.
@@ -86,8 +85,9 @@ A monitor raises an alert if the specified temporal properties are ever violated
 The AGREE specification for the monitor in our example states that an automation response can only be generated in conjunction with an automation request; and further, that response must come with the request or in the next step after the request.
 As with the filter, the system designer provides the policy, and that policy is typically based on existing AGREE specifications in the SW system.
 
-The AGREE analysis of the cyber-hardened implementation with the auto-generated high-assurance components is shown in \figref{fig:hardened}.
+The AGREE analysis of the cyber-hardened implementation with the auto-generated high-assurance components is shown in \figref{fig:hardened-certificate}.
 Here AGREE provides a proof certificate that the high-assurance components guarantee the correct behavior of the SW implementation in the presence of the untrusted AI route planner.
+Having passed AGREE verification, the high-assurance components are ready to be synthesized.
 
 The high-assurance components are automatically synthesized by SPLAT from the AGREE specifications to equivalent models in the CakeML language.
 The synthesis includes a proof that it captures the meaning of the AGREE specification in CakeML.
