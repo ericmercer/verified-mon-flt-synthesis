@@ -1,6 +1,6 @@
 \newsavebox{\sw}
 \begin{lrbox}{\sw}
-\begin{lstlisting}[style=agree,numbers=left,escapeinside={*}{*}]
+\begin{lstlisting}[style=agree,numbers=left]
 eq req : bool = event(AutomationRequest);*\label{line:sw-event-def-start}*
 eq avl : bool = event(AirVehicleLocation);
 eq wp : bool = event(Waypoint);
@@ -53,7 +53,7 @@ The specification uses \texttt{eq} statements to define variables local to the c
 For example, \lineref{line:sw-event-def-start} defines the \texttt{req} variable to be equivalent to the \texttt{event} expression.
 
 All the named ports in the corresponding AADL component are in the scope of the specification, and there are additional implicit boolean \emph{event} inputs (or outputs) associated with event ports.
-An \texttt{event} expression refers to that implicit input (or output) boolean value and is true when data present the named port and false otherwise.
+An \texttt{event} expression refers to that implicit input (or output) boolean value and is true when data is present on the named port and false otherwise.
 \linesref{line:sw-event-def-start}{line:sw-event-def-end} create local variables that are true when data is present on the corresponding event ports for the component.
 The local variables here are purely for convenience in writing the specification.
 
@@ -71,25 +71,26 @@ Guarantees should use the \texttt{pre} operator anytime they need to reason abou
 
 The assumption on \lineref{line:sw-assume-3} uses a \emph{followed-by} operator, \texttt{->}, to \emph{guard} the \texttt{pre} operator at time 0.
 A followed-by expression defines what happens at the first instance of the stream, time 0, and then what follows after. 
-Here the assumption is \texttt{true} at time 0, and then takes on the truth value of the implication in all future instances.
+Here the assumption is \texttt{true} at time 0 and then it is the truth value of the implication in all future instances.
 The followed-by guards the \texttt{pre} because expressions are undefined before time 0 and the followed-by prevents the \texttt{pre} from being evaluated before time 1.
-So after the first instance, the assumption depends on the presence of a request and the pre-state of the component.
+So after time 0, the assumption depends on the presence of a request and the pre-state of the component.
 
 The stream semantics in AGREE mean that it is possible to use PLTL operators that look back in time.
 The \texttt{Historically} operator is the same as $\historically$ defined previously; it is true if the enclosed expression has been true in all moments up to the present one. 
 The \texttt{Since} operator is true if the first expression has been true in all moments up to the present one since the second expression most recently became true.
-The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}.
+The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}--\emph{not request since start}.
 
 The guarantees on \linesref{line:sw-guarantee-1}{line:sw-guarantee-3} coincide events and assert well-formed output.
 The guarantees on \linesref{line:sw-guarantee-4}{line:sw-guarantee-6} define temporal properties of the component.
 \lineref{line:sw-guarantee-4} insists that a start happens with a request or one step after a request.
 The guarantee uses the assumption on \lineref{line:sw-assume-3} and does not check for two requests in a row without a start as the assumption precludes that input behavior.
-The guarantee also does not force the start to take place, it only says that if it takes place, it is under the defined conditions.
+It differentiates with the followed-by operator what is required at time 0, the start must coincide with the request, with what is required after time 0, the start must coincides with the request or is a response to a request one step earlier.
+The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
 
 \lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound.
 Together with \lineref{line:sw-guarantee-4} the contract model allows for non-alerting and alerting behavior.
 The final guarantee on \lineref{line:sw-guarantee-6} defines additional behavior for the alert.
 
 The \texttt{Once} operator is true if the enclosed expression has ever been true before the current moment.
-\lineref{line:sw-guarantee-6} ensures that once alerted always alerted because either there has never been an alert, \texttt{\textbf{not} alrt}, or there has been an alert sometime in the past and so it is alerting in now, \texttt{\textbf{Once}(alrt) \textbf{and} alrt}.
+\lineref{line:sw-guarantee-6} ensures that once alerted always alerted because either there has never been an alert, \texttt{\textbf{not} alrt}, or there has been an alert sometime in the past and so it is alerting now, \texttt{\textbf{Once}(alrt) \textbf{and} alrt}.
 These six guarantees define the behavior of the SW component under the three assumptions.

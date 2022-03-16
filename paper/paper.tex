@@ -57,6 +57,7 @@
   tabsize=2,
   linewidth=2\linewidth,
   morecomment=[l]{--},
+  escapeinside={*}{*},
   morekeywords={eq, bool, guarantee, assume, true, false, pre, not, and, or, property, const, Historically, Since, Once, event}
 }
 
@@ -74,7 +75,7 @@
 \newcommand{\figref}[1]{Fig.~\ref{#1}}
 \newcommand{\secref}[1]{Sec.~\ref{#1}}
 \newcommand{\lineref}[1]{Line~\ref{#1}}
-\newcommand{\linesref}[2]{Lines~\ref{#1}-\ref{#2}}
+\newcommand{\linesref}[2]{Lines~\ref{#1}--\ref{#2}}
 
 % Latex trickery for infix div operator, from stackexchange
 
@@ -177,8 +178,8 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 
 \subsection{Revisions}
 \begin{compactitem}
-  \item Add in the AGREE specification for the system
-  \item Add in the AGREE verification conditions (e.g., similar to those in the Scheduled Components NFM submission)
+  \item \sout{Add in the AGREE specification for the system}
+  \item \sout{Add in the AGREE verification conditions (e.g., similar to those in the Scheduled Components NFM submission)}
 \end{compactitem}
 
 \section{AGREE Semantics for Component Synthesis}
