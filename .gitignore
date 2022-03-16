@@ -9,3 +9,9 @@ dirt
 paper.d
 paper.pdf
 .DS*
+*.zip
+*.out
+*.slang*
+Requirements
+*.lus
+certificate
