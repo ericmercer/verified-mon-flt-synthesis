@@ -76,39 +76,39 @@ renames AGREE_PLTL::all;
       ------------------------------
       -- Component Implementation --
       ------------------------------
-     eq isPending : bool = Since(not rsp, req and not rsp);
-     eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
-     
-     eq policy : bool = (rsp => req) ->
-                        (    (isPending => latency < MAX_LATENCY)   
-                         and (rsp => (req or pre(isPending))));
-     eq alert : bool = (not policy) -> 
-                       ((is_latched and pre(alert)) or not policy);
-     	                        
-     guarantee "Alert port tracks alert variable" :
-       event(Alert) = alert;
-     guarantee "Output if not alerted" :
-       if (not(alert) and rsp) then
-         event(Output) and (Output = Response)
-       else
-         not (event(Output));
+--     eq isPending : bool = Since(not rsp, req and not rsp);
+--     eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
+--     
+--     eq policy : bool = (rsp => req) ->
+--                        (    (isPending => latency < MAX_LATENCY)   
+--                         and (rsp => (req or pre(isPending))));
+--     eq alert : bool = (not policy) -> 
+--                       ((is_latched and pre(alert)) or not policy);
+--     	                        
+--     guarantee "Alert port tracks alert variable" :
+--       event(Alert) = alert;
+--     guarantee "Output if not alerted" :
+--       if (not(alert) and rsp) then
+--         event(Output) and (Output = Response)
+--       else
+--         not (event(Output));
       
       --------------------------------------
       -- Properties of Componont Behavior --
       --------------------------------------
-      guarantee "Output the response when not alerting" :
+     guarantee "Output the response when not alerting" :
       	if (not event(Alert) and event(Response)) then 
       	  event(Output) and Output = Response
       	else 
       	  not event(Output);
-      guarantee "Alert if no response within one cycle of request" :
-       	true -> 
-       	((pre(event(Request) and not event(Response)) and not event(Response)) => event(Alert));
-      guarantee "Alert if response without a request" :
-      	(event(Response) and (not event(Request))) => event(Alert) ->
-      	(event(Response) and (not event(Request)) and not pre(event(Request))) => event(Alert);
-      guarantee "Once alerted always alerted" :
-        true -> pre(event(Alert)) => event(Alert);
+      
+      eq isAlert : bool = (rsp and not req) ->
+        (   (pre(req and not rsp) and not rsp)
+         or (rsp and (not req) and pre(not req or (req and rsp)))
+         or pre(event(Alert)));
+         
+      guarantee "Alert late response, orphaned response, or pre-state alert" :
+      	event(Alert) <=> isAlert;
     **};
   end CASE_Monitor_Thr;
 
