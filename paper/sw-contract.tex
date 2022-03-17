@@ -1,0 +1,96 @@
+\newsavebox{\sw}
+\begin{lrbox}{\sw}
+\begin{lstlisting}[style=agree,numbers=left]
+eq req : bool = event(AutomationRequest);*\label{line:sw-event-def-start}*
+eq avl : bool = event(AirVehicleLocation);
+eq wp : bool = event(Waypoint);
+eq strt: bool = event(Start);
+eq alrt : bool = event(Alert);*\label{line:sw-event-def-end}*
+
+assume "Automation requests are well-formed" : *\label{line:sw-assume-1}*
+  req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+assume "Air vehicle locations are well-formed" : *\label{line:sw-assume-2}*
+  avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    
+assume "One automation request in flight at a time" : *\label{line:sw-assume-3}*
+  true -> 
+  (req => pre(Historically(not req) or Since(not req, strt)));
+      
+guarantee "Waypoints coincide with air vehicle locations": *\label{line:sw-guarantee-1}*
+  wp => avl;
+guarantee "Starts include a new waypoint" : *\label{line:sw-guarantee-2}*
+  strt => wp;
+guarantee "Waypoints are well-formed" :  *\label{line:sw-guarantee-3}*
+  wp => WELL_FORMED_WAYPOINT(Waypoint);
+guarantee "Starts within one cycle of requests if not alerting" : *\label{line:sw-guarantee-4}*
+  (strt => ((not alrt) and req)) -> 
+  (strt => ((not alrt) and (req or pre(req))));
+guarantee "Alert if not started within one cycle of requests" : *\label{line:sw-guarantee-5}*
+    true -> ((pre(req and not strt) and not strt) => alrt);
+guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
+  not alrt or (Once(alrt) and alrt);
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \scalebox{0.62}{\usebox{\sw}}
+  \end{center}
+  \caption{The SW component contract.}
+  \label{fig:sw}
+\end{figure}
+
+The AGREE specification language uses stream concepts, and operators, from the Lustre language \cite{10.1145/41625.41641}.
+As with Lustre, the semantics are synchronous dataflow where the inputs, outputs, and expressions are data streams that comply with the input assumptions.
+Contracts are evaluated in dependency order with inputs being propagated to outputs through all contracts until they stabilize; as such, the contracts, and thereby the top-level model, must be acyclic.\footnote{An apparent syntactic cycle, where a component is linked back to itself, may be broken temporally by inserting delay elements.}
+
+Once the contracts have stabilized, the model takes a synchronous step to the next input data in the stream.
+The semantics do not model computation or communication delay.
+The output of one contract is seen at the input of any downstream contract in the same step of the input data stream.
+The language is best introduced through example.
+
+The AGREE specification for the SW component in the example of Section~\ref{sec:example} is given in \figref{fig:sw}.
+The specification uses \texttt{eq} statements to define variables local to the contract specification.
+For example, \lineref{line:sw-event-def-start} defines the \texttt{req} variable to be equivalent to the \texttt{event} expression.
+
+All the named ports in the corresponding AADL component are in the scope of the specification, and there are additional implicit boolean \emph{event} inputs (or outputs) associated with event ports.
+An \texttt{event} expression refers to that implicit input (or output) boolean value and is true when data is present on the named port and false otherwise.
+\linesref{line:sw-event-def-start}{line:sw-event-def-end} create local variables that are true when data is present on the corresponding event ports for the component.
+The local variables here are purely for convenience in writing the specification.
+
+The \texttt{assume} statement is a string description followed by a predicate.
+Those on \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2} are implications requiring that when data is present it is well-formed.
+The well-formed predicates themselves are defined elsewhere using AGREE functions.
+
+The assumption on \lineref{line:sw-assume-3} constrains when a request can arrive by reasoning about the \emph{state} of the contract.
+Streams are associated with every expression in AGREE, meaning that expressions are defined through time, and are therefore stateful.
+When writing assumptions and guarantees, it is important to differentiate pre-state, before a contract updates its state, and post-state, after a contract updates its state, in response to the current input. AGREE provides the \texttt{pre} operator to make that distinction.
+
+The \texttt{pre} operator returns the previous value of the enclosed expression by looking back one step in time on the expression's stream.
+In general, assumptions regarding state should be evaluated in the pre-state of the component with the current inputs, and guarantees regarding state should be evaluated on the post-state of the component given the current inputs.
+Guarantees should use the \texttt{pre} operator anytime they need to reason about the current state relative to the previous state. 
+
+The assumption on \lineref{line:sw-assume-3} uses a \emph{followed-by} operator, \texttt{->}, to \emph{guard} the \texttt{pre} operator at time 0.
+A followed-by expression defines what happens at the first instance of the stream, time 0, and then what follows after. 
+Here the assumption is \texttt{true} at time 0 and then it is the truth value of the implication in all future instances.
+The followed-by guards the \texttt{pre} because expressions are undefined before time 0 and the followed-by prevents the \texttt{pre} from being evaluated before time 1.
+So after time 0, the assumption depends on the presence of a request and the pre-state of the component.
+
+The stream semantics in AGREE mean that it is possible to use PLTL operators that look back in time.
+The \texttt{Historically} operator is the same as $\historically$ defined previously; it is true if the enclosed expression has been true in all moments up to the present one. 
+The \texttt{Since} operator is true if the first expression has been true in all moments up to the present one since the second expression most recently became true.
+The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}--\emph{not request since start}.
+
+The guarantees on \linesref{line:sw-guarantee-1}{line:sw-guarantee-3} coincide events and assert well-formed output.
+The guarantees on \linesref{line:sw-guarantee-4}{line:sw-guarantee-6} define temporal properties of the component.
+\lineref{line:sw-guarantee-4} insists that a start happens with a request or one step after a request.
+The guarantee uses the assumption on \lineref{line:sw-assume-3} and does not check for two requests in a row without a start as the assumption precludes that input behavior.
+It differentiates with the followed-by operator what is required at time 0, the start must coincide with the request, with what is required after time 0, the start must coincides with the request or is a response to a request one step earlier.
+The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
+
+\lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound.
+Together with \lineref{line:sw-guarantee-4} the contract model allows for non-alerting and alerting behavior.
+The final guarantee on \lineref{line:sw-guarantee-6} defines additional behavior for the alert.
+
+The \texttt{Once} operator is true if the enclosed expression has ever been true before the current moment.
+\lineref{line:sw-guarantee-6} ensures that once alerted always alerted because either there has never been an alert, \texttt{\textbf{not} alrt}, or there has been an alert sometime in the past and so it is alerting now, \texttt{\textbf{Once}(alrt) \textbf{and} alrt}.
+These six guarantees define the behavior of the SW component under the three assumptions.

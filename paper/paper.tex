@@ -15,6 +15,8 @@
 \usepackage{flushend}
 \usepackage{hyperref}
 \usepackage[firstpage]{draftwatermark}
+\usepackage[lighttt]{lmodern}
+\usepackage[normalem]{ulem}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -54,10 +56,12 @@
   breakatwhitespace=true,
   tabsize=2,
   linewidth=2\linewidth,
-  morekeywords={eq, bool, guarantee, assume, true, false, pre, not, and, or, property, const}
+  morecomment=[l]{--},
+  escapeinside={*}{*},
+  morekeywords={eq, bool, guarantee, assume, true, false, pre, not, and, or, property, const, Historically, Since, Once, event}
 }
 
-\hyphenation{op-tical net-works semi-conduc-tor}
+\hyphenation{op-tical net-works semi-conduc-tor Cake-ML}
 
 \newcommand{\konst}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\imp}{\Rightarrow}
@@ -69,6 +73,9 @@
 \newcommand{\itelse}[3]{\mbox{$\mathtt{if}\ {#1}\ \mathtt{then}\ {#2}\ \mathtt{else}\ {#3}$}}
 
 \newcommand{\figref}[1]{Fig.~\ref{#1}}
+\newcommand{\secref}[1]{Sec.~\ref{#1}}
+\newcommand{\lineref}[1]{Line~\ref{#1}}
+\newcommand{\linesref}[2]{Lines~\ref{#1}--\ref{#2}}
 
 % Latex trickery for infix div operator, from stackexchange
 
@@ -134,52 +141,92 @@
 
 \section{Introduction} \label{sec:intro}
 \input{intro}
+
 \subsection{SOSYM Journal Details}
-The submission must have 30\% new material over what was published in MODELS 2021.
-There is no page limit.
-The article will go through a full review cycle.
-The due date is \textbf{March} $1^\mathrm{st}$, \textbf{2022}.
+The due date is \textbf{March} $22^\mathrm{nd}$, \textbf{2022}.
+Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if you don't have one), login and go to the "Author"-section, select the link "Start New Submission" under Author Dashboard and select "Special Section Paper" as the paper type, and choose "MODELS 2021 Special Issue". Also, make sure to mention the MODELS 2021 special issue in the cover letter.
 
-\noindent The summary of the discussion regarding how the MODELS publication might be extended is given below.
+\subsection{Revisions}
 \begin{compactitem}
-  \item Expand the case study with the TA6 models
-  \item Expand the case study with an actual full AGREE specification
-  \item AGREE formal semantics summary including the uninterpreted functions
-  \item Strengthen the assurance argument from AGREE to binary by way of CakeML
-  \item Expand related work (add recent work published after 2018). 
-  \item Respond more fully to the reviews from MODELS (see below).
-\end{compactitem}
-
-\noindent The summary of items from the MODELS reviews.
-\begin{compactitem}
-  \item Add recent work published after 2018
   \item Add discussion on the limitation of the approach: what attacks can and cannot be covered, can valid messages be rejected, etc.
-  \item Expand the role of Briefcase in the case study with input examples to provide more proof of the proposed model's effectiveness on the hardened system (e.g., show a malformed line search task, it's filter, and why it works) 
-  \item Clarify research questions answered by the case study and make the figures bigger
-  \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
-  \item Without verifying the correctness of the transformations, can prevention of certain attacks be guaranteed?
 \end{compactitem}
-\noindent Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if you don't have one), login and go to the "Author"-section, select the link "Start New Submission" under Author Dashboard and select "Special Section Paper" as the paper type, and choose "MODELS 2021 Special Issue". Also, make sure to mention the MODELS 2021 special issue in the cover letter.
 
-\section{Simple Example} \label{sec:example}
+\section{Illustrative Example}
+\label{sec:example}
 \input{example}
 
-\section{AGREE Contract Specification} \label{sec:agree}
+\subsection{Revisions}
+\begin{compactitem}
+  \item \sout{Reformat text to put single sentence on each line.}
+  \item Move example to its own repository, archive, and give the DOI and URL for the example.
+  \item \sout{Update AGREE certificates with new model}
+  \item Separate example into separate files for initial design, cyber-components and tests, hardened design, and seL4 process design.
+  \item \sout{Make clear the initial properties for the assumed correct model:}
+    \begin{compactitem}
+      \item \sout{Assume at the system level that a new automation request is not sent unless the prior request, if any, is acknowledged}
+      \item \sout{Assume at all levels input messages are well-formed}
+      \item \sout{Guarantee at all levels that waypoint outputs coincide with air vehicle location messages}
+      \item \sout{Guarantee that a start from the waypoint manager coincides with an automation response}
+      \item \sout{Guarantee for all trusted components that outputs are well-formed}
+    \end{compactitem}
+  \item Add citations to last paragraph for scheduled AGREE and HAMR.
+\end{compactitem}
+
+\section{Assume-Guarantee Reasoning in AGREE}
+\label{sec:agree}
 \input{agree}
 
+\subsection{Revisions}
+\begin{compactitem}
+  \item \sout{Add in the AGREE specification for the system}
+  \item \sout{Add in the AGREE verification conditions (e.g., similar to those in the Scheduled Components NFM submission)}
+\end{compactitem}
+
 \section{AGREE Semantics for Component Synthesis}
+\label{sec:semantics}
 \input{semantics}
 
-\section{Synthesis to CakeML and Proof Sketch} \label{sec:synthesis}
+\subsection{Revisions}
+\begin{compactitem}
+  \item Add in intuitive definition or AGREE leaf-component semantics
+  \item State well-formed theorem
+  \item State correctness theorem or any key theorems to the synthesis proof
+\end{compactitem}
+
+
+\section{Synthesis to CakeML and Proof Sketch}
+\label{sec:synthesis}
 \input{synthesis}
 
-\section{UxAS Case Study} \label{sec:case-study}
+\subsection{Revisions}
+\begin{compactitem}
+  \item State theorem relating the step function to the meaning of the leaf-node semantics
+\end{compactitem}
+
+\section{Case Studies}
+\label{sec:case-study}
 \input{case-study}
 
-\section{Related Work} \label{sec:related-work}
+\subsection{Revisions}
+\begin{compactitem}
+  \item Clarify research questions answered by the case study
+  \item Make the figures bigger 
+  \item Rewrite to focus on synthesized components and the AGREE specifications
+  \item Add an interesting monitor from the TA6 model
+  \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
+\end{compactitem}
+
+\section{Related Work}
+\label{sec:related-work}
 \input{related-work}
 
-\section{Conclusion} \label{sec:conclusion}
+\subsection{Revisions}
+\begin{compactitem}
+  \item Add recent work published after 2018
+\end{compactitem}
+
+\section{Conclusion}
+\label{sec:conclusion}
 \input{conclusion}
 
 \clearpage

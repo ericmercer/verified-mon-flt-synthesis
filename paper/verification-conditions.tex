@@ -1,0 +1,67 @@
+
+\newcommand{\globally}{\ensuremath{\mathbf{G}}}
+\newcommand{\historically}{\ensuremath{\mathbf{H}}}
+\newcommand{\assumes}{\ensuremath{A}}
+\newcommand{\guarantees}{\ensuremath{P}}
+\newcommand{\dispatch}{\ensuremath{\mathit{dispatch}}}
+\newcommand{\complete}{\ensuremath{\mathit{complete}}}
+\newcommand{\same}[1]{\ensuremath{\mathit{same}(#1)}}
+\newcommand{\inputs}{\ensuremath{I}}
+\newcommand{\outputs}{\ensuremath{O}}
+\newcommand{\system}{\ensuremath{S}}
+\newcommand{\components}{\ensuremath{C}}
+\newcommand{\component}{\ensuremath{c}}
+\newcommand{\schedule}{\ensuremath{\phi}}
+\newcommand{\valid}{\ensuremath{\mathit{valid}}}
+\newcommand{\dpred}{\ensuremath{\delta^\phi}}
+\newcommand{\dispred}{\ensuremath{\mathbb{D}^\phi}}
+\newcommand{\compred}{\ensuremath{\mathbb{C}^\phi}}
+\newcommand{\dispredp}{\ensuremath{\mathbb{D}^{\phi\prime}}}
+\newcommand{\compredp}{\ensuremath{\mathbb{C}^{\phi\prime}}}
+
+AGREE generates, and then proves or disproves with model checking, a set of verification conditions to show that a system's component implementation is correct~\cite{agree2013}. 
+The verification conditions are formalized in \emph{past-time linear temporal logic} (PLTL).
+PLTL is a first-order predicate calculus with temporal operators to reason about the truth values of formulas through time.
+Its semantics are defined relative to a finite trace of system states $\pi = s_0, s_1, \ldots$, and a moment of evaluation in the trace, $i$.
+
+The two PLTL operators necessary for the AGREE generated verification conditions are $\globally$ (globally) that looks forward in time along the trace and $\historically$ (historically) that looks backward in time along the trace.
+These are defined as
+\begin{eqnarray*}
+ (\pi, i) \models \globally(f) & \iff & \forall j \ge i, (\pi, j) \models f \\
+(\pi, i) \models \historically(f) & \iff & \forall 0 \le j \le i, (\pi, j) \models f
+\end{eqnarray*}
+The $\models$-operator is read as \emph{satisfies}.
+A trace at a moment in time satisfies $\globally(f)$ if and only if it satisfies $f$ in the current and all future states of $\pi$.
+Globally is invariant from the current moment into the future and historically is invariant from the beginning of the trace to the current moment.
+
+A system is a tuple, $\system = (\inputs, \outputs, \assumes, \guarantees)$, where $\inputs$ is the input set, $\outputs$ is the output set, $\assumes$ is the set of assumptions, and $\guarantees$ is the set of guarantees.
+A system is implemented by a set of components, $\components$, with their various connections.
+A component $\component$ is defined by its own tuple in a manner similar to the system as $(\inputs_\component, \outputs_\component, \assumes_\component, \guarantees_\component)$.
+From the components and connections, $\mathbb{I}_\component$ is defined such that it is the set of components providing input to some component $\component$ in the system, and $\mathbb{O}$ is defined such that it is the set of components that provide the output for the system.
+
+An system is correct if and only if for all $\pi$ and for all $i \ge 0$ the following holds:
+\[
+\begin{array}{lll}
+        & \forall \component \in \components &  
+            \globally(\historically(\assumes \wedge 
+            \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime}) 
+            \implies \assumes_\component) \\
+ \wedge &   & 
+            \globally(\historically(\assumes \wedge 
+            \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime}) 
+            \implies \guarantees)
+\end{array}
+\]
+The first condition verifies the input assumptions on each component under the system assumptions and upstream component guarantees. 
+It checks if the component guarantees and system assumptions are strong enough to imply input assumptions on all immediate downstream components.
+The second condition checks the output guarantees of the system under the system assumptions and component guarantees that provide the output. 
+It checks if the guarantees on components providing primary outputs are strong enough to imply the system guarantees.
+
+AGREE uses $k$-inductive model checking to prove or disprove each generated verification condition.
+If all the verification conditions hold, then the system is said to be \emph{correct}, meaning that the system composition meets input assumptions at each input as well as the guarantees on the system output. A consequence of this result is that $\globally(\historically(\assumes) \implies \guarantees)$ holds for the system contract. As such, the system contract is a sound abstraction of the system implementation.
+
+The expanded property lists in \figref{fig:example-certificate} and \figref{fig:hardened-certificate} are the results from disproving or proving out the above verification conditions.
+The additional unexpanded results at the bottom of the figures prove \emph{self-consistency} in the contracts.
+It is not uncommon to accidentally write contracts that are self-contradicting.
+For example, a contract may guarantee an output be two different values in the same moment of time.
+AGREE generates additional verification conditions that prove each component contract, and the composition of contracts, self-consistent.
