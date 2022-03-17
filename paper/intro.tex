@@ -1,18 +1,33 @@
-In recent years, aerospace stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.  Thus, in addition to being fault-tolerant, safety-critical avionics systems must also be {\em cyber-resilient}. Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-critical systems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate. 
+In recent years, aerospace stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.  Thus, in addition to being fault-tolerant, safety-critical avionics systems must also be {\em cyber-resilient}. Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-critical systems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
 
 Unfortunately, systems engineers are currently given few development tools to help answer even basic questions about potential vulnerabilities and mitigations, and instead rely on process-oriented checklists and guidelines.  Cyber vulnerabilities are often discovered during penetration testing late in the development process; or worse yet, they may be discovered only after the product has been fielded, necessitating extremely expensive and time-consuming remediation. This is not a sustainable development model.
 
 The DARPA Cyber Assured Systems Engineering (CASE) program is targeted at developing tools for design, analysis, and verification that enable systems engineers to {\em design-in} cyber-resiliency for complex cyber-physical systems.\footnote{This work was funded in part by the Defense Advanced Research Projects Agency (DARPA).  The views expressed are those of the authors and do not reflect the official policy or position of DARPA or the U.S. Government.}
-We have developed a Model-Based Systems Engineering (MBSE) environment called {\em BriefCASE} which is based on the Architecture Analysis and Design Language (AADL)~\cite{aadl}.  BriefCASE extends the Open Source AADL Tool Environment (OSATE) to add new design, analysis, and code generation capabilities for building cyber-resilient systems.  
+We have developed a Model-Based Systems Engineering (MBSE) environment called {\em BriefCASE} which is based on the Architecture Analysis and Design Language (AADL)~\cite{aadl}.  BriefCASE extends the Open Source AADL Tool Environment (OSATE) to add new design, analysis, and code generation capabilities for building cyber-resilient systems.
 
-BriefCASE provides access to two analysis tools (GearCASE~\cite{gearcase2020} and DCRYPPS~\cite{dcrypps2019}) that can examine AADL models for potential cyber vulnerabilities and suggest cyber-security requirements to mitigate them.
-A library of architectural transforms guides systems engineers through automated model transformations that modify the architecture to address these requirements, possibly inserting new high-assurance components into the system. 
-Implementations for these new high-assurance components are synthesized from formal specifications using the Semantic Properties for Language and Automata Theory (SPLAT) tool~\cite{slind-hcss2020},~\cite{formal-filter-synth-langsec}.
-Formal verification that the transformed system model satisfies its cyber requirements is accomplished via the Assume Guarantee Reasoning Environment (AGREE)~\cite{agree2013}.
-%The AGREE analysis \emph{assumes} properties on the inputs of a given component of the system, and attempts to formally prove the conjectured \emph{guarantees} of the output. 
-AGREE is a {\em compositional assume-guarantee} style model checker for AADL models that attempts to prove properties about one layer of the architecture using
-properties allocated to its subcomponents.
-Cyber-resilient code implementing the verified model is then automatically generated using the High Assurance Modeling and Rapid Engineering for Embedded Systems (HAMR) toolkit~\cite{hamr}.  If desired, this code can be targeted to the formally verified seL4 secure microkernel~\cite{sel4-2009}.
+BriefCASE incorporates model-level cyber-analysis tools (presently
+GearCASE~\cite{gearcase2020} and DCRYPPS~\cite{dcrypps2019}) which can
+examine AADL models for potential vulnerabilities and suggest
+cyber-security requirements to mitigate them.  A library of
+architectural transforms guides the system engineer through automated
+model transformations that modify the architecture to address these
+requirements, possibly inserting new high-assurance components into
+the system.  Implementations for the new components are synthesized
+from formal specifications using
+SPLAT~\cite{slind-hcss2020},~\cite{formal-filter-synth-langsec}
+(Semantic Properties for Language and Automata Theory).  Formal
+verification that the transformed system model meets its requirements
+is accomplished via AGREE~\cite{agree2013} (Assume Guarantee Reasoning
+Environment).
+%The AGREE analysis \emph{assumes} properties on the inputs of a given component of the system, and attempts to formally prove the conjectured \emph{guarantees} of the output.
+AGREE is a {\em compositional assume-guarantee} style model checker
+for AADL models that attempts to prove properties about one layer of
+an architecture using properties allocated to its subcomponents.
+Cyber-resilient code implementing the verified model is then
+automatically generated using the High Assurance Modeling and Rapid
+Engineering for Embedded Systems (HAMR) toolkit~\cite{hamr}.  If
+desired, this code can be targeted to the formally verified seL4
+secure microkernel~\cite{sel4-2009}.
 
 %% DSH  This paragraph seems mostly duplicative of the paragraph above; attempted to merge the two.
 %A novel aspect of the BriefCASE approach is the ability to automatically transform the model to insert high-assurance %components to satisfy requirements added to mitigate cyber vulnerabilities. In this work, the behavior of the system is %modeled by contracts on components expressed in the AGREE modeling language. These contracts are modified as a result %of the cyber-vulnerability analysis with the new requirements for mitigation.  The requirements assume properties on the %input and guarantee properties of the output that reflect a hardened system. In the absence of any transformation to %implement such requirements, AGREE fails to prove the system meets these new requirements.
@@ -24,6 +39,6 @@ Another novel aspect of the approach is the synthesis of the AGREE specification
 CASE was scoped to address the more common cyber-vulnerabilities that programmers introduce, such as overflow, lack of input validation, supply-chain issues, and identity verification; but not other cyber-vulnerabilities such as side-channel attacks and denial of service.
 In this program, we have not invented a new type of filter or monitor in terms of capability, instead our contribution is in the automated synthesis of these components from a formal specification, and a means to show that the synthesis is correct.
 
-The approach is motivated, and illustrated, in a simple example in Section~\ref{sec:example}. Contract specification in the AGREE language is presented in Section~\ref{sec:agree}, followed by a description of the synthesis pathway in Section~\ref{sec:synthesis}. A case study applying these transformations to an Unmanned Aerial Vehicle (UAV) system that uses the Air Force Research Laboratory's OpenUxAS services for route planning is presented in Section~\ref{sec:case-study}. Here the transforms add filters to guard against malformed input and monitors to guard against ground station spoofing and malicious flight plans from OpenUxAS. The case study system is significantly more complex than the simple example and shows the viability of the modeling approach to a full-scale industrial design. 
+The approach is motivated, and illustrated, in a simple example in Section~\ref{sec:example}. Contract specification in the AGREE language is presented in Section~\ref{sec:agree}, followed by a description of the synthesis pathway in Section~\ref{sec:synthesis}. A case study applying these transformations to an Unmanned Aerial Vehicle (UAV) system that uses the Air Force Research Laboratory's OpenUxAS services for route planning is presented in Section~\ref{sec:case-study}. Here the transforms add filters to guard against malformed input and monitors to guard against ground station spoofing and malicious flight plans from OpenUxAS. The case study system is significantly more complex than the simple example and shows the viability of the modeling approach to a full-scale industrial design.
 
-The BriefCASE tools are open source and publicly available \cite{fmide}, as is the motivating example \cite{repo}, and the full UxAS model with its deployment in seL4 \cite{phase2, camkes}.  Videos demonstrating the use of the BriefCASE tools to build the UAV example presented in Section~\ref{sec:case-study} are also available \cite{case}. 
+The BriefCASE tools are open source and publicly available \cite{fmide}, as is the motivating example \cite{repo}, and the full UxAS model with its deployment in seL4 \cite{phase2, camkes}.  Videos demonstrating the use of the BriefCASE tools to build the UAV example presented in Section~\ref{sec:case-study} are also available \cite{case}.
