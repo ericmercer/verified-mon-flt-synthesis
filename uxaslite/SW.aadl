@@ -76,27 +76,27 @@ renames AGREE_PLTL::all;
       ------------------------------
       -- Component Implementation --
       ------------------------------
---     eq isPending : bool = Since(not rsp, req and not rsp);
---     eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
---     
---     eq policy : bool = (rsp => req) ->
---                        (    (isPending => latency < MAX_LATENCY)   
---                         and (rsp => (req or pre(isPending))));
---     eq alert : bool = (not policy) -> 
---                       ((is_latched and pre(alert)) or not policy);
---     	                        
---     guarantee "Alert port tracks alert variable" :
---       event(Alert) = alert;
---     guarantee "Output if not alerted" :
---       if (not(alert) and rsp) then
---         event(Output) and (Output = Response)
---       else
---         not (event(Output));
+      eq isPending : bool = Since(not rsp, req and not rsp);
+      eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
+     
+      eq policy : bool = (rsp => req) ->
+                         (    (isPending => latency < MAX_LATENCY)   
+                          and (rsp => (req or pre(isPending))));
+      eq alert : bool = (not policy) -> 
+                        ((is_latched and pre(alert)) or not policy);
+     	                        
+      guarantee "Alert port tracks alert variable" :
+        event(Alert) = alert;
+      guarantee "Output if not alerted" :
+        if (not(alert) and rsp) then
+          event(Output) and (Output = Response)
+        else
+          not (event(Output));
       
       --------------------------------------
       -- Properties of Componont Behavior --
       --------------------------------------
-     guarantee "Output the response when not alerting" :
+      guarantee "Output the response when not alerting" :
       	if (not event(Alert) and event(Response)) then 
       	  event(Output) and Output = Response
       	else 
@@ -108,7 +108,7 @@ renames AGREE_PLTL::all;
          or pre(event(Alert)));
          
       guarantee "Alert late response, orphaned response, or pre-state alert" :
-      	event(Alert) <=> isAlert;
+      	event(Alert) = isAlert;
     **};
   end CASE_Monitor_Thr;
 

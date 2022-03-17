@@ -89,7 +89,7 @@ thread Monitor_Thr
          or pre(event(Alert)));
          
       guarantee "Alert late response, orphaned response, or pre-state alert" :
-      	event(Alert) <=> isAlert;
+      	event(Alert) = isAlert;
     **};
     
   end Monitor_Thr;
