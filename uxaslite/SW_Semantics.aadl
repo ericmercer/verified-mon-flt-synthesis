@@ -36,7 +36,7 @@ public
       	(rsp and not req) => event(Alert) ->
       	(rsp and (not req) and (not pre(req))) => event(Alert);
       guarantee "Once alerted always alerted" :
-        true -> pre(event(Alert)) => event(Alert);
+        event(Alert) => Once(event(Alert));
     **};
     
   end CASE_Monitor_Thr;
