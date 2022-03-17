@@ -25,9 +25,9 @@ guarantee "Starts within one cycle of requests if not alerting" : *\label{line:s
   (strt => ((not alrt) and req)) -> 
   (strt => ((not alrt) and (req or pre(req))));
 guarantee "Alert if not started within one cycle of requests" : *\label{line:sw-guarantee-5}*
-    true -> ((pre(req and not strt) and not strt) => alrt);
+  true -> ((pre(req and not strt) and not strt) => alrt);
 guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
-  not alrt or (Once(alrt) and alrt);
+  true -> (pre(alrt) => alrt);
 \end{lstlisting}
 \end{lrbox}
 
@@ -89,8 +89,5 @@ The guarantee also does not force the start to always happen, it only says that 
 
 \lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound.
 Together with \lineref{line:sw-guarantee-4} the contract model allows for non-alerting and alerting behavior.
-The final guarantee on \lineref{line:sw-guarantee-6} defines additional behavior for the alert.
-
-The \texttt{Once} operator is true if the enclosed expression has ever been true before the current moment.
-\lineref{line:sw-guarantee-6} ensures that once alerted always alerted because either there has never been an alert, \texttt{\textbf{not} alrt}, or there has been an alert sometime in the past and so it is alerting now, \texttt{\textbf{Once}(alrt) \textbf{and} alrt}.
+\lineref{line:sw-guarantee-6} ensures that once alerted always alerted since an alert in the pre-state requires an alert in the post-state., \texttt{\textbf{Once}(alrt) \textbf{and} alrt}.
 These six guarantees define the behavior of the SW component under the three assumptions.
