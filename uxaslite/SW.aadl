@@ -64,9 +64,6 @@ renames AGREE_PLTL::all;
       CASE_Properties::Component_Spec => ("Alert", "Output");
       CASE_Properties::Monitor_Latched => true;
     annex agree {**
-      const is_latched : bool = true;
-      const MAX_LATENCY : int = 1;
-      
       eq rsp : bool = event(Response);
       eq req : bool = event(Request);
       
@@ -76,6 +73,9 @@ renames AGREE_PLTL::all;
       ------------------------------
       -- Component Implementation --
       ------------------------------
+      const is_latched : bool = true;
+      const MAX_LATENCY : int = 1;
+      
       eq isPending : bool = Since(not rsp, req and not rsp);
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
      
@@ -366,7 +366,7 @@ renames AGREE_PLTL::all;
       guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
-        alrt => Once(alrt);
+        Once(alrt) => alrt;
     **};
   end SW;
     
@@ -478,7 +478,7 @@ renames AGREE_PLTL::all;
       guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
-        alrt => Once(alrt);
+        Once(alrt) => alrt;
     **};
   end SWSystem;
 

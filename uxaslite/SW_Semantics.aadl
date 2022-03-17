@@ -36,7 +36,7 @@ public
       	(rsp and not req) => event(Alert) ->
       	(rsp and (not req) and (not pre(req))) => event(Alert);
       guarantee "Once alerted always alerted" :
-        event(Alert) => Once(event(Alert));
+        Once(event(Alert)) => event(Alert);
     **};
     
   end CASE_Monitor_Thr;
@@ -68,9 +68,6 @@ thread Monitor_Thr
       Alert: out event port;
       Output: out event data port SW::AutomationResponse.Impl;
     annex agree {**
-      const is_latched : bool = true;
-      const MAX_LATENCY : int = 1;
-      
       eq rsp : bool = event(Response);
       eq req : bool = event(Request);
       
@@ -96,6 +93,9 @@ thread Monitor_Thr
 
   thread implementation Monitor_Thr.Impl
   	annex agree {**
+      const is_latched : bool = true;
+      const MAX_LATENCY : int = 1;
+      
       eq isPending : bool = Since(not rsp, req and not rsp);
       eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);
       

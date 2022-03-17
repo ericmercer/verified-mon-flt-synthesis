@@ -50,12 +50,12 @@
                         ((is_latched and pre(alert)) or not policy);
                           
     guarantee "Alert port tracks alert variable" :
-    event(Alert) = alert;
+      event(Alert) = alert;
     guarantee "Output if not alerted" :
-    if (not(alert) and rsp) then
-        event(Output) and (Output = Response)
-    else
-        not (event(Output));    
+      if (not(alert) and rsp) then
+          event(Output) and (Output = Response)
+      else
+          not (event(Output));    
   \end{lstlisting}
 \end{lrbox}
 
