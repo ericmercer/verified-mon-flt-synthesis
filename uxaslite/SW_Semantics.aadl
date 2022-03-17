@@ -86,7 +86,7 @@ thread Monitor_Thr
       eq isAlert : bool = (rsp and not req) ->
         (   (pre(req and not rsp) and not rsp)
          or (rsp and (not req) and pre(not req or (req and rsp)))
-         or pre(event(Alert)));
+         or Once(event(Alert)));
          
       guarantee "Alert late response, orphaned response, or pre-state alert" :
       	event(Alert) = isAlert;
