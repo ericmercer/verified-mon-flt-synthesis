@@ -13,14 +13,14 @@
   \begin{lstlisting}[style=agree,numbers=left]
     -- start user definitions
     eq policy : bool = 
-    WELL_FORMED_AUTOMATION_RESPONSE(Input);
+      WELL_FORMED_AUTOMATION_RESPONSE(Input);
     -- stop user definitions
 
-    guarantee Filter_Output
-    "Filter output is well-formed" :
-    if event(Input) and policy then 
+    guarantee "Filter output is well-formed" :
+      if event(Input) and policy then 
         event(Output) and Output = Input
-    else not event(Output);
+      else 
+        not event(Output);
   \end{lstlisting}
 \end{lrbox}
 
