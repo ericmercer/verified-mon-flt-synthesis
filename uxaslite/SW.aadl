@@ -105,7 +105,7 @@ renames AGREE_PLTL::all;
       eq isAlert : bool = (rsp and not req) ->
         (   (pre(req and not rsp) and not rsp)
          or (rsp and (not req) and pre(not req or (req and rsp)))
-         or pre(event(Alert)));
+         or Once(event(Alert)));
          
       guarantee "Alert late response, orphaned response, or pre-state alert" :
       	event(Alert) = isAlert;
@@ -366,7 +366,7 @@ renames AGREE_PLTL::all;
       guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
-        true -> (pre(alrt) => alrt);
+        alrt => Once(alrt);
     **};
   end SW;
     
@@ -478,7 +478,7 @@ renames AGREE_PLTL::all;
       guarantee "Alert if not started within one cycle of requests" :
        	true -> ((pre(req and not strt) and not strt) => alrt);
       guarantee "Once alerted always alerted" :
-        true -> (pre(alrt) => alrt);
+        alrt => Once(alrt);
     **};
   end SWSystem;
 
