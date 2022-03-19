@@ -9,7 +9,7 @@
 \usepackage{comment}
 \usepackage{paralist}
 \usepackage{graphicx}
-\graphicspath{{./figs/}} 
+\graphicspath{{./figs/}}
 \usepackage{listings}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{flushend}
@@ -65,11 +65,10 @@
 
 \newcommand{\konst}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\imp}{\Rightarrow}
-\newcommand{\lval}{\ensuremath{\mathit{lval}}}
 \newcommand{\set}[1]{\ensuremath{\{ {#1} \}}}
+\newcommand{\sem}[1]{\ensuremath{[\![ #1 ]\!]}}
 \newcommand{\kstar}[1]{\ensuremath{{#1}^{*}}}
 \newcommand{\Lang}[1]{\ensuremath{{\mathcal L}({#1})}}
-\newcommand{\LangTheta}[1]{\ensuremath{{\mathcal L}_{\theta}({#1})}}
 \newcommand{\itelse}[3]{\mbox{$\mathtt{if}\ {#1}\ \mathtt{then}\ {#2}\ \mathtt{else}\ {#3}$}}
 
 \newcommand{\figref}[1]{Fig.~\ref{#1}}
@@ -112,7 +111,7 @@
 }
 
 \author{
-  Eric Mercer\inst{1}    \and 
+  Eric Mercer\inst{1}    \and
   Konrad Slind\inst{2}   \and
   Isaac Amundson\inst{2} \and
   Darren Cofer\inst{2}   \and
@@ -123,10 +122,10 @@
 \institute{
   Brigham Young University        \\
   Provo, Utah                     \and
-  Applied Research and Technology \\ 
+  Applied Research and Technology \\
   Collins Aerospace               \\
   Minneapolis, Minnesota          \and
-  Applied Research and Technology \\ 
+  Applied Research and Technology \\
   Collins Aerospace               \\
   Cedar Rapids, Iowa
 }
@@ -210,7 +209,7 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 \subsection{Revisions}
 \begin{compactitem}
   \item Clarify research questions answered by the case study
-  \item Make the figures bigger 
+  \item Make the figures bigger
   \item Rewrite to focus on synthesized components and the AGREE specifications
   \item Add an interesting monitor from the TA6 model
   \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
@@ -235,11 +234,9 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 
 % \appendix
 % \section{Contiguity Types}
-% \input{contig} 
+% \input{contig}
 
 % \section{System Model and Semantics}
 % \input{system}
 
 \end{document}
-
-

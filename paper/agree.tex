@@ -1,11 +1,17 @@
-This section formalizes AGREE's assume-guarantee reasoning by defining the set of verification conditions that AGREE must check.
-The verification conditions succinctly summarize what in means when AGREE proves that a system implementation satisfies it specification.
-These conditions are useful in understanding how the semantics in synthesis differ from those in the assume-guarantee reasoning in \secref{sec:semantics}.
+This section gives an overview of AGREE's assume-guarantee reasoning
+system, abstractly defining the verification conditions that AGREE
+checks in order to establish overall system correctness at the model
+level.  The discussion then becomes more concrete, showing how the
+AGREE contract specification language is used to specify the
+cyber-hardened system of \figref{fig:hardened}. It explains the the
+top-level specification of the example system, then shifts to the
+specifications for the filter and the monitor.  These two
+specifications are those that are synthesized to equivalent CakeML by
+SPLAT.
 
-This section then introduces the AGREE contract specification language through the cyber-hardened system of \figref{fig:hardened}.
-It details the specification of that top-level system interface.
-It then discusses the specifications for the filter and the monitor.
-These two specifications are those that are synthesized to equivalent CakeML by SPLAT.
+%% These conditions are useful in understanding how the semantics in
+%% synthesis differ from those in the assume-guarantee reasoning
+%% in \secref{sec:semantics}.
 
 \subsection{Verification Conditions}
 \input{verification-conditions}
