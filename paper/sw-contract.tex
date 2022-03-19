@@ -3,18 +3,18 @@
 \begin{lstlisting}[style=agree,numbers=left]
 eq req : bool = event(AutomationRequest);*\label{line:sw-event-def-start}*
 eq avl : bool = event(AirVehicleLocation);
-eq wp : bool = event(Waypoint);
+eq wp  : bool = event(Waypoint);
 eq strt: bool = event(Start);
-eq alrt : bool = event(Alert);*\label{line:sw-event-def-end}*
+eq alrt: bool = event(Alert);*\label{line:sw-event-def-end}*
 
 assume "Automation requests are well-formed" : *\label{line:sw-assume-1}*
   req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
 assume "Air vehicle locations are well-formed" : *\label{line:sw-assume-2}*
-  avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);    
+  avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
 assume "One automation request in flight at a time" : *\label{line:sw-assume-3}*
-  true -> 
+  true ->
   (req => pre(Historically(not req) or Since(not req, strt)));
-      
+
 guarantee "Waypoints coincide with air vehicle locations": *\label{line:sw-guarantee-1}*
   wp => avl;
 guarantee "Starts include a new waypoint" : *\label{line:sw-guarantee-2}*
@@ -22,7 +22,7 @@ guarantee "Starts include a new waypoint" : *\label{line:sw-guarantee-2}*
 guarantee "Waypoints are well-formed" :  *\label{line:sw-guarantee-3}*
   wp => WELL_FORMED_WAYPOINT(Waypoint);
 guarantee "Starts within one cycle of requests if not alerting" : *\label{line:sw-guarantee-4}*
-  (strt => ((not alrt) and req)) -> 
+  (strt => ((not alrt) and req)) ->
   (strt => ((not alrt) and (req or pre(req))));
 guarantee "Alert if not started within one cycle of requests" : *\label{line:sw-guarantee-5}*
   true -> ((pre(req and not strt) and not strt) => alrt);
@@ -67,16 +67,16 @@ When writing assumptions and guarantees, it is important to differentiate pre-st
 
 The \texttt{pre} operator returns the previous value of the enclosed expression by looking back one step in time on the expression's stream.
 In general, assumptions regarding state should be evaluated in the pre-state of the component with the current inputs, and guarantees regarding state should be evaluated on the post-state of the component given the current inputs.
-Guarantees should use the \texttt{pre} operator anytime they need to reason about the current state relative to the previous state. 
+Guarantees should use the \texttt{pre} operator anytime they need to reason about the current state relative to the previous state.
 
 The assumption on \lineref{line:sw-assume-3} uses a \emph{followed-by} operator, \texttt{->}, to \emph{guard} the \texttt{pre} operator at time 0.
-A followed-by expression defines what happens at the first instance of the stream, time 0, and then what follows after. 
+A followed-by expression defines what happens at the first instance of the stream, time 0, and then what follows after.
 Here the assumption is \texttt{true} at time 0 and then it is the truth value of the implication in all future instances.
 The followed-by guards the \texttt{pre} because expressions are undefined before time 0 and the followed-by prevents the \texttt{pre} from being evaluated before time 1.
 So after time 0, the assumption depends on the presence of a request and the pre-state of the component.
 
 The stream semantics in AGREE mean that it is possible to use PLTL operators that look back in time.
-The \texttt{Historically} operator is the same as $\historically$ defined previously; it is true if the enclosed expression has been true in all moments up to the present one. 
+The \texttt{Historically} operator is the same as $\historically$ defined previously; it is true if the enclosed expression has been true in all moments up to the present one.
 The \texttt{Since} operator is true if the first expression has been true in all moments up to the present one since the second expression most recently became true.
 The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}--\emph{not request since start}.
 

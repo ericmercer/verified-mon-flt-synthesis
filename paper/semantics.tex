@@ -27,7 +27,7 @@ b & ::= & v \mid c \mid a \mid \neg b
 
 There is a conditional, $\itelse{b}{(-)}{(-)}$, for both terms and
 formulas. There are also temporal operators $\konst{pre}(-)$, delay
-$(-) \to (-)$, and $\konst{Historically}(-)$.
+$(-) \to (-)$, and $\konst{Hist}(-)$.
 
 The semantics of terms and formulas is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
@@ -50,3 +50,34 @@ formulas, omitting temporal operators, is standard.
    & \cdots & \\
 \end{array}
 \]
+
+The temporal operators deal with time in more significant ways:
+\[
+\begin{array}{rcl}
+\sem{\konst{pre}(e)}_t & = & \sem{e}_{t-1}, \mathrm{when}\ t > 0 \\
+\sem{e_1 \to e_2}_t & = & \itelse{t=0}{\sem{e_1}_0}{\sem{e_2}_t} \\
+\sem{\konst{Hist}(b)}_t & = & \forall n \leq t.\; \sem{b}_n
+\end{array}
+\]
+
+\subsubsection{Extracting computation from specification}
+
+A subtle aspect of our approach is that AGREE does not explicitly
+present the computation that a component performs. This is entirely
+appropriate since AGREE is intended to reason about components solely
+at the specification level. However, specifications do support state
+variables, and updates to them; consequently---for inserted leaf-level
+security components---SPLAT interprets sequences of variable
+assignments as specifying the computation of the component.
+
+\begin{itemize}
+\item \textit{Point to discussion on output code guarantees}
+
+\item \textit{code contract representation}
+
+\item \textit{strmStep}
+
+\item \textit{Contract semantics}
+
+\item \textit{How example looks}
+\end{itemize}
