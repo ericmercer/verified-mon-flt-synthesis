@@ -1,17 +1,40 @@
-This section gives an overview of AGREE's assume-guarantee reasoning
-system, abstractly defining the verification conditions that AGREE
-checks in order to establish overall system correctness at the model
-level.  The discussion then becomes more concrete, showing how the
-AGREE contract specification language is used to specify the
-cyber-hardened system of \figref{fig:hardened}. It explains the the
-top-level specification of the example system, then shifts to the
-specifications for the filter and the monitor.  These two
-specifications are those that are synthesized to equivalent CakeML by
-SPLAT.
+This section gives an abstract overview of AGREE's compositional
+reasoning system, defining the verification conditions that AGREE
+checks in order to modularly establish overall system correctness at
+the model level.  The discussion then becomes more concrete,
+showing---by example---how the AGREE contract language is used to
+specify the cyber-hardened system of \figref{fig:hardened}.  After the
+system-level contract, discussion shifts to the filter and monitor
+component specifications, which are structured to support code
+generation.
 
 %% These conditions are useful in understanding how the semantics in
 %% synthesis differ from those in the assume-guarantee reasoning
 %% in \secref{sec:semantics}.
+
+\subsection{Model of computation}
+
+The AGREE specification language is based on stream concepts, and
+operators, from the Lustre language \cite{10.1145/41625.41641}.  Thus
+the setting is synchronous dataflow where the inputs, outputs, and
+expressions are data streams that comply with the input assumptions.
+Contracts are evaluated in dependency order with inputs being
+propagated to outputs through all contracts until they stabilize; as
+such, the contracts, and thereby the top-level model, must be
+acyclic. (An apparent syntactic cycle, where a component is linked
+back to itself, may be broken temporally by inserting delay
+elements.) \footnote{KLS: some undefined terms here: evaluation of
+contracts, stabilization, synchronous step.}
+
+
+Once the contracts have stabilized, the model takes a synchronous step
+to the next input data in the input stream(s).  The semantics do not
+model computation or communication delay.\footnote{KLS: how does a
+delay element (mentioned above) work then?}  The output of one
+contract is seen at the input of any downstream contract in the same
+step of the input data stream.
+\footnote{KLS: This subsection should give a helpful abstract description of what AG specifications are about, \ie, constraints on IO stream. Needs a rewrite, however.}
+
 
 \subsection{Verification conditions}
 \input{verification-conditions}

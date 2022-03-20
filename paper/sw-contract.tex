@@ -39,18 +39,12 @@ guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
   \label{fig:sw}
 \end{figure}
 
-The AGREE specification language uses stream concepts, and operators, from the Lustre language \cite{10.1145/41625.41641}.
-As with Lustre, the semantics are synchronous dataflow where the inputs, outputs, and expressions are data streams that comply with the input assumptions.
-Contracts are evaluated in dependency order with inputs being propagated to outputs through all contracts until they stabilize; as such, the contracts, and thereby the top-level model, must be acyclic.\footnote{An apparent syntactic cycle, where a component is linked back to itself, may be broken temporally by inserting delay elements.}
-
-Once the contracts have stabilized, the model takes a synchronous step to the next input data in the stream.
-The semantics do not model computation or communication delay.
-The output of one contract is seen at the input of any downstream contract in the same step of the input data stream.
-The language is best introduced through example.
-
-The AGREE specification for the SW component in the example of Section~\ref{sec:example} is given in \figref{fig:sw}.
-The specification uses \texttt{eq} statements to define variables local to the contract specification.
-For example, \lineref{line:sw-event-def-start} defines the \texttt{req} variable to be equivalent to the \texttt{event} expression.
+The AGREE specification for the SW component in the example of
+Section~\ref{sec:example} is given in \figref{fig:sw}.  The
+specification uses \texttt{eq} statements to define variables local to
+the contract specification.  For
+example, \lineref{line:sw-event-def-start} defines the \texttt{req}
+variable to be equivalent to the \texttt{event} expression.
 
 All the named ports in the corresponding AADL component are in the scope of the specification, and there are additional implicit boolean \emph{event} inputs (or outputs) associated with event ports.
 An \texttt{event} expression refers to that implicit input (or output) boolean value and is true when data is present on the named port and false otherwise.

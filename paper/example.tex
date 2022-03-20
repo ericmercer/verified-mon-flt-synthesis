@@ -29,7 +29,7 @@ The waypoint manager is a repurposed legacy component that cannot be modified.
 
 The expected behavior of the SW system, and the components implementing the system, are modeled with AGREE contract specifications.
 The contracts constrain input with assumptions and state properties of output with guarantees.
-AGREE performs model checking on this assume-guarantee system to hierarchically prove that the composite system obeys all contract obligations under all possible finite input streams. 
+AGREE performs model checking on this assume-guarantee system to hierarchically prove that the composite system obeys all contract obligations under all possible finite input streams.
 The AGREE analysis, contract language, and the contracts for this example system are discussed in greater detail in \secref{sec:agree}.
 
 The initial AGREE contracts for the system in \figref{fig:example}, and its implementing components, assume and guarantee the absence of any malicious, or unspecified, component behavior.
@@ -78,23 +78,47 @@ These missing output guarantees from the WM lead to the rest of the failures in 
 The system implementation is cyber-hardened using BriefCASE, which automatically transforms the model by inserting high-assurance components in the form of a filter and a monitor as shown in \figref{fig:hardened}.
 A filter enforces an invariant over each datum in the data stream by not forwarding input to its output if that input violates the filter invariant.
 The auto-generated AGREE specification states that only well-formed inputs are passed to the output.
-The system developer must provide this filtering policy, but it is usually based on the existing assumptions made by downstream components that consume the filter output. 
+The system developer must provide this filtering policy, but it is usually based on the existing assumptions made by downstream components that consume the filter output.
 
 A monitor captures a relation on input data over time and is thus able to reason about temporal properties of that input.
 A monitor raises an alert if the specified temporal properties are ever violated.
 The AGREE specification for the monitor in our example states that an automation response can only be generated in conjunction with an automation request; and further, that response must come with the request or in the next step after the request.
-As with the filter, the system designer provides the policy, and that policy is typically based on existing AGREE specifications in the SW system.
+As with the filter, the system designer provides the policy, and that policy is typically based on existing AADL/AGREE definitions in the SW system.
 
-The AGREE analysis of the cyber-hardened implementation with the auto-generated high-assurance components is shown in \figref{fig:hardened-certificate}.
-Here AGREE provides a proof certificate that the high-assurance components guarantee the correct behavior of the SW implementation in the presence of the untrusted AI route planner.
-Having passed AGREE verification, the high-assurance components are ready to be synthesized.
+The AGREE analysis of the cyber-hardened implementation is shown in
+\figref{fig:hardened-certificate}. AGREE has generated hihg-level
+evidence justifying the claim that the high-assurance components
+guarantee the correct behavior of the SW implementation in the
+presence of the untrusted AI route planner.  Having passed AGREE
+verification, the high-assurance components are ready to be
+synthesized.
 
-The high-assurance components are automatically synthesized by SPLAT from the AGREE specifications to equivalent models in the CakeML language.
-The synthesis includes a proof that it captures the meaning of the AGREE specification in CakeML.
-In other words, for any set of input streams that meet the component's contract assumptions, the output streams produced from the synthesized CakeML code exactly match those defined by the high-assurance component's guarantees. 
-From here, CakeML itself provides a complete verified compilation to binaries for several different platforms meaning that the resulting binaries exactly preserve the meaning of the original CakeML code \cite{cakeml}. 
+High-assurance components are automatically synthesized by SPLAT from
+the AGREE specifications to equivalent programs in the CakeML
+language.  The synthesis toolchain generates a proof that equates the
+meaning of the AGREE specification to the behavior of the CakeML
+program.  In other words, for any set of input streams that meet the
+component's contract assumptions, the output streams produced from the
+synthesized CakeML code exactly match those defined by the
+high-assurance component's guarantees.  CakeML provides verified
+compilation to binaries for several different platforms, meaning that
+the resulting binaries exactly preserve the meaning of the original
+CakeML code \cite{cakeml}.
 
-Preserving the input to output relationship of streams between the AGREE contracts and CakeML lifts the AGREE contract verification results to the actual deployed system.
-If the contract model verification succeeds, then the meaning of those results hold for the deployed system.
-These results, however, are only valid under additional assumptions on the deployed system: contracts for non-synthesized components accurately model their deployed counterparts, an appropriate schedule exists to sequence component execution following the dependent data-flow in the design, and the communication fabric stitching components together works in harmony with the schedule.
-Support and automation for these aspects of the design process are discussed in other works.
+Preserving the input to output relationship of streams between the
+AGREE contracts and CakeML lifts the AGREE contract verification
+results to the actual deployed system.  If the contract model
+verification succeeds, then the meaning of those results hold for the
+deployed system.  These results, however, are only valid under
+additional assumptions on the deployed system:
+\begin{itemize}
+\item contracts for non-synthesized components accurately model their deployed
+counterparts;
+\item an appropriate schedule exists to sequence component
+  execution following the dependent data-flow in the design; and
+\item the communication fabric stitching components together works in harmony
+  with the schedule.
+\end{itemize}
+
+Support and automation for these aspects of the design process are
+discussed in other works.\footnote{KLS:need cites to HAMR, seL4, and Adventium work}

@@ -60,24 +60,19 @@ The temporal operators deal with time in more significant ways:
 \end{array}
 \]
 
-\subsubsection{Extracting computation from specification}
-
-A subtle aspect of our approach is that AGREE does not explicitly
-present the computation that a component performs. This is entirely
-appropriate since AGREE is intended to reason about components solely
-at the specification level. However, specifications do support state
-variables, and updates to them; consequently---for inserted leaf-level
-security components---SPLAT interprets sequences of variable
-assignments as specifying the computation of the component.
+The temporal operators can be used to construct higher-level operators
+from PTLTL, such as \konst{Once} and \konst{Since}; they are also used
+to manipulate state.
 
 \begin{itemize}
-\item \textit{Point to discussion on output code guarantees}
+\item \textit{strmStep}.
 
-\item \textit{code contract representation}
+Given a code contract an implementation will execute the equations in
+order, and then compute the values on outputs.
 
-\item \textit{strmStep}
 
 \item \textit{Contract semantics}
 
 \item \textit{How example looks}
+
 \end{itemize}

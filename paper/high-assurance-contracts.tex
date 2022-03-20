@@ -66,7 +66,7 @@
       \scalebox{0.62}{\usebox{\flt}} \\
     \end{tabular}
   \end{center}
-  \caption{Contract specification for high-assurance filter.}
+  \caption{Code contract specification for high-assurance filter.}
   \label{fig:filter}
 \end{figure}
 
@@ -76,21 +76,18 @@
     \scalebox{0.62}{\usebox{\mntr}} \\
     \end{tabular}
   \end{center}
-  \caption{Contract specification for high-assurance monitor.}
+  \caption{Code contract specification for high-assurance monitor.}
   \label{fig:monitor}
 \end{figure}
 
-As noted previously, the system with the untrusted AI does not pass
-AGREE verification.  Transformations carried out in the BriefCASE
-interface cyber-harden the system against malicious AI behavior by
-inserting a high-assurance filter and monitor between the AI and the
-WM as shown in
-\figref{fig:hardened}.  (In our context \emph{high-assurance} means
-that the behaviors of the components are verified to meet their
-contracts.)  In the example, the inserted filter protects the WM from
-malformed data and the monitor protects the WM from (possibly malicious)
-spontaneous or delayed responses.  These high-assurance components are
-added, one at a time, by
+
+As previously discussed, transformations carried out in the BriefCASE
+interface have created a cyber-hardened system, protecting against
+malicious AI behavior, by inserting a high-assurance filter and
+monitor between the AI and the WM (see \figref{fig:hardened}). The
+filter protects the WM from malformed data and the monitor protects
+the WM from (possibly malicious) spontaneous or delayed responses.
+These components were added, one at a time, by
 \begin{itemize}
   \item selecting the connection in the model where the
     component is to appear,
@@ -109,28 +106,61 @@ added, one at a time, by
 %% the transformation.
 
 BriefCASE creates all the needed AADL for the new high-assurance
-component and its connections in the system implementation as part of
-the transformation.  It also creates a default AGREE specification
-that defines everything about the component behavior but the policy
-itself, unless that is provided in the dialogue.  The resulting AGREE
-specification from the transformation for the filter is shown in
-\figref{fig:filter}.  The single guarantee completely defines the
-filter output under any input according to the truth value of the
-policy.  Such a strong guarantee is needed for synthesis (a weaker
-version suffices for AGREE analysis).
+component, and its connections in the system implementation, as part
+of the transformation.  It also creates a default AGREE specification
+that defines everything about the component behavior, leaving only the
+component behavior (policy) to be specified.
 
-The AGREE specification for the monitor is shown in
-\figref{fig:monitor}. As can be seen, it is considerably more complex
-than the filter specification.  BriefCASE generates everything but the
-statements in \linesref{line:mon-assume}{line:mon-policy}.  As with
+\subsubsection{Code contracts}
+
+Generally, AGREE specifications \emph{do not} describe the computation
+that a component performs. This is entirely by design: AGREE is
+intended to reason about component behavior solely at the
+specification level. However, the syntax of AGREE specifications
+provides enough expressiveness to support the notion of an
+AGREE \emph{code contract}: a component contract from which SPLAT can
+extract an implementation.
+
+\begin{definition}[Output guarantee]
+An \emph{output guarantee} is a stylized guarantee that fully
+specifies the data written to an output port. There are three
+possibilities according to whether the output port $p$ is
+a \konst{data} port, an \konst{event} port, or an \konst{event data}
+port:
+\[
+\begin{array}{ll}
+\konst{data}: &  p = \mathit{e} \\
+\konst{event}: &  \konst{event} (p) = \mathit{b} \\
+\konst{event data}: & \itelse{b}{\konst{event} (p) \land p = e}{\neg \konst{event}(p)} \\
+\end{array}
+\]
+\end{definition}
+
+\begin{definition}[Code contract]
+A component of the form $(I_c,O_c,A_c,P_c)$ is a \emph{code contract}
+if $E \cup G \subset P_c$ and $E$ is a non-empty list of \konst{eq}
+statements and $G$ is a set of code guarantees, one for each element
+of $O_c$
+\end{definition}
+
+The AGREE code contracts for the filter and monitor are shown in
+\figref{fig:filter} and \figref{fig:monitor}. In general, the
+\konst{eq}-statements of a code contract keep track of
+state and provide data values from which to compute values to place on
+the outputs.
+
+\subsubsection{Monitor specification}
+ For the monitor, BriefCASE generates everything but the
+\konst{eq}-statements in \linesref{line:mon-assume}{line:mon-policy}.  As with
 the filter, the guarantees completely define the output, as required
 for synthesis, in terms of the policy and the alert.  The
 \texttt{alert} variable defined on \lineref{line:mon-alert} depends
 not just on the policy but also on configuration details supplied when
-the component is specified.  Setting \texttt{is\_latched} as true
-makes the alert persistent, meaning that once the alert is raised, it
-is always raised; otherwise, it is the complement of the policy value
-in the current step.
+the component is specified.  At configuration
+time, \texttt{is\_latched} has been set to \konst{true}, thus making
+the alert persistent, meaning that once the alert is raised, it is
+always raised; otherwise, it is the complement of the policy value in
+the current step.
 
 The monitor policy is defined by marking when a request is not
 satisfied, \texttt{isPending} on \lineref{line:mon-pending}, and
