@@ -19,7 +19,7 @@ the usual comparison operators.
 \[
 \begin{array}{rcl}
 e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
-a & ::= & e\; \set{=,<,\leq}\; e \\
+a & ::= & e\; \set{=,<}\; e \\
 b & ::= & v \mid c \mid a \mid \neg b
             \mid b \; \set{\land,\lor,\imp,\iff}\; b
 \end{array}
@@ -32,47 +32,90 @@ $(-) \to (-)$, and $\konst{Hist}(-)$.
 The semantics of terms and formulas is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
 readily extended to include records and arrays. A value stream is a
-total function from natural numbers to values:
+total function from time (natural numbers) to values:
 \[
  \konst{stream} = \mathbb{N} \to \konst{value}
 \]
 Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
-binding variable names to value streams, the semantics $\sem{-}$ of terms and
-formulas, omitting temporal operators, is standard.
+binding variable names to value streams, the semantics $\sem{-}^E_t$
+of terms and formulas, omitting the temporal operators, is
+conventional. The value of a variable $v$ at time $t$ is found by
+looking up the stream bound to $v$ in $E$ (call it $s$) and extracting
+the value of $s$ at time $t$.
 
 \[
 \begin{array}{rcl}
-\sem{v}_t & = & E(v)(t) \\
-\sem{c}_t & = & c \\
-\sem{e_1 + e_2}_t & = & \sem{e_1}_t + \sem{e_2}_t \\
+\sem{v}^E_t & = & E(v)(t) \\
+\sem{c}^E_t & = & c \\
+\sem{e_1 + e_2}^E_t & = & \sem{e_1}^E_t + \sem{e_2}^E_t \\
    & \cdots & \\
-\sem{b_1 \land b_2}_t & = & \sem{b_1}_t \land \sem{b_2}_t \\
+\sem{b_1 \land b_2}^E_t & = & \sem{b_1}^E_t \land \sem{b_2}^E_t \\
    & \cdots & \\
 \end{array}
 \]
 
-The temporal operators deal with time in more significant ways:
+The temporal operators deal with time in more significant ways. For
+example, they are used to define higher-level operators from PTLTL,
+such as \konst{Once} and \konst{Since}. In code contracts, the
+temporal operators are essential for manipulating state variables
+between component invocations.
+
 \[
 \begin{array}{rcl}
-\sem{\konst{pre}(e)}_t & = & \sem{e}_{t-1}, \mathrm{when}\ t > 0 \\
-\sem{e_1 \to e_2}_t & = & \itelse{t=0}{\sem{e_1}_0}{\sem{e_2}_t} \\
-\sem{\konst{Hist}(b)}_t & = & \forall n \leq t.\; \sem{b}_n
+\sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
+\sem{e_1 \to e_2}^E_t & = & \itelse{t=0}{\sem{e_1}^E_0}{\sem{e_2}^E_t} \\
+\sem{\konst{Hist}(b)}^E_t & = & \forall n \leq t.\; \sem{b}^E_n
 \end{array}
 \]
 
-The temporal operators can be used to construct higher-level operators
-from PTLTL, such as \konst{Once} and \konst{Since}; they are also used
-to manipulate state.
+Code generation is a multi-step transformation that starts with a code
+contract and ends with an executable. The first step maps the contract
+to a code-focused representation. Assume given code contract
+$(I,O,A,\mathit{Eqs} \cup G \cup P)$, environment $E$, and time
+$t$. The evaluation of $\mathit{Eqs}$ followed by the evaluation of
+$G$ results in a new environment $E'$ where the stream values for
+state variables and outputs have been computed for time $t$. The step
+from $E$ to $E'$ is one full cycle in the repeated evaluation of the
+component.
 
-\begin{itemize}
-\item \textit{strmStep}.
+\begin{definition}[Evaluation]
+We overload existing notation and write the evaluation of
+$\mathit{Eqs}$ and then $G$ in environment $E$ at time $t$ as
+$\sem{\mathit{Eqs}\cdot G}^E_t$. Each $v = e \in {\Eqs}$ is treated as
+an environment transformation
+\[
+ \sem{v = e}^E_t = E[v(t) \mapsto\sem{e}^E_t] \ .
+\]
+modifying $E$ so that stream $v$ has value $\sem{e}^E_t$ at time $t$.
+{\Eqs} is evaluated by folding the transformation left-to-right
+through it. The transformation is also applied to the list of output
+guarantees $G$, computing the values on output ports. The details are
+omitted, being a bit messy because of the different kinds of output
+ports available.
+\end{definition}
 
-Given a code contract an implementation will execute the equations in
-order, and then compute the values on outputs.
 
+\begin{definition}[Code contract correctness]
+Assume given code contract $(I,O,A,\mathit{Eqs} \cup G \cup P)$ and
+environment $E$.  The contract is \emph{correct}, if for all $t$,
+whenever the assumptions (historically) hold in $E$ and evaluation
+steps from $E$ to $E'$, then the guarantees hold in $E'$:
+\[
+\sem{\konst{Hist}(A)}^E_t \land E' = \sem{\mathit{Eqs} \cdot G}^E_t \imp \sem{P}^{E'}_t
+\]
+\end{definition}
+\footnote
+{KLS: At this point we would like to assert that the AGREE ``consistency
+ check'' for a contract implies code contract correctness.}
 
-\item \textit{Contract semantics}
+The evaluation semantics given above is based on the stream
+computation model, where values `deep in the past' can be accessed in
+computations. However, the conventional program languages we wish to
+target do not support such a view. Thus code generation is only
+defined for a class of \emph{well formed} equations.
 
-\item \textit{How example looks}
+\begin{definition}[Wellformedness]
 
-\end{itemize}
+\end{definition}
+
+\subsubsection{Example}

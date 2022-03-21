@@ -62,14 +62,15 @@ finite inputs. Preliminary work has shown how to lift this result to
 infinite input traces as these systems are inherently reactive and
 intended to run forever~\cite{case-verified-filter}, \cite{cakeml-space-cost}.
 
-CASE was scoped to address common cyber-vulnerabilities, such as
-overflow, lack of input validation, supply-chain issues, and identity
-verification; however, other cyber-vulnerabilities such as
-side-channel attacks and denial of service are yet dealt with in our
-work.  Research in CASE has not invented a new type of filter or
-monitor, in terms of capability; instead, our contribution is in the
-automated synthesis of these components from a formal specification,
-and a means to show that the synthesis is correct.
+Our approach currently applies to common cyber-vulnerabilities, such
+as overflow, lack of input validation, supply-chain issues, and
+identity verification; however, other cyber-vulnerabilities such as
+side-channel attacks and denial of service are not yet dealt with in
+our work.  Here, we do not report on the invention of a new type of
+filter or monitor, in terms of capability; instead, our contribution
+is in the automated synthesis of security-improving components from
+formal specifications, and a means to show that the synthesis is
+correct.
 
 The approach is illustrated by a simple example in
 Section~\ref{sec:example}. Contract specification in the AGREE
