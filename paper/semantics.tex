@@ -6,68 +6,6 @@ specifications of leaf level cyber-components. It also provides the root
 meaning at the base of a chain of translation steps moving from AGREE
 specifications to CakeML executables.
 
-
-\subsection{AGREE syntax and semantics}
-\label{agree-semantics}
-
-The syntax of AGREE is essentially that of quantifier-free first order
-logic (FOL) supplemented with a few temporal operators. The terms
-(\emph{e}) are the usual arithmetic expressions built from variables
-and numeric literals, while formulas (\emph{b}) are built using the
-standard logical connectives from atomic formulas (\emph{a}) based on
-the usual comparison operators.
-\[
-\begin{array}{rcl}
-e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
-a & ::= & e\; \set{=,<}\; e \\
-b & ::= & v \mid c \mid a \mid \neg b
-            \mid b \; \set{\land,\lor,\imp,\iff}\; b
-\end{array}
-\]
-
-There is a conditional, $\itelse{b}{(-)}{(-)}$, for both terms and
-formulas. There are also temporal operators $\konst{pre}(-)$, delay
-$(-) \to (-)$, and $\konst{Hist}(-)$.
-
-The semantics of terms and formulas is in terms of \emph{streams of
-values}. Values encompass at least booleans and numbers, but can be
-readily extended to include records and arrays. A value stream is a
-total function from time (natural numbers) to values:
-\[
- \konst{stream} = \mathbb{N} \to \konst{value}
-\]
-Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
-binding variable names to value streams, the semantics $\sem{-}^E_t$
-of terms and formulas, omitting the temporal operators, is
-conventional. The value of a variable $v$ at time $t$ is found by
-looking up the stream bound to $v$ in $E$ (call it $s$) and extracting
-the value of $s$ at time $t$.
-
-\[
-\begin{array}{rcl}
-\sem{v}^E_t & = & E(v)(t) \\
-\sem{c}^E_t & = & c \\
-\sem{e_1 + e_2}^E_t & = & \sem{e_1}^E_t + \sem{e_2}^E_t \\
-   & \cdots & \\
-\sem{b_1 \land b_2}^E_t & = & \sem{b_1}^E_t \land \sem{b_2}^E_t \\
-   & \cdots & \\
-\end{array}
-\]
-
-The temporal operators deal with time in more significant ways. For
-example, they are used to define higher-level operators from PTLTL,
-such as \konst{Once} and \konst{Since}. In code contracts, the
-temporal operators are essential for manipulating state variables
-between component invocations.
-
-\[
-\begin{array}{rcl}
-\sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
-\sem{e_1 \to e_2}^E_t & = & \itelse{t=0}{\sem{e_1}^E_0}{\sem{e_2}^E_t} \\
-\sem{\konst{Hist}(b)}^E_t & = & \forall n \leq t.\; \sem{b}^E_n
-\end{array}
-\]
-
 Code generation is a multi-step transformation that starts with a code
 contract and ends with an executable. The first step maps the contract
 to a code-focused representation. Assume given code contract

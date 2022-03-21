@@ -19,7 +19,7 @@
 \newcommand{\dispredp}{\ensuremath{\mathbb{D}^{\phi\prime}}}
 \newcommand{\compredp}{\ensuremath{\mathbb{C}^{\phi\prime}}}
 
-AGREE generates, and then proves or disproves with model checking, a set of verification conditions to show that a system's component implementation is correct~\cite{agree2013}. 
+AGREE generates, and then proves or disproves with model checking, a set of verification conditions to show that a system's component implementation is correct~\cite{agree2013}.
 The verification conditions are formalized in \emph{past-time linear temporal logic} (PLTL).
 PLTL is a first-order predicate calculus with temporal operators to reason about the truth values of formulas through time.
 Its semantics are defined relative to a finite trace of system states $\pi = s_0, s_1, \ldots$, and a moment of evaluation in the trace, $i$.
@@ -34,34 +34,155 @@ The $\models$-operator is read as \emph{satisfies}.
 A trace at a moment in time satisfies $\globally(f)$ if and only if it satisfies $f$ in the current and all future states of $\pi$.
 Globally is invariant from the current moment into the future and historically is invariant from the beginning of the trace to the current moment.
 
-A system is a tuple, $\system = (\inputs, \outputs, \assumes, \guarantees)$, where $\inputs$ is the input set, $\outputs$ is the output set, $\assumes$ is the set of assumptions, and $\guarantees$ is the set of guarantees.
-A system is implemented by a set of components, $\components$, with their various connections.
-A component $\component$ is defined by its own tuple in a manner similar to the system as $(\inputs_\component, \outputs_\component, \assumes_\component, \guarantees_\component)$.
-From the components and connections, $\mathbb{I}_\component$ is defined such that it is the set of components providing input to some component $\component$ in the system, and $\mathbb{O}$ is defined such that it is the set of components that provide the output for the system.
-
-An system is correct if and only if for all $\pi$ and for all $i \ge 0$ the following holds:
+A \emph{system} $\system = (\inputs, \outputs, \assumes,
+\guarantees)$, where $\inputs$ is the input set, $\outputs$ is the
+output set, $\assumes$ is the set of assumptions, and $\guarantees$ is
+the set of guarantees.  A system is implemented by a set of
+\emph{components}, $\components$, together with with their
+inter-connections.  A component $\component$ is defined by its own
+tuple in a manner similar to the system as $(\inputs_\component,
+\outputs_\component, \assumes_\component, \guarantees_\component)$.
+From the components and connections, $\mathbb{I}_\component$ is
+defined to be the set of components providing input to some component
+$\component$ in the system, and $\mathbb{O}$ is defined to be the set
+of components that provide the output for the system.  A system is
+correct if and only if for all $\pi$ and for all $i \ge 0$ the
+following conditions hold:
 \[
 \begin{array}{lll}
-        & \forall \component \in \components &  
-            \globally(\historically(\assumes \wedge 
-            \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime}) 
+        & \forall \component \in \components &
+            \globally(\historically(\assumes \wedge
+            \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime})
             \implies \assumes_\component) \\
- \wedge &   & 
-            \globally(\historically(\assumes \wedge 
-            \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime}) 
+ \wedge &   &
+            \globally(\historically(\assumes \wedge
+            \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime})
             \implies \guarantees)
 \end{array}
 \]
-The first condition verifies the input assumptions on each component under the system assumptions and upstream component guarantees. 
-It checks if the component guarantees and system assumptions are strong enough to imply input assumptions on all immediate downstream components.
-The second condition checks the output guarantees of the system under the system assumptions and component guarantees that provide the output. 
-It checks if the guarantees on components providing primary outputs are strong enough to imply the system guarantees.
+The first condition verifies the input assumptions on each component
+under the system assumptions and upstream component guarantees.  It
+checks if the component guarantees and system assumptions are strong
+enough to imply input assumptions on all immediate downstream
+components.  The second condition checks the output guarantees of the
+system under the system assumptions and component guarantees that
+provide the output.  It checks if the guarantees on components
+providing primary outputs are strong enough to imply the system
+guarantees.
 
 AGREE uses $k$-inductive model checking to prove or disprove each generated verification condition.
 If all the verification conditions hold, then the system is said to be \emph{correct}, meaning that the system composition meets input assumptions at each input as well as the guarantees on the system output. A consequence of this result is that $\globally(\historically(\assumes) \implies \guarantees)$ holds for the system contract. As such, the system contract is a sound abstraction of the system implementation.
 
-The expanded property lists in \figref{fig:example-certificate} and \figref{fig:hardened-certificate} are the results from disproving or proving out the above verification conditions.
-The additional unexpanded results at the bottom of the figures prove \emph{self-consistency} in the contracts.
-It is not uncommon to accidentally write contracts that are self-contradicting.
-For example, a contract may guarantee an output be two different values in the same moment of time.
-AGREE generates additional verification conditions that prove each component contract, and the composition of contracts, self-consistent.
+The expanded property lists in \figref{fig:example-certificate} and
+\figref{fig:hardened-certificate} are the results from verifying or
+disproving the above verification conditions.  The additional
+unexpanded results at the bottom of the figures prove
+\emph{self-consistency} in the contracts.  It is not uncommon to
+accidentally write contracts that are self-contradicting.  For
+example, a contract may guarantee an output be two different values in
+the same moment of time.  AGREE generates additional verification
+conditions that prove each component contract, and the composition of
+contracts, self-consistent.\footnote{KLS:Is this the same as
+satisfiable?}
+
+\subsection{Syntax and semantics of AGREE}
+\label{agree-semantics}
+
+The syntax of AGREE is essentially that of quantifier-free first order
+logic (FOL) supplemented with a few temporal operators. The terms
+(\emph{e}) are the usual arithmetic expressions built from variables
+($v$) and numeric and boolean literals ($c$), while formulas
+(\emph{b}) are built using the standard logical connectives from
+atomic formulas (\emph{a}) based on the usual comparison operators.
+\[
+\begin{array}{rcl}
+e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
+a & ::= & e\; \set{=,<}\; e \\
+b & ::= & v \mid c \mid a \mid \neg b
+            \mid b \; \set{\land,\lor,\imp,\iff}\; b
+\end{array}
+\]
+
+Supplementing this basic syntax are is a conditional,
+$\itelse{b}{(-)}{(-)}$, for both terms and formulas. There are also
+temporal operators $\konst{pre}(-)$, delay $(-) \to (-)$, and
+$\konst{Hist}(-)$.
+
+The semantics of terms and formulas is in terms of \emph{streams of
+values}. Values encompass at least booleans and numbers, but can be
+readily extended to include records and arrays. A value stream is a
+total function from time (natural numbers) to values:
+\[
+ \konst{stream} = \mathbb{N} \to \konst{value}
+\]
+Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
+binding variable names to value streams, the semantics $\sem{-}^E_t$
+of terms and formulas, omitting the temporal operators, is
+conventional. The value of a variable $v$ at time $t$ is found by
+looking up the stream bound to $v$ in $E$ (call it $s$) and extracting
+the value of $s$ at time $t$.
+
+\[
+\begin{array}{rcl}
+\sem{v}^E_t & = & E(v)(t) \\
+\sem{c}^E_t & = & c \\
+\sem{e_1 + e_2}^E_t & = & \sem{e_1}^E_t + \sem{e_2}^E_t \\
+   & \cdots & \\
+\sem{b_1 \land b_2}^E_t & = & \sem{b_1}^E_t \land \sem{b_2}^E_t \\
+   & \cdots & \\
+\end{array}
+\]
+
+The temporal operators deal with time in more significant ways. The
+value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time
+$t-1$ (at time zero, \konst{pre} is undefined).  A delay $e_1 \to e_2$
+temporally ``shifts'' $e_2$ by means of prepending the first element
+of $e_1$ to it.
+
+\[
+\begin{array}{rcl}
+\sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
+\sem{e_1 \to e_2}^E_t & = & \itelse{t=0}{\sem{e_1}^E_0}{\sem{e_2}^E_t} \\
+\sem{\konst{Hist}(b)}^E_t & = & \forall n \leq t.\; \sem{b}^E_n
+\end{array}
+\]
+
+Although basic, these definitions can be used to define higher-level
+operators from PTLTL, such as \konst{Once} and \konst{Since}.
+
+\subsection{Code contracts}
+
+Generally, AGREE specifications do not describe the computation
+that a component performs. This is entirely by design: AGREE is
+intended to reason about component behavior solely at the
+specification level. However, the syntax of AGREE specifications
+provides enough expressiveness to support the notion of a
+\emph{code contract}: a component contract from which an implementation
+can be extracted.
+
+\begin{definition}[Output guarantee]
+An \emph{output guarantee} is a stylized guarantee that fully
+specifies the data written to an output port. There are three
+possibilities according to whether the output port $p$ is
+a \konst{data} port, an \konst{event} port, or an \konst{event data}
+port:
+\[
+\begin{array}{ll}
+\konst{data}: &  p = \mathit{e} \\
+\konst{event}: &  \konst{event} (p) = \mathit{b} \\
+\konst{event data}: & \itelse{b}{\konst{event} (p) \land p = e}{\neg \konst{event}(p)} \\
+\end{array}
+\]
+\end{definition}
+
+\begin{definition}[Code contract]
+A component of the form $(I_c,O_c,A_c,P_c)$ is a \emph{code contract}
+if $\mathit{Eqs} \cup G \subseteq P_c$, where
+\[\mathit{Eqs} = \set{v_1 = e_1, \cdots , v_n = e_n} \] is a non-empty set
+of \konst{eq} statements and $G$ is the set of output guarantees, one for
+each element of $O_c$. In the interpretation as code, the order of
+elements of $\mathit{Eqs}$ is important, and is simply taken to be the
+occurrence order of the \konst{eq} statements in the syntax. Thus we
+will work with the
+\emph{list} of equations $\mathit{Eqs} = [v_1 = e_1; \cdots ; v_n = e_n]$.
+\end{definition}

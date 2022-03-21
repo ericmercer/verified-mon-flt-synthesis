@@ -111,42 +111,6 @@ of the transformation.  It also creates a default AGREE specification
 that defines everything about the component behavior, leaving only the
 component behavior (policy) to be specified.
 
-\subsubsection{Code contracts}
-
-Generally, AGREE specifications do not describe the computation
-that a component performs. This is entirely by design: AGREE is
-intended to reason about component behavior solely at the
-specification level. However, the syntax of AGREE specifications
-provides enough expressiveness to support the notion of a
-\emph{code contract}: a component contract from which an implementation
-can be extracted.
-
-\begin{definition}[Output guarantee]
-An \emph{output guarantee} is a stylized guarantee that fully
-specifies the data written to an output port. There are three
-possibilities according to whether the output port $p$ is
-a \konst{data} port, an \konst{event} port, or an \konst{event data}
-port:
-\[
-\begin{array}{ll}
-\konst{data}: &  p = \mathit{e} \\
-\konst{event}: &  \konst{event} (p) = \mathit{b} \\
-\konst{event data}: & \itelse{b}{\konst{event} (p) \land p = e}{\neg \konst{event}(p)} \\
-\end{array}
-\]
-\end{definition}
-
-\begin{definition}[Code contract]
-A component of the form $(I_c,O_c,A_c,P_c)$ is a \emph{code contract}
-if $\mathit{Eqs} \cup G \subseteq P_c$, where
-\[\mathit{Eqs} = \set{v_1 = e_1, \cdots , v_n = e_n} \] is a non-empty set
-of \konst{eq} statements and $G$ is the set of output guarantees, one for
-each element of $O_c$. In the interpretation as code, the order of
-elements of $\mathit{Eqs}$ is important, and is simply taken to be the
-occurrence order of the \konst{eq} statements in the syntax. Thus we
-will work with the
-\emph{list} of equations $\mathit{Eqs} = [v_1 = e_1; \cdots ; v_n = e_n]$.
-\end{definition}
 
 Code contracts for the filter and monitor are shown in
 \figref{fig:filter} and \figref{fig:monitor}.\footnote{KLS: do we discuss wellformedness anywhere?} In general, the
