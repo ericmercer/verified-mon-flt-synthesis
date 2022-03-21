@@ -86,7 +86,7 @@ The AGREE specification for the monitor in our example states that an automation
 As with the filter, the system designer provides the policy, and that policy is typically based on existing AADL/AGREE definitions in the SW system.
 
 The AGREE analysis of the cyber-hardened implementation is shown in
-\figref{fig:hardened-certificate}. AGREE has generated hihg-level
+\figref{fig:hardened-certificate}. AGREE has generated high-level
 evidence justifying the claim that the high-assurance components
 guarantee the correct behavior of the SW implementation in the
 presence of the untrusted AI route planner.  Having passed AGREE
@@ -112,13 +112,12 @@ verification succeeds, then the meaning of those results hold for the
 deployed system.  These results, however, are only valid under
 additional assumptions on the deployed system:
 \begin{itemize}
-\item contracts for non-synthesized components accurately model their deployed
+\item first, contracts for non-synthesized components accurately model their deployed
 counterparts;
-\item an appropriate schedule exists to sequence component
+\item second, an appropriate schedule exists to sequence component
   execution following the dependent data-flow in the design; and
-\item the communication fabric stitching components together works in harmony
+\item third the communication fabric stitching components together works in harmony
   with the schedule.
 \end{itemize}
-
-Support and automation for these aspects of the design process are
+\noindent Support and automation for these aspects of the design process are
 discussed in other works.\footnote{KLS:need cites to HAMR, seL4, and Adventium work}
