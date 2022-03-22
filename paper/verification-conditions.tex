@@ -37,41 +37,44 @@ Globally is invariant from the current moment into the future and historically i
 A \emph{system} $\system = (\inputs, \outputs, \assumes,
 \guarantees)$, where $\inputs$ is the input set, $\outputs$ is the
 output set, $\assumes$ is the set of assumptions, and $\guarantees$ is
-the set of guarantees.  A system is implemented by a set of
-\emph{components}, $\components$, together with with their
-inter-connections.  A component $\component$ is defined by its own
-tuple in a manner similar to the system as $(\inputs_\component,
-\outputs_\component, \assumes_\component, \guarantees_\component)$.
-From the components and connections, $\mathbb{I}_\component$ is
-defined to be the set of components providing input to some component
-$\component$ in the system, and $\mathbb{O}$ is defined to be the set
-of components that provide the output for the system.  A system is
-correct if and only if for all $\pi$ and for all $i \ge 0$ the
-following conditions hold:
-\[
-\begin{array}{lll}
-        & \forall \component \in \components &
+the set of guarantees.  A system is composed of a set of
+\emph{components}, $\components$, together with their
+inter-connections.  A component $\component$ is, hierarchically, also
+a system, and may be designated by its own tuple
+$(\inputs_\component, \outputs_\component, \assumes_\component,
+\guarantees_\component)$.  From the components and connections,
+$\mathbb{I}_\component$ is defined to be the set of components
+providing input to some component $\component$ in the system, and
+$\mathbb{O}$ is defined to be the set of components that provide the
+output for the system.  A system $S$ is \emph{correct} if and only if for all
+components $c \in C$:
+\begin{equation}
             \globally(\historically(\assumes \wedge
             \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime})
-            \implies \assumes_\component) \\
- \wedge &   &
+            \implies \assumes_\component)
+\end{equation}
+\begin{equation}
             \globally(\historically(\assumes \wedge
             \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime})
             \implies \guarantees)
-\end{array}
-\]
-The first condition verifies the input assumptions on each component
-under the system assumptions and upstream component guarantees.  It
-checks if the component guarantees and system assumptions are strong
-enough to imply input assumptions on all immediate downstream
-components.  The second condition checks the output guarantees of the
-system under the system assumptions and component guarantees that
-provide the output.  It checks if the guarantees on components
-providing primary outputs are strong enough to imply the system
-guarantees.
+\end{equation}
+Condition (1) verifies the input assumptions on each component under
+the system assumptions and upstream component guarantees.  It checks
+if the component guarantees and system assumptions are strong enough
+to imply input assumptions on all immediate downstream components.
+Condition (2) checks the output guarantees of the system under the
+system assumptions and component guarantees that provide the output.
+It checks if the guarantees on components providing primary outputs
+are strong enough to imply the system guarantees.
 
-AGREE uses $k$-inductive model checking to prove or disprove each generated verification condition.
-If all the verification conditions hold, then the system is said to be \emph{correct}, meaning that the system composition meets input assumptions at each input as well as the guarantees on the system output. A consequence of this result is that $\globally(\historically(\assumes) \implies \guarantees)$ holds for the system contract. As such, the system contract is a sound abstraction of the system implementation.
+AGREE uses $k$-inductive model checking to prove or disprove each
+generated verification condition.  If all the verification conditions
+hold, then the system is said to be \emph{correct}, meaning that the
+system composition meets input assumptions at each input as well as
+the guarantees on the system output. A consequence of this result is
+that $\globally(\historically(\assumes) \implies \guarantees)$ holds
+for the system contract. As such, the system contract is a sound
+abstraction of the system implementation.
 
 The expanded property lists in \figref{fig:example-certificate} and
 \figref{fig:hardened-certificate} are the results from verifying or

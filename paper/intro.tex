@@ -34,10 +34,10 @@ secure microkernel~\cite{sel4-2009}.
 %% DSH  This paragraph seems mostly duplicative of the paragraph above; attempted to merge the two.
 %A novel aspect of the BriefCASE approach is the ability to automatically transform the model to insert high-assurance %components to satisfy requirements added to mitigate cyber vulnerabilities. In this work, the behavior of the system is %modeled by contracts on components expressed in the AGREE modeling language. These contracts are modified as a result %of the cyber-vulnerability analysis with the new requirements for mitigation.  The requirements assume properties on the %input and guarantee properties of the output that reflect a hardened system. In the absence of any transformation to %implement such requirements, AGREE fails to prove the system meets these new requirements.
 
-Two security-enhancing transformations are discussed: (1) the
-insertion of a filter to prevent malformed data from a malicious actor
-from being propagated to downstream components, and (2) the insertion
-of a monitor to detect (and alert) unexpected behaviors arising from
+Two cyber-resiliency transformations are discussed: (1) the insertion
+of a filter to prevent malformed data from a malicious actor from
+being propagated to downstream components, and (2) the insertion of a
+monitor to detect (and alert) unexpected behaviors arising from
 untrusted components. These transformations not only change the
 architecture of the model by adding in new components; they also
 generate a formal specification for the behavior of the inserted
