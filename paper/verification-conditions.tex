@@ -93,10 +93,10 @@ satisfiable?}
 
 The syntax of AGREE is essentially that of quantifier-free first order
 logic (FOL) supplemented with a few temporal operators. The terms
-(\emph{e}) are the usual arithmetic expressions built from variables
-($v$) and numeric and boolean literals ($c$), while formulas
-(\emph{b}) are built using the standard logical connectives from
-atomic formulas (\emph{a}) based on the usual comparison operators.
+(\emph{e}) are arithmetic expressions built from variables ($v$) and
+numeric and boolean literals ($c$), while formulas (\emph{b}) are
+built using logical connectives from atomic formulas (\emph{a}) based
+on the familiar comparison operators.
 \[
 \begin{array}{rcl}
 e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
@@ -106,10 +106,9 @@ b & ::= & v \mid c \mid a \mid \neg b
 \end{array}
 \]
 
-Supplementing this basic syntax are is a conditional,
-$\itelse{b}{(-)}{(-)}$, for both terms and formulas. There are also
-temporal operators $\konst{pre}(-)$, delay $(-) \to (-)$, and
-$\konst{Hist}(-)$.
+There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
+and formulas. Lastly, there are temporal operators $\konst{pre}(-)$,
+delay $(-) \to (-)$, and $\konst{Hist}(-)$.
 
 The semantics of terms and formulas is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
