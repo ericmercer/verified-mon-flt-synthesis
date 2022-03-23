@@ -19,35 +19,60 @@
 \newcommand{\dispredp}{\ensuremath{\mathbb{D}^{\phi\prime}}}
 \newcommand{\compredp}{\ensuremath{\mathbb{C}^{\phi\prime}}}
 
-AGREE generates, and then proves or disproves with model checking, a set of verification conditions to show that a system's component implementation is correct~\cite{agree2013}.
-The verification conditions are formalized in \emph{past-time linear temporal logic} (PLTL).
-PLTL is a first-order predicate calculus with temporal operators to reason about the truth values of formulas through time.
-Its semantics are defined relative to a finite trace of system states $\pi = s_0, s_1, \ldots$, and a moment of evaluation in the trace, $i$.
+The AGREE specification language is based on stream concepts, and
+operators, from the Lustre language \cite{10.1145/41625.41641}. Thus
+the setting is synchronous dataflow where the inputs and outputs of
+components are streams, and contracts express relationships between
+input and output streams. When considering a system of components,
+data flows through the components in dependency order, with inputs
+being propagated to outputs through all contracts until they stabilize
+(can't propagate further). Therefore, the subcomponent contracts, and
+thus the top-level model, must be acyclic. (An apparent syntactic
+cycle, where a component is linked back to itself, may be broken
+temporally by inserting delay elements.)  Once the data propagation
+has stabilized, the model proceeds to the next input data in the input
+streams. The semantics do not model computation or communication
+delay. The output of one contract is seen at the input of any
+downstream contract in the same step of the input data stream.
 
-The two PLTL operators necessary for the AGREE generated verification conditions are $\globally$ (globally) that looks forward in time along the trace and $\historically$ (historically) that looks backward in time along the trace.
-These are defined as
+From the system and component contracts, AGREE generates a set of
+verification conditions to show that a system's component
+implementation is correct~\cite{agree2013}.  The AGREE model checker
+is then invoked to prove or disprove the verification
+conditions. Contracts and verification conditions are expressed in
+\emph{past-time linear temporal logic} (PLTL).\footnote{KLS: citation
+needed.}  PLTL is a logic enhanced with temporal operators able to
+reason about the truth values of formulas through time.  Its semantics
+are defined relative to a point in time $i$ and a finite trace of
+system states $\pi = s_0, s_1, \ldots, s_i$.
+
+The two PLTL operators necessary for the AGREE generated verification
+conditions are $\globally$ (globally) that looks forward in time along
+the trace and $\historically$ (historically) that looks backward in
+time along the trace.  These are defined as
 \begin{eqnarray*}
  (\pi, i) \models \globally(f) & \iff & \forall j \ge i, (\pi, j) \models f \\
 (\pi, i) \models \historically(f) & \iff & \forall 0 \le j \le i, (\pi, j) \models f
 \end{eqnarray*}
-The $\models$-operator is read as \emph{satisfies}.
-A trace at a moment in time satisfies $\globally(f)$ if and only if it satisfies $f$ in the current and all future states of $\pi$.
-Globally is invariant from the current moment into the future and historically is invariant from the beginning of the trace to the current moment.
+The $\models$-operator is read as \emph{satisfies}.  A trace at a
+moment in time satisfies $\globally(f)$ if and only if it satisfies
+$f$ in the current and all future states of $\pi$.  $\globally(f)$ is
+invariant from the current moment into the future and $\historically$ is
+invariant from the beginning of the trace to the current moment.
 
 A \emph{system} $\system = (\inputs, \outputs, \assumes,
-\guarantees)$, where $\inputs$ is the input set, $\outputs$ is the
-output set, $\assumes$ is the set of assumptions, and $\guarantees$ is
-the set of guarantees.  A system is composed of a set of
-\emph{components}, $\components$, together with their
-inter-connections.  A component $\component$ is, hierarchically, also
-a system, and may be designated by its own tuple
-$(\inputs_\component, \outputs_\component, \assumes_\component,
-\guarantees_\component)$.  From the components and connections,
-$\mathbb{I}_\component$ is defined to be the set of components
-providing input to some component $\component$ in the system, and
-$\mathbb{O}$ is defined to be the set of components that provide the
-output for the system.  A system $S$ is \emph{correct} if and only if for all
-components $c \in C$:
+\guarantees,C)$, where $\inputs$ is the input set, $\outputs$ is the
+output set, $\assumes$ is the set of assumptions, $\guarantees$ is the
+set of guarantees, and $C$ are subcomponents.  A subcomponent
+$\component$ is, hierarchically, also a system, and may be designated
+by its own tuple $(\inputs_\component, \outputs_\component,
+\assumes_\component, \guarantees_\component, C_c)$.  From the
+components and their connections, $\mathbb{I}_\component$ is defined
+to be the set of components providing input to some component
+$\component$ in the system, and $\mathbb{O}$ is defined to be the set
+of components that provide the output for the system.  A system $S$ is
+\emph{correct} if and only if for all components $c \in C$ the
+following two verification conditions hold:
 \begin{equation}
             \globally(\historically(\assumes \wedge
             \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime})
@@ -67,14 +92,13 @@ system assumptions and component guarantees that provide the output.
 It checks if the guarantees on components providing primary outputs
 are strong enough to imply the system guarantees.
 
-AGREE uses $k$-inductive model checking to prove or disprove each
-generated verification condition.  If all the verification conditions
-hold, then the system is said to be \emph{correct}, meaning that the
-system composition meets input assumptions at each input as well as
-the guarantees on the system output. A consequence of this result is
-that $\globally(\historically(\assumes) \implies \guarantees)$ holds
-for the system contract. As such, the system contract is a sound
-abstraction of the system implementation.
+If all the verification conditions hold (AGREE uses $k$-inductive
+model checking to automatically prove or disprove each generated
+verification condition), then the system is said to be \emph{correct},
+meaning that the system composition meets input assumptions at each
+input as well as the guarantees on the system output. A consequence of
+this result is that $\globally(\historically(\assumes) \implies
+\guarantees)$ holds for the system contract.
 
 The expanded property lists in \figref{fig:example-certificate} and
 \figref{fig:hardened-certificate} are the results from verifying or
@@ -85,18 +109,21 @@ accidentally write contracts that are self-contradicting.  For
 example, a contract may guarantee an output be two different values in
 the same moment of time.  AGREE generates additional verification
 conditions that prove each component contract, and the composition of
-contracts, self-consistent.\footnote{KLS:Is this the same as
-satisfiable?}
+contracts, self-consistent.
 
 \subsection{Syntax and semantics of AGREE}
 \label{agree-semantics}
 
-The syntax of AGREE is essentially that of quantifier-free first order
-logic (FOL) supplemented with a few temporal operators. The terms
-(\emph{e}) are arithmetic expressions built from variables ($v$) and
-numeric and boolean literals ($c$), while formulas (\emph{b}) are
-built using logical connectives from atomic formulas (\emph{a}) based
-on the familiar comparison operators.
+We now give an overview of a formal model for AGREE. This provides a
+setting in which we are able to relate the contract correctness
+results discussed above, obtained via model-checking, with the code
+generated from high-assurance contracts.  The syntax of AGREE is
+essentially that of quantifier-free first order predicate logic
+supplemented with a few temporal operators. The terms (\emph{e}) are
+arithmetic expressions built from variables ($v$) and numeric and
+boolean literals ($c$), while formulas (\emph{b}) are built using
+logical connectives from atomic formulas (\emph{a}) based on the
+familiar comparison operators.
 \[
 \begin{array}{rcl}
 e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
@@ -108,7 +135,7 @@ b & ::= & v \mid c \mid a \mid \neg b
 
 There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
 and formulas. Lastly, there are temporal operators $\konst{pre}(-)$,
-delay $(-) \to (-)$, and $\konst{Hist}(-)$.
+\emph{delay} $(-) \to (-)$, and $\konst{Hist}(-)$.
 
 The semantics of terms and formulas is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
@@ -119,11 +146,11 @@ total function from time (natural numbers) to values:
 \]
 Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
 binding variable names to value streams, the semantics $\sem{-}^E_t$
-of terms and formulas, omitting the temporal operators, is
-conventional. The value of a variable $v$ at time $t$ is found by
-looking up the stream bound to $v$ in $E$ (call it $s$) and extracting
-the value of $s$ at time $t$.
-
+of terms and formulas defines the meaning of compound syntax in terms
+of the meaning of subexpressions. The value of a variable $v$ at time
+$t$ is found by looking up the stream bound to $v$ in $E$ (call it
+$s$) and returning $s_t$. Some clauses of the semantics follow,
+omitting the temporal operators:
 \[
 \begin{array}{rcl}
 \sem{v}^E_t & = & E(v)(t) \\
@@ -153,14 +180,16 @@ Although basic, these definitions can be used to define higher-level
 operators from PTLTL, such as \konst{Once} and \konst{Since}.
 
 \subsection{Code contracts}
+\label{code-contracts}
 
-Generally, AGREE specifications do not describe the computation
-that a component performs. This is entirely by design: AGREE is
-intended to reason about component behavior solely at the
-specification level. However, the syntax of AGREE specifications
-provides enough expressiveness to support the notion of a
-\emph{code contract}: a component contract from which an implementation
-can be extracted.
+Generally, AGREE specifications do not describe the computation that a
+component performs. This is entirely by design: AGREE is intended to
+reason about component behavior solely at the specification
+level. However, the syntax of AGREE specifications provides enough
+expressiveness to support the notion of a \emph{code contract}: a
+contract from which an implementation can be extracted. First we must
+discuss a class of guarantees---\emph{output guarantees}---which
+determine the values on all output ports of a component.
 
 \begin{definition}[Output guarantee]
 An \emph{output guarantee} is a stylized guarantee that fully
@@ -177,12 +206,16 @@ port:
 \]
 \end{definition}
 
-\begin{definition}[Code contract]
-A component of the form $(I_c,O_c,A_c,P_c)$ is a \emph{code contract}
-if $\mathit{Eqs} \cup G \subseteq P_c$, where
+Informally, a code contract treats its \konst{eq} ``statements'' as
+defining a list of assignments to state variables, and its output
+guarantees as directives for producing output.
+
+\begin{definition}[Code contract] A
+  leaf component of the form $(I,O,A,P,\emptyset)$ is a
+  \emph{code contract} if $\mathit{Eqs} \cup G \subseteq P$, where
 \[\mathit{Eqs} = \set{v_1 = e_1, \cdots , v_n = e_n} \] is a non-empty set
 of \konst{eq} statements and $G$ is the set of output guarantees, one for
-each element of $O_c$. In the interpretation as code, the order of
+each element of $O$. In the interpretation as code, the order of
 elements of $\mathit{Eqs}$ is important, and is simply taken to be the
 occurrence order of the \konst{eq} statements in the syntax. Thus we
 will work with the
