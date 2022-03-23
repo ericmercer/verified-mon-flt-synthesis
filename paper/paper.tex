@@ -76,6 +76,7 @@
 \newcommand{\secref}[1]{Sec.~\ref{#1}}
 \newcommand{\lineref}[1]{Line~\ref{#1}}
 \newcommand{\linesref}[2]{Lines~\ref{#1}--\ref{#2}}
+% \newcommand{\eqref}[1]{Eq.~\ref{#1}}
 
 % Latex trickery for infix div operator, from stackexchange
 
@@ -104,6 +105,9 @@
 % \newtheorem{remark}{Remark}
 
 \journalname{Software and Systems Modeling}
+
+\newif\ifREVISIONS
+\REVISIONSfalse
 
 \begin{document}
 \title{
@@ -142,10 +146,13 @@
 \section{Introduction} \label{sec:intro}
 \input{intro}
 
+\ifREVISIONS
 \subsection{SOSYM Journal Details}
 The due date is \textbf{March} $22^\mathrm{nd}$, \textbf{2022}.
 Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if you don't have one), login and go to the "Author"-section, select the link "Start New Submission" under Author Dashboard and select "Special Section Paper" as the paper type, and choose "MODELS 2021 Special Issue". Also, make sure to mention the MODELS 2021 special issue in the cover letter.
+\fi
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item Revise the end of the abstract regarding the case studies to be consistent with what ends up in this version of the paper.
@@ -153,11 +160,13 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
   \item Fix the link to the motivating example to point to the new repository once it is created. Fix in the next section too.
   \item Add discussion on the limitation of the approach: what attacks can and cannot be covered, can valid messages be rejected, etc.
 \end{compactitem}
+\fi
 
 \section{Illustrative example}
 \label{sec:example}
 \input{example}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item \sout{Reformat text to put single sentence on each line.}
@@ -174,11 +183,13 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
     \end{compactitem}
   \item Add citations, and remove KLS footnote to last paragraph---should cite HAMR, seL4, and Adventium.
 \end{compactitem}
+\fi
 
 \section{Compositional reasoning}
 \label{sec:agree}
-\input{agree}
+\input{verification-conditions}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item \sout{Add in the AGREE specification for the system}
@@ -186,6 +197,7 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
   \item Add reference to the Liskov principle of safe-substitution when stating that the system contract is a sound abstraction of the implementation.
   \item Add back in a few sentences on the contract for the filter since those have been removed with the addition of the formal definitions.
 \end{compactitem}
+\fi
 
 \section{Syntax and semantics of AGREE}
 \label{agree-semantics}
@@ -206,26 +218,31 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 %% \label{sec:semantics}
 %% \input{semantics}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item Add in intuitive definition or AGREE leaf-component semantics
   \item State well-formed theorem
   \item State correctness theorem or any key theorems to the synthesis proof
 \end{compactitem}
+\fi
 
 \section{Synthesis to CakeML}
 \label{sec:synthesis}
 \input{synthesis}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item State theorem relating the step function to the meaning of the leaf-node semantics
 \end{compactitem}
+\fi
 
 \section{Case studies}
 \label{sec:case-study}
 \input{case-study}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item Possible Outline:
@@ -241,15 +258,18 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
   \item Add an interesting monitor from the TA6 model
   \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
 \end{compactitem}
+\fi
 
 \section{Related work}
 \label{sec:related-work}
 \input{related-work}
 
+\ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item Add recent work published after 2018
 \end{compactitem}
+\fi
 
 \section{Conclusion}
 \label{sec:conclusion}

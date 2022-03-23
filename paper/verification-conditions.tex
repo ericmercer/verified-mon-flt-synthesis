@@ -1,37 +1,30 @@
 
-\newcommand{\globally}{\ensuremath{\mathbf{G}}}
-\newcommand{\historically}{\ensuremath{\mathbf{H}}}
+\newcommand{\globally}{\konst{Always}}
+\newcommand{\historically}{\konst{Hist}}
 \newcommand{\assumes}{\ensuremath{A}}
 \newcommand{\guarantees}{\ensuremath{P}}
-\newcommand{\dispatch}{\ensuremath{\mathit{dispatch}}}
-\newcommand{\complete}{\ensuremath{\mathit{complete}}}
-\newcommand{\same}[1]{\ensuremath{\mathit{same}(#1)}}
 \newcommand{\inputs}{\ensuremath{I}}
 \newcommand{\outputs}{\ensuremath{O}}
-\newcommand{\system}{\ensuremath{S}}
 \newcommand{\components}{\ensuremath{C}}
 \newcommand{\component}{\ensuremath{c}}
-\newcommand{\schedule}{\ensuremath{\phi}}
-\newcommand{\valid}{\ensuremath{\mathit{valid}}}
-\newcommand{\dpred}{\ensuremath{\delta^\phi}}
-\newcommand{\dispred}{\ensuremath{\mathbb{D}^\phi}}
-\newcommand{\compred}{\ensuremath{\mathbb{C}^\phi}}
-\newcommand{\dispredp}{\ensuremath{\mathbb{D}^{\phi\prime}}}
-\newcommand{\compredp}{\ensuremath{\mathbb{C}^{\phi\prime}}}
 
-The AGREE specification language is based on stream concepts, and
-operators, from the Lustre language \cite{10.1145/41625.41641}. Thus
-the setting is synchronous dataflow where the inputs and outputs of
-components are streams, and contracts express relationships between
-input and output streams. When considering a system of components,
+The AGREE specification language, and semantics, are inspired by the Lustre language \cite{10.1145/41625.41641}.
+Lustre reasons over a synchronous dataflow model where the inputs and outputs of
+components are streams.
+Informally, streams assign values to expressions at each point in time.
+AGREE contracts express relationships between input and output streams by assuming a set of allowed input streams and then guaranteeing a corresponding set of allowed output streams.
+Output for streams not included in the assumed input is undefined. 
+
+When considering a system of components,
 data flows through the components in dependency order, with inputs
 being propagated to outputs through all contracts until they stabilize
-(can't propagate further). Therefore, the subcomponent contracts, and
-thus the top-level model, must be acyclic. (An apparent syntactic
-cycle, where a component is linked back to itself, may be broken
-temporally by inserting delay elements.)  Once the data propagation
+(i.e., they cannot propagate further). Therefore, the subcomponent contracts, and
+thus the top-level model, must be acyclic. 
+Cyclic systems are made acyclic by breaking cycles with delays.
+That is to say that input at the cut point reasons about previous input data rather than the current input data.
+Once the data propagation
 has stabilized, the model proceeds to the next input data in the input
-streams. The semantics do not model computation or communication
+streams. It is worth noting that the semantics do not model computation or communication
 delay. The output of one contract is seen at the input of any
 downstream contract in the same step of the input data stream.
 
@@ -39,15 +32,18 @@ From the system and component contracts, AGREE generates a set of
 verification conditions to show that a system's component
 implementation is correct~\cite{agree2013}.  The AGREE model checker
 is then invoked to prove or disprove the verification
-conditions. Contracts and verification conditions are expressed in
-\emph{past-time linear temporal logic} (PLTL).\footnote{KLS: citation
-needed.}  PLTL is a logic enhanced with temporal operators able to
-reason about the truth values of formulas through time.  Its semantics
+conditions. The contracts and verification conditions are expressed in
+\emph{past-time linear temporal logic} (PLTL) \cite{10.1093/jigpal/8.1.55}.
+
+PLTL is a logic enhanced with temporal operators able to
+reason about the truth values of formulas through time.
+It combines past-time operators that reason over the history of computation up to a point (PTLTL) and future-time operators that reason over the computation that follows that point (LTL).
+Its semantics
 are defined relative to a point in time $i$ and a finite trace of
 system states $\pi = s_0, s_1, \ldots, s_i$.
 
 The two PLTL operators necessary for the AGREE generated verification
-conditions are $\globally$ (globally) that looks forward in time along
+conditions are $\globally$ that looks forward in time along
 the trace and $\historically$ (historically) that looks backward in
 time along the trace.  These are defined as
 \begin{eqnarray*}
@@ -60,7 +56,7 @@ $f$ in the current and all future states of $\pi$.  $\globally(f)$ is
 invariant from the current moment into the future and $\historically$ is
 invariant from the beginning of the trace to the current moment.
 
-A \emph{system} $\system = (\inputs, \outputs, \assumes,
+A \emph{system} is a tuple $(\inputs, \outputs, \assumes,
 \guarantees,C)$, where $\inputs$ is the input set, $\outputs$ is the
 output set, $\assumes$ is the set of assumptions, $\guarantees$ is the
 set of guarantees, and $C$ are subcomponents.  A subcomponent
@@ -70,24 +66,26 @@ by its own tuple $(\inputs_\component, \outputs_\component,
 components and their connections, $\mathbb{I}_\component$ is defined
 to be the set of components providing input to some component
 $\component$ in the system, and $\mathbb{O}$ is defined to be the set
-of components that provide the output for the system.  A system $S$ is
+of components that provide the output for the system.  
+
+A system $S$ is
 \emph{correct} if and only if for all components $c \in C$ the
 following two verification conditions hold:
-\begin{equation}
+\begin{equation}\label{eq:assumes}
             \globally(\historically(\assumes \wedge
             \bigwedge_{\component^\prime \in \mathbb{I}_\component} P_{\component^\prime})
             \implies \assumes_\component)
 \end{equation}
-\begin{equation}
+\begin{equation}\label{eq:guarantees}
             \globally(\historically(\assumes \wedge
             \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime})
             \implies \guarantees)
 \end{equation}
-Condition (1) verifies the input assumptions on each component under
-the system assumptions and upstream component guarantees.  It checks
+The conditions from \eqref{eq:assumes} verify the input assumptions on each component under
+the system assumptions and upstream component guarantees.  They check
 if the component guarantees and system assumptions are strong enough
 to imply input assumptions on all immediate downstream components.
-Condition (2) checks the output guarantees of the system under the
+The condition in \eqref{eq:guarantees} checks the output guarantees of the system under the
 system assumptions and component guarantees that provide the output.
 It checks if the guarantees on components providing primary outputs
 are strong enough to imply the system guarantees.
@@ -99,6 +97,7 @@ meaning that the system composition meets input assumptions at each
 input as well as the guarantees on the system output. A consequence of
 this result is that $\globally(\historically(\assumes) \implies
 \guarantees)$ holds for the system contract.
+In this way the Liskhov substitution principle applies meaning that the implementation is a safe substitution for the system contract \cite{10.1145/62139.62141}.
 
 The expanded property lists in \figref{fig:example-certificate} and
 \figref{fig:hardened-certificate} are the results from verifying or
