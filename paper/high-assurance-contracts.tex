@@ -8,6 +8,126 @@
 %%   \label{fig:dialogue}
 %% \end{figure}
 
+\subsection{Code contracts}
+\label{code-contracts}
+
+Generally, AGREE specifications do not describe the computation that a
+component performs. This is entirely by design: AGREE is intended to
+reason about component behavior solely at the specification
+level. However, the syntax of AGREE specifications provides enough
+expressiveness to support the notion of a \emph{code contract}: a
+contract from which an implementation can be extracted. First we must
+discuss a class of guarantees---\emph{output guarantees}---which
+determine the values on all output ports of a component.
+
+\begin{definition}[Output guarantee]
+An \emph{output guarantee} is a stylized guarantee that fully
+specifies the data written to an output port. There are three
+possibilities according to whether the output port $p$ is
+a \konst{data} port, an \konst{event} port, or an \konst{event data}
+port:
+\[
+\begin{array}{ll}
+\konst{data}: &  p = \mathit{e} \\
+\konst{event}: &  \konst{event} (p) = \mathit{b} \\
+\konst{event data}: & \itelse{b}{\konst{event} (p) \land p = e}{\neg \konst{event}(p)} \\
+\end{array}
+\]
+\end{definition}
+
+Informally, a code contract treats its \konst{eq} ``statements'' as
+defining a list of assignments to state variables, and its output
+guarantees as directives for producing output.
+
+\begin{definition}[Code contract] A
+  leaf component of the form $(I,O,A,P,\emptyset)$ is a
+  \emph{code contract} if $\mathit{Eqs} \cup G \subseteq P$, where
+\[\mathit{Eqs} = \set{v_1 = e_1, \cdots , v_n = e_n} \] is a non-empty set
+of \konst{eq} statements and $G$ is the set of output guarantees, one for
+each element of $O$. In the interpretation as code, the order of
+elements of $\mathit{Eqs}$ is important, and is simply taken to be the
+occurrence order of the \konst{eq} statements in the syntax. Thus we
+will work with the
+\emph{list} of equations $\mathit{Eqs} = [v_1 = e_1; \cdots ; v_n = e_n]$.
+\end{definition}
+
+
+The semantics of Section \ref{agree-semantics} supports a formal
+connection between the original contract (and verification results of
+the AGREE model checker being run on it), and code generated from
+specifications of leaf level cyber-components. It also provides the
+root meaning at the base of a chain of translation steps moving from
+AGREE specifications to CakeML executables.
+
+The first step in the chain maps the contract to a code-focused
+representation. Assume given code contract $(I,O,A,\mathit{Eqs} \cup G \cup
+P,\emptyset)$, environment $E$, and time $t$. The evaluation of $\mathit{Eqs}$
+followed by the evaluation of $G$ results in a new environment $E'$
+where the stream values for state variables and outputs have been
+computed for time $t$. The step from $E$ to $E'$ is one full cycle in
+the repeated evaluation of the component.
+
+\begin{definition}[Evaluation]
+We overload existing notation and write the evaluation of
+$\mathit{Eqs}$ and then $G$ in environment $E$ at time $t$ as
+$\sem{\mathit{Eqs}\cdot G}^E_t$. Each $v = e \in {\Eqs}$ is treated as
+an environment transformation
+\[
+ \sem{v = e}^E_t = E[v(t) \mapsto\sem{e}^E_t] \ .
+\]
+modifying $E$ so that stream $v$ has value $\sem{e}^E_t$ at time $t$.
+{\Eqs} is evaluated by folding the transformation left-to-right
+through it. The transformation is also applied to the list of output
+guarantees $G$, computing the values on output ports. The details are
+omitted, being a bit messy because of the different kinds of output
+ports available.
+\end{definition}
+
+
+\begin{definition}[Code contract correctness]
+Assume code contract $(I,O,A,\mathit{Eqs} \cup G \cup P,\emptyset)$.
+The contract is \emph{correct}, if for all $E$ and $t$, whenever the
+assumptions (historically) hold in $E$ and evaluation steps from $E$
+to $E'$, then the guarantees hold in $E'$:
+\[
+\sem{\konst{Hist}(A)}^E_t \land E' = \sem{\mathit{Eqs} \cdot G}^E_t \imp \sem{P}^{E'}_t
+\]
+\end{definition}
+\footnote
+{KLS: At this point we would like to assert that the AGREE ``consistency
+ check'' for a contract implies code contract correctness.}
+
+How does this notion of correctness integrate with the verification
+conditions addressed by model checking? In \emph{contract
+correctness}, the model checker is proving the following property
+\[
+\konst{Hist}(A) \imp P
+\]
+and in \emph{code contract correctness} we essentially prove a Hoare
+triple of the form
+\[
+\set{\konst{Hist}(A)}\; (\mathit{Eqs} \cdot G) \; \set{P}
+\]
+This accords with intution, namely that AGREE is a kind of
+`program-free program logic'; by pulling out a program $(\mathit{Eqs}
+\cdot G)$ from a code contract we find ourselves in the tepid
+bathwater of imperative program verification. In order to use the code
+contract result in system contract verifcation conditions, one has to
+show that the code contract result implies the system verification
+condtion.
+
+\subsubsection*{Wellformedness}
+The evaluation semantics given above is based on the stream
+computation model, where values `deep in the past' can be accessed in
+computations. However, the conventional program languages we target
+target do not support such a view. Thus code generation is only
+defined for a class of \emph{wellformed} equations.
+
+\begin{definition}[Wellformedness]
+\end{definition}
+
+\subsection{Code contracts for the hardened system}
+
 \newsavebox{\flt}
 \begin{lrbox}{\flt}
   \begin{lstlisting}[style=agree,numbers=left]
