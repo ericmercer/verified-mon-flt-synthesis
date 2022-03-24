@@ -9,14 +9,14 @@
 %% \end{figure}
 
 
-Generally, AGREE specifications do not describe the computation that a
+Generally, AGREE contracts do not describe the computation that a
 component performs. This is entirely by design: AGREE is intended to
 reason about component behavior solely at the specification
-level. However, the syntax of AGREE specifications provides enough
-expressiveness to support the notion of a \emph{code contract}: a
-contract from which an implementation can be extracted. First we must
-discuss a class of guarantees---\emph{output guarantees}---which
-determine the values on all output ports of a component.
+level. However, the syntax of AGREE provides enough expressiveness to
+support the notion of a \emph{code contract}: a contract from which an
+implementation can be extracted. First we must discuss a class of
+guarantees---\emph{output guarantees}---which determine the values on
+all output ports of a component.
 
 \begin{definition}[Output guarantee]
 An \emph{output guarantee} is a stylized guarantee that fully
@@ -51,31 +51,32 @@ will work with the
 
 
 The semantics of Section \ref{agree-semantics} supports a formal
-connection between the original contract (and verification results of
-the AGREE model checker being run on it), and code generated from
+connection between the original contract---and verification results of
+the AGREE model checker being run on it---and code generated from
 specifications of leaf level cyber-components. It also provides the
 root meaning at the base of a chain of translation steps moving from
-AGREE specifications to CakeML executables.
+an AGREE contract to a CakeML executables.
 
 The first step in the chain maps the contract to a code-focused
-representation. Assume given code contract $(I,O,A,\mathit{Eqs} \cup G \cup
-P,\emptyset)$, environment $E$, and time $t$. The evaluation of $\mathit{Eqs}$
-followed by the evaluation of $G$ results in a new environment $E'$
-where the stream values for state variables and outputs have been
-computed for time $t$. The step from $E$ to $E'$ is one full cycle in
-the repeated evaluation of the component.
+representation. Assume given a code contract
+$(I,O,A,\mathit{Eqs} \cup G \cup P,\emptyset)$, environment $E$, and
+time $t$. The \emph{evaluation} of $\mathit{Eqs}$ followed by the
+evaluation of $G$ results in a new environment $E'$ where the stream
+values for state variables and outputs have been computed for time
+$t$. The step from $E$ to $E'$ is one full cycle in the repeated
+evaluation of the component.
 
 \begin{definition}[Evaluation]
 We overload existing notation and write the evaluation of
 $\mathit{Eqs}$ and then $G$ in environment $E$ at time $t$ as
-$\sem{\mathit{Eqs}\cdot G}^E_t$. Each $v = e \in {\Eqs}$ is treated as
-an environment transformation
+$\sem{\mathit{Eqs}\cdot G}^E_t$. The evaluation of $v = e \in {\Eqs}$
+is an environment transformation
 \[
  \sem{v = e}^E_t = E[v(t) \mapsto\sem{e}^E_t] \ .
 \]
 modifying $E$ so that stream $v$ has value $\sem{e}^E_t$ at time $t$.
-{\Eqs} is evaluated by folding the transformation left-to-right
-through it. The transformation is also applied to the list of output
+The list {\Eqs} is evaluated by folding the transformation left-to-right
+through it. The transformation is similarly applied to the list of output
 guarantees $G$, computing the values on output ports. The details are
 omitted, being a bit messy because of the different kinds of output
 ports available.
@@ -106,22 +107,31 @@ triple of the form
 \[
 \set{\konst{Hist}(A)}\; (\mathit{Eqs} \cdot G) \; \set{P}
 \]
-This accords with intution, namely that AGREE is a kind of
+This accords with intuition, namely that AGREE is a kind of
 `program-free program logic'; by pulling out a program $(\mathit{Eqs}
 \cdot G)$ from a code contract we find ourselves in the tepid
-bathwater of imperative program verification. In order to use the code
-contract result in system contract verifcation conditions, one has to
-show that the code contract result implies the system verification
-condtion.
+bathwater of imperative program verification. For example, at this
+point one could apply a verification condition generator to help break
+down the proof obligation. In order to use the code contract result in
+system contract verifcation conditions, one has to show that the code
+contract result implies the system verification condtion.
 
 \subsubsection*{Wellformedness}
 The evaluation semantics given above is based on the stream
-computation model, where values `deep in the past' can be accessed in
-computations. However, the conventional program languages we target
-target do not support such a view. Thus code generation is only
-defined for a class of \emph{wellformed} equations.
+computation model, where values arbitrarily `deep in the past' can be
+accessed in computations by use of $\konst{pre}(-)$. However, the
+conventional program languages we target do not support such a
+view. We are currently examining transformations that compile such
+deep temporal accesses away by introducing intermediate
+variables. Avoiding discussion of the algorithm, we focus on the
+notion of \emph{wellformed} equations that needs to hold. The guiding
+intuition is that an \emph{implementable} {\Eqs} can allow access at
+most one step in the past, and accesses of a past value for a variable
+are only possible until the variable is updated. In lieu of a formal
+definition, we give a few examples.
 
 \begin{definition}[Wellformedness]
+
 \end{definition}
 
 \subsection{Code contracts for the hardened system}
