@@ -28,17 +28,17 @@ The system receives an automation request that is forwarded to a
 third-party route planner (AI).  The route planner decides the flight
 path of the UAV based on its current position and the requested task.
 The waypoint manager (WM) receives the mission command as a set of
-waypoints from the planner and starts the UAV flying the mission,
+waypoints from the planner and starts the UAV flying the mission with an event on the \texttt{start} output port,
 issuing waypoints to the UAV flight controller as the UAV location
 changes.  The waypoint manager is a legacy component that cannot be
-modified.
+modified so it critically relies on assumptions about its input behavior to guarantee its intended output behavior.
 
 The expected behavior of the SW system, and the components
 implementing the system, are modeled with AGREE contract
 specifications.  The contracts constrain input with assumptions and
-state properties of output with guarantees.  AGREE performs model
+state properties of output with guarantees if the assumptions are satisfied.  AGREE performs model
 checking on this assume-guarantee system to hierarchically prove that
-SW obeys all contract obligations under all possible finite input
+the SW component obeys all contract obligations under all possible finite input
 streams.  The AGREE analysis, contract language, and contracts for SW
 are discussed in greater detail in \secref{sec:agree}.
 
@@ -51,20 +51,23 @@ The meaning of well-formed is given by user-written predicates for
 each data type.  For example, a waypoint is well-formed if it falls
 within bounds for latitude, longitude, and altitude.  The guarantees
 for SW ensure that
-\begin{itemize}
-\item a start includes a waypoint,\footnote{KLS: maybe describe the start port earlier.}
-\item a start is within one cycle of an automation request and if not, then it persistently alerts,
-\item new waypoints coincide with air vehicle location updates, and
+\begin{compactitem}
+\item a start includes a waypoint;
+\item a start is within one cycle of an automation request and if not, then it persistently alerts;
+\item new waypoints coincide with air vehicle location updates; and
 \item all outputs are well-formed.
-\end{itemize}
+\end{compactitem}
 
 The contracts for the sub-components assume their inputs are
 well-formed, and they guarantee their outputs are well-formed.  The AI
 contract guarantees it only responds to automation requests and always
-in the same cycle.  The legacy WM contract guarantees the following: a
-start from a response and always in the same cycle; start always comes
-with a waypoint; and, further waypoints coincide with air vehicle
-location updates.  These initial specifications pass AGREE
+in the same cycle.  The legacy WM contract guarantees the following if its input assumptions hold: 
+\begin{compactitem}
+  \item it generates a start from a response from the AI and always in the same cycle; 
+  \item the start always comes with a waypoint; and 
+  \item any further waypoints coincide with air vehicle location updates.  
+\end{compactitem}
+These initial specifications pass AGREE
 verification meaning that the contract composition of the components
 with the system satisfies all component input assumptions and system
 output guarantees.
@@ -116,7 +119,8 @@ level outputs.
 
 The system designer now uses BriefCASE to cyber-harden SW by inserting
 high-assurance components in the form of a filter and a monitor, as
-shown in \figref{fig:hardened}.  A filter enforces an invariant over
+shown in \figref{fig:hardened}, to isolate the AI component and prevent it from violating the WM component input assumptions.
+A filter enforces an invariant over
 each datum in the data stream by not forwarding input to its output if
 that input violates the filter invariant.  The auto-generated AGREE
 specification states that only well-formed inputs are passed to the
@@ -125,14 +129,14 @@ policy, but it is usually based on the existing assumptions made by
 downstream components that consume the filter output.
 
 A monitor captures a relation on input data over time and is thus able
-to reason about temporal properties of that input.  A monitor raises
-an alert if the specified temporal properties are ever violated.  The
+to reason about the temporal, and other invariant, properties of that input.  A monitor raises
+an alert if the specified properties are ever violated.  The
 AGREE specification for the monitor in our example states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
 request or in the next step after the request.  As with the filter,
 the system designer provides the policy, and that policy is typically
-based on existing AADL/AGREE definitions in the SW system.
+based on existing the assumptions and guarantees of the SW system and its implementing components.
 
 The AGREE analysis of the cyber-hardened implementation is shown in
 \figref{fig:hardened-certificate}. AGREE has generated high-level
@@ -161,13 +165,13 @@ results to the actual deployed system.  If the contract model
 verification succeeds, then the meaning of those results hold for the
 deployed system.  These results, however, are only valid under
 additional assumptions on the deployed system:
-\begin{itemize}
+\begin{compactitem}
 \item contracts for non-synthesized components accurately model their deployed
 counterparts;
 \item an appropriate schedule exists to sequence component
   execution following the dependent data-flow in the design; and
 \item the communication fabric stitching components together works in harmony
   with the schedule.
-\end{itemize}
+\end{compactitem}
 \noindent Support and automation for these aspects of the design process are
-discussed in other works.\footnote{KLS:need cites to HAMR, seL4, and Adventium work}
+discussed in other works \cite{gearcase2020, dcrypps2019, 10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17, sel4-2009, scheduled-agree, 9734792}.
