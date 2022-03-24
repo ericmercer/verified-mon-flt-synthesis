@@ -9,7 +9,7 @@
 \newcommand{\component}{\ensuremath{c}}
 
 The AGREE specification language, and semantics, are inspired by the Lustre language \cite{10.1145/41625.41641}.
-Lustre reasons over a synchronous dataflow model where the inputs and outputs of
+Lustre reasons over a synchronous data-flow model where the inputs and outputs of
 components are streams.
 Informally, streams assign values to expressions at each point in time.
 AGREE contracts express relationships between input and output streams by assuming a set of allowed input streams and then guaranteeing a corresponding set of allowed output streams.
@@ -39,8 +39,8 @@ PLTL is a logic enhanced with temporal operators able to
 reason about the truth values of formulas through time.
 It combines past-time operators that reason over the history of computation up to a point (PTLTL) and future-time operators that reason over the computation that follows that point (LTL).
 Its semantics
-are defined relative to a point in time $i$ and a finite trace of
-system states $\pi = s_0, s_1, \ldots, s_i$.
+are defined relative to a point in time $i$, a finite trace of
+system states $\pi = s_0, s_1, \ldots, s_i$, and some logic formula $f$.
 
 The two PLTL operators necessary for the AGREE generated verification
 conditions are $\globally$ that looks forward in time along
@@ -59,7 +59,7 @@ invariant from the beginning of the trace to the current moment.
 A \emph{system} is a tuple $(\inputs, \outputs, \assumes,
 \guarantees,C)$, where $\inputs$ is the input set, $\outputs$ is the
 output set, $\assumes$ is the set of assumptions, $\guarantees$ is the
-set of guarantees, and $C$ are subcomponents.  A subcomponent
+set of guarantees, and $C$ are subcomponents.  Assumptions and guarantees only use the past-time operators from PLTL. A subcomponent
 $\component$ is, hierarchically, also a system, and may be designated
 by its own tuple $(\inputs_\component, \outputs_\component,
 \assumes_\component, \guarantees_\component, C_c)$.  From the
@@ -68,7 +68,7 @@ to be the set of components providing input to some component
 $\component$ in the system, and $\mathbb{O}$ is defined to be the set
 of components that provide the output for the system.  
 
-A system $S$ is
+A system is
 \emph{correct} if and only if for all components $c \in C$ the
 following two verification conditions hold:
 \begin{equation}\label{eq:assumes}
@@ -97,7 +97,7 @@ meaning that the system composition meets input assumptions at each
 input as well as the guarantees on the system output. A consequence of
 this result is that $\globally(\historically(\assumes) \implies
 \guarantees)$ holds for the system contract.
-In this way the Liskhov substitution principle applies meaning that the implementation is a safe substitution for the system contract \cite{10.1145/62139.62141}.
+Therefore the Liskhov substitution principle applies, and as such, the implementation is a safe substitution for the system contract \cite{10.1145/62139.62141}.
 
 The expanded property lists in \figref{fig:example-certificate} and
 \figref{fig:hardened-certificate} are the results from verifying or
