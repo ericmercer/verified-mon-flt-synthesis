@@ -166,45 +166,26 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 \label{sec:example}
 \input{example}
 
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item \sout{Reformat text to put single sentence on each line.}
-  \item Move example to its own repository, archive, and give the DOI and URL for the example.
-  \item \sout{Update AGREE certificates with new model}
-  \item Separate example into separate files for initial design, cyber-components and tests, hardened design, and seL4 process design.
-  \item \sout{Make clear the initial properties for the assumed correct model:}
-    \begin{compactitem}
-      \item \sout{Assume at the system level that a new automation request is not sent unless the prior request, if any, is acknowledged}
-      \item \sout{Assume at all levels input messages are well-formed}
-      \item \sout{Guarantee at all levels that waypoint outputs coincide with air vehicle location messages}
-      \item \sout{Guarantee that a start from the waypoint manager coincides with an automation response}
-      \item \sout{Guarantee for all trusted components that outputs are well-formed}
-    \end{compactitem}
-  \item Add citations, and remove KLS footnote to last paragraph---should cite HAMR, seL4, and Adventium.
-\end{compactitem}
-\fi
-
 \section{Compositional reasoning}
 \label{sec:agree}
 \input{verification-conditions}
+
+\section{Syntax and semantics of AGREE}
+\label{agree-semantics}
+\input{agree-semantics}
+
+\subsection{Formal contract for the example system}
+\input{sw-contract}
 
 \ifREVISIONS
 \subsection{Revisions}
 \begin{compactitem}
   \item \sout{Add in the AGREE specification for the system}
   \item \sout{Add in the AGREE verification conditions (e.g., similar to those in the Scheduled Components NFM submission)}
-  \item Add reference to the Liskov principle of safe-substitution when stating that the system contract is a sound abstraction of the implementation.
+  \item \sotu{Add reference to the Liskov principle of safe-substitution when stating that the system contract is a sound abstraction of the implementation.}
   \item Add back in a few sentences on the contract for the filter since those have been removed with the addition of the formal definitions.
 \end{compactitem}
 \fi
-
-\section{Syntax and semantics of AGREE}
-\label{agree-semantics}
-\input{agree-semantics}
-
-\subsection{Formal contracts for the example system}
-\input{sw-contract}
 
 \section{Code contracts for cyber components}
 \label{sec:code-contracts}

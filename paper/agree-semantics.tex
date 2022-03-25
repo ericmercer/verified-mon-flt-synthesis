@@ -1,7 +1,22 @@
-We now give an overview of a formal model for AGREE. This provides a
-setting in which we are able to relate the contract correctness
-results discussed above, obtained via model-checking, with the code
-generated from high-assurance contracts.  The syntax of AGREE is
+\begin{comment}
+This section gives an abstract mathematical overview of AGREE's
+compositional reasoning system, defining assume-guarantee contracts
+and the verification conditions that AGREE checks in order to
+modularly establish overall system correctness at the model level.
+The syntax and semantics of AGREE are sketched in some detail.  The
+discussion then becomes more concrete, showing---by example---how the
+AGREE contract language is used to specify the cyber-hardened system
+of \figref{fig:hardened}. The discussion proceeds from the
+system-level contract to the filter and monitor components, which rely
+on the notion of a \emph{code contract} to support code generation.
+\end{comment}
+
+
+We now give an overview of a formal model for AGREE syntax and semantics.
+The discussion then becomes more concrete, showing by example, how the AGREE language is used to specify the properties of the SW system introduced in \secref{sec:example}.
+Any implementation of the SW system must guarantee the specification output under the system assumptions.
+
+The syntax of AGREE is
 essentially that of quantifier-free first order predicate logic
 supplemented with a few temporal operators. The terms (\emph{e}) are
 arithmetic expressions built from variables ($v$) and numeric and
@@ -16,18 +31,18 @@ b & ::= & v \mid c \mid a \mid \neg b
             \mid b \; \set{\land,\lor,\imp,\iff}\; b
 \end{array}
 \]
-
 There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
-and formulas. Lastly, there are temporal operators $\konst{pre}(-)$,
-\emph{delay} $(-) \to (-)$, and $\konst{Hist}(-)$.
+and formulas. Lastly, there are temporal operators $\konst{pre}(-)$ (i.e., \emph{yesterday} in PLTL),
+\emph{followed-by} $(-) \to (-)$, and $\konst{Hist}(-)$.
 
-The semantics of terms and formulas is in terms of \emph{streams of
+The semantics of terms and formulas, as mentioned in the previous section, is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
 readily extended to include records and arrays. A value stream is a
-total function from time (natural numbers) to values:
+total function from time (natural numbers including 0) to values:
 \[
- \konst{stream} = \mathbb{N} \to \konst{value}
+ \konst{stream} = \mathbb{N}_0 \to \konst{value}
 \]
+
 Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
 binding variable names to value streams, the semantics $\sem{-}^E_t$
 of terms and formulas defines the meaning of compound syntax in terms
@@ -48,10 +63,9 @@ omitting the temporal operators:
 
 The temporal operators deal with time in more significant ways. The
 value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time
-$t-1$ (at time zero, \konst{pre} is undefined).  A delay $e_1 \to e_2$
-temporally ``shifts'' $e_2$ by means of prepending the first element
-of $e_1$ to it.
-
+$t-1$ (at time zero, \konst{pre} is undefined).  
+A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time 0; otherwise it is $e_2$.
+Followed-by is often used to give a value to a stream in the first step so that subsequent steps are able to use $\konst{pre}(e)$.
 \[
 \begin{array}{rcl}
 \sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
@@ -61,4 +75,10 @@ of $e_1$ to it.
 \]
 
 Although basic, these definitions can be used to define higher-level
-operators from PTLTL, such as \konst{Once} and \konst{Since}.
+operators from PTLTL, such as \konst{Once} and \konst{Since}. 
+\[
+   \begin{array}{rcl}
+      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\mathit{false} \to \konst{pre}(\konst{Once}(b)))}^E_t \\
+      \sem{\konst{Once}(b)}^E_t & = & \exists n \leq t.\; \sem{b}^E_n
+   \end{array}
+\]
