@@ -3,7 +3,7 @@
 author="Cofer, Darren
 and Gacek, Andrew
 and Miller, Steven
-and Whalen, Michael W.
+and Whalen, Michael
 and LaValley, Brian
 and Sha, Lui",
 editor="Goodloe, Alwyn E.
@@ -42,7 +42,7 @@ keywords = {system decomposition, cyber physical systems, compositional verifica
 author="Backes, John
 and Cofer, Darren
 and Miller, Steven
-and Whalen, Michael W.",
+and Whalen, Michael",
 editor="Havelund, Klaus
 and Holzmann, Gerard
 and Joshi, Rajeev",
@@ -50,7 +50,6 @@ title="Requirements Analysis of a Quad-Redundant Flight Control System",
 booktitle="NASA Formal Methods",
 year="2015",
 publisher="Springer International Publishing",
-address="Cham",
 pages="82--96",
 abstract="In this paper we detail our effort to formalize and prove requirements for the Quad-redundant Flight Control System (QFCS) within NASA's Transport Class Model (TCM). We use a compositional approach with assume-guarantee contracts that correspond to the requirements for software components embedded in an AADL system architecture model. This approach is designed to exploit the verification effort and artifacts that are already part of typical software verification processes in the avionics domain. Our approach is supported by an AADL annex that allows specification of contracts along with a tool, called AGREE, for performing compositional verification. The goal of this paper is to show the benefits of a compositional verification approach applied to a realistic avionics system and to demonstrate the effectiveness of the AGREE tool in performing this analysis.",
 isbn="978-3-319-17524-9"
@@ -60,7 +59,7 @@ isbn="978-3-319-17524-9"
 @InProceedings{10.1007/978-3-319-17524-9_13,
 author="Gacek, Andrew
 and Katis, Andreas
-and Whalen, Michael W.
+and Whalen, Michael
 and Backes, John
 and Cofer, Darren",
 editor="Havelund, Klaus
@@ -70,7 +69,6 @@ title="Towards Realizability Checking of Contracts Using Theories",
 booktitle="NASA Formal Methods",
 year="2015",
 publisher="Springer International Publishing",
-address="Cham",
 pages="173--187",
 abstract="Virtual integration techniques focus on building architectural models of systems that can be analyzed early in the design cycle to try to lower cost, reduce risk, and improve quality of complex embedded systems. Given appropriate architectural descriptions and compositional reasoning rules, these techniques can be used to prove important safety properties about the architecture prior to system construction. Such proofs build from ``leaf-level'' assume/guarantee component contracts through architectural layers towards top-level safety properties. The proofs are built upon the premise that each leaf-level component contract is realizable; i.e., it is possible to construct a component such that for any input allowed by the contract assumptions, there is some output value that the component can produce that satisfies the contract guarantees. Without engineering support it is all too easy to write leaf-level components that can't be realized. Realizability checking for propositional contracts has been well-studied for many years, both for component synthesis and checking correctness of temporal logic requirements. However, checking realizability for contracts involving infinite theories is still an open problem. In this paper, we describe a new approach for checking realizability of contracts involving theories and demonstrate its usefulness on several examples.",
 isbn="978-3-319-17524-9"
@@ -79,14 +77,13 @@ isbn="978-3-319-17524-9"
 @InProceedings{10.1007/978-3-319-29613-5_7,
 author="Katis, Andreas
 and Gacek, Andrew
-and Whalen, Michael W.",
+and Whalen, Michael",
 editor="Gurfinkel, Arie
 and Seshia, Sanjit A.",
 title="Machine-Checked Proofs for Realizability Checking Algorithms",
 booktitle="Verified Software: Theories, Tools, and Experiments",
 year="2016",
 publisher="Springer International Publishing",
-address="Cham",
 pages="110--123",
 abstract="Virtual integration techniques focus on building architectural models of systems that can be analyzed early in the design cycle to try to lower cost, reduce risk, and improve quality of complex embedded systems. Given appropriate architectural descriptions, assume/guarantee contracts, and compositional reasoning rules, these techniques can be used to prove important safety properties about the architecture prior to system construction. For these proofs to be meaningful, each leaf-level component contract must be realizable; i.e., it is possible to construct a component such that for any input allowed by the contract assumptions, there is some output value that the component can produce that satisfies the contract guarantees.",
 isbn="978-3-319-29613-5"
@@ -96,7 +93,7 @@ isbn="978-3-319-29613-5"
 # Synthesis for Reactive Assume-guarantee reasoning
 @misc{katis2017synthesis,
       title={Synthesis from Assume-Guarantee Contracts using Skolemized Proofs of Realizability}, 
-      author={Andreas Katis and Grigory Fedyukovich and Andrew Gacek and John Backes and Arie Gurfinkel and Michael W. Whalen},
+      author={Andreas Katis and Grigory Fedyukovich and Andrew Gacek and John Backes and Arie Gurfinkel and Michael Whalen},
       year={2017},
       eprint={1610.05867},
       archivePrefix={arXiv},
@@ -110,14 +107,13 @@ and Guo, Huajun
 and Gacek, Andrew
 and Backes, John
 and Gurfinkel, Arie
-and Whalen, Michael W.",
+and Whalen, Michael",
 editor="Beyer, Dirk
 and Huisman, Marieke",
 title="Validity-Guided Synthesis of Reactive Systems from Assume-Guarantee Contracts",
 booktitle="Tools and Algorithms for the Construction and Analysis of Systems",
 year="2018",
 publisher="Springer International Publishing",
-address="Cham",
 pages="176--193",
 abstract="Automated synthesis of reactive systems from specifications has been a topic of research for decades. Recently, a variety of approaches have been proposed to extend synthesis of reactive systems from propositional specifications towards specifications over rich theories. We propose a novel, completely automated approach to program synthesis which reduces the problem to deciding the validity of a set of {\$}{\$}{\backslash}forall {\backslash}exists {\$}{\$}∀∃-formulas. In spirit of IC3/PDR, our problem space is recursively refined by blocking out regions of unsafe states, aiming to discover a fixpoint that describes safe reactions. If such a fixpoint is found, we construct a witness that is directly translated into an implementation. We implemented the algorithm on top of the JKind model checker, and exercised it against contracts written using the Lustre specification language. Experimental results show how the new algorithm outperforms JKind's already existing synthesis procedure based on k-induction and addresses soundness issues in the k-inductive approach with respect to unrealizable results.",
 isbn="978-3-319-89963-3"
@@ -608,7 +604,6 @@ title="{HAMR}: An {AADL} Multi-platform Code Generation Toolset",
 booktitle="Leveraging Applications of Formal Methods, Verification and Validation",
 year="2021",
 publisher="Springer International Publishing",
-address="Cham",
 pages="274--295",
 abstract="This paper describes the High-Assurance Model-based Rapid engineering for embedded systems (HAMR) tool-kit that generates high-assurance software from standards-based system architecture models for embedded cyber-physical systems. HAMR's computational model is based on standardized run-time services and communication models that together provide an abstract platform-independent realization which can be instantiated by back-end translations for different platforms. HAMR currently targets multiple platforms, including rapid prototyping targets such as Java Virtual Machines, Linux, as well as the formally verified seL4 space partitioned micro-kernel.",
 isbn="978-3-030-89159-6"
@@ -623,7 +618,6 @@ title="Slang: The {S}ireum Programming Language",
 booktitle="Leveraging Applications of Formal Methods, Verification and Validation",
 year="2021",
 publisher="Springer International Publishing",
-address="Cham",
 pages="253--273",
 abstract="This paper presents design goals, development approaches, and applications for Slang -- a subset of the Scala programming language designed for engineering high assurance safety/security-critical systems. Rationale is given for specializing Scala for Slang so as to retain Scala's synergistic blend of imperative, functional, and object-oriented features while omitting and tailoring features that make formal verification and other analyses difficult. Strategies for enhancing the usability of Slang are discussed including integration with the broader Scala/JVM ecosystem, compilers, and development environments. A number of accompanying Slang tools are described including Slang scripting, meta-programming support, and translators to Javascript and native code that enable support for a wide range of deployment platforms. To support deployment on constrained embedded platforms, the Slang Embedded subset and an accompanying C translator generate efficient implementations that avoid garbage-collection and other aspects that hinder deployment and safety/security assurances. We conclude with a discussion of how our experiences with Slang may provide suggestions for the future of programming and programming language design for engineering critical systems.",
 isbn="978-3-030-89159-6"
