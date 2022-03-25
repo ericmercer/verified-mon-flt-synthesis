@@ -1,12 +1,20 @@
-\emph{Discussion on mapping program from stream environment to logic
-function and then to CakeML}
+Synthesis maps from model and specifications to code. The SPLAT tool
+traverses the system architecture looking for occurrences of high
+assurance components specified by code contracts; for each such
+occurrence it generates a CakeML program. Starting from the semantics
+of the code contract described in Section \ref{sec:code-contracts}
+a sequence of semantics-preserving steps are taken:
+\begin{itemize}
+\item $\sem{{\Eqs}\cdot G}$ yields a function on arbitrary depth streams
+\item transform to function over depth-1 streams (wellformedness)
+\item transform to logic function
+\item attach buffer handling to inputs and outputs (contig type parsing)
+\item translate to CakeML
+\item run CakeML compiler
+\end{itemize}
 
-Synthesis maps from model and specifications to code. The synthesis
-algorithm traverses the system architecture looking for occurrences of
-filter and monitor specifications;  for each such occurrence it
-generates a CakeML program. In the following, we examine both filter
-and monitor synthesis. The latter is typically much more involved, and
-we will therefore devote more attention to it.
+In the following, we examine further details in both filter and
+monitor synthesis.
 
 \subsection{Filter Generation}
 

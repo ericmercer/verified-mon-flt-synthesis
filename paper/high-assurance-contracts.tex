@@ -116,18 +116,19 @@ contract result implies the system verification condtion.
 \subsubsection*{Wellformedness}
 Stream-based evaluation allows values arbitrarily `deep in the past'
 to be accessed by use of $\konst{pre}(-)$. However, the programming
-languages we target do not directly support streams.  We are currently
-developing a means of translating away such deep temporal accesses by
-the introduction of intermediate variables. For now, we focus on the
-notion of \emph{wellformed} equations that needs to hold. The guiding
-intuition is that a wellformed {\Eqs} allows access at most one step
-in the past, and accesses of a past value for a variable are only
-possible until the variable is updated. In informal terms, this means
-that ${\Eqs}\cdot G$ in a code contract must be such that:
+languages being targeted by SPLAT do not directly support streams.  We
+are currently developing a means of translating away such deep
+temporal accesses by the introduction of intermediate variables. For
+now, we focus on the notion of \emph{wellformed} equations that needs
+to hold. The guiding intuition is that a wellformed {\Eqs} allows
+access at most one step in the past, and accesses of a past value for
+a variable are only possible until the variable is updated. In
+informal terms, this means that ${\Eqs}\cdot G$ in a code contract
+must be such that:
 \begin{itemize}
 \item \konst{fby} only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
 \item $\konst{pre}(e)$ is allowed only when $e$ is a variable; and
-\item $\konst{pre}(v)$ is allowed before the defining equation $v = e$, and may occur in $e$.
+\item $\konst{pre}(v)$ is allowed only before the defining equation $v = e$ (and may occur in $e$).
 \end{itemize}
 For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be
 defined, albeit in a non-wellformed manner, by
@@ -213,7 +214,7 @@ Section \ref{sec:synthesis}.
       \scalebox{0.62}{\usebox{\flt}} \\
     \end{tabular}
   \end{center}
-  \caption{Code contract specification for high-assurance filter.}
+  \caption{Code contract for high-assurance filter.}
   \label{fig:filter}
 \end{figure}
 
@@ -223,10 +224,9 @@ Section \ref{sec:synthesis}.
     \scalebox{0.62}{\usebox{\mntr}} \\
     \end{tabular}
   \end{center}
-  \caption{Code contract specification for high-assurance monitor.}
+  \caption{Code contract for high-assurance monitor.}
   \label{fig:monitor}
 \end{figure}
-
 
 As previously discussed, transformations carried out in the BriefCASE
 interface have created a cyber-hardened system, protecting against
@@ -257,7 +257,6 @@ component, and its connections in the system implementation, as part
 of the transformation.  It also creates a default AGREE specification
 that defines everything about the component behavior, leaving only the
 component behavior (policy) to be specified.
-
 
 Code contracts for the filter and monitor are shown in
 \figref{fig:filter} and \figref{fig:monitor}.\footnote{KLS: do we discuss wellformedness anywhere?} In general, the
