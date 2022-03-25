@@ -78,6 +78,7 @@ Although basic, these definitions can be used to define higher-level
 operators from PTLTL, such as \konst{Once} and \konst{Since}. 
 \[
    \begin{array}{rcl}
-      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\mathit{false} \to \konst{pre}(\konst{Once}(b)))}^E_t
+      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\mathit{false} \to \konst{pre}(\konst{Once}(b)))}^E_t \\
+      \sem{\konst{Once}(b)}^E_t & = & \exists n \leq t.\; \sem{b}^E_n
    \end{array}
 \]
