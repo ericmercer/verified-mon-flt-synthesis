@@ -64,7 +64,7 @@ AGREE proves the component implements the test, and the Liskov substitution prin
     \scalebox{0.62}{\usebox{\tst}} \\
     \end{tabular}
   \end{center}
-  \caption{AGREE Unit test for high-assurance monitor.}
+  \caption{AGREE unit test for high-assurance monitor.}
   \label{fig:test}
 \end{figure}
 
@@ -77,8 +77,19 @@ It also checks that the alarm does not fire.
 \linesref{line:tst-guarantee-1}{line:tst-guarantee-2} define the expected test output.
 The test additionally proves that nothing happens after the initial test input and output (e.g., no more input is provided and no more output is generated).
 AGREE proves the test correct.
-\linesref{line:tst-imp-start}{line:tst-imp-end} implement the system using the component (\lineref{line:tst-imp-comp})
+\linesref{line:tst-imp-start}{line:tst-imp-end} implement the system using the component (\lineref{line:tst-imp-comp}).
+\figref{fig:test-output} is the AGREE output for the test is showing that it passes. 
 
 This AGREE test method is effective for detecting vacuity, under-specified behavior, and missed corner cases.
 It enables designers to iteratively develop specifications inside the MBE framework using AGREE, and it builds assurance that the specification reflects the desired behavior with black-box, white-box, and other test coverage metrics.
 These same tests can be synthesized to the backend implementation for traditional testing.
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \includegraphics[scale=0.38]{agree-test-output.png} \\
+    \end{tabular}
+  \end{center}
+  \caption{AGREE output for unit test.} 
+  \label{fig:test-output}
+\end{figure}
