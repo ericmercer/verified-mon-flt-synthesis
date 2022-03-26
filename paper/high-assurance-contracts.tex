@@ -140,15 +140,16 @@ defined, albeit in a non-wellformed manner, by
 {\small
 \begin{verbatim}
   N = 0 -> 1 + pre(N)
-  Fib = if N <= 1 then 1 else pre(Fib) + pre(pre(Fib)).
+  Fib = if N <= 1 then 1 else pre(Fib) + pre(pre(Fib))
 \end{verbatim}
 }
 \noindent or by (wellformed):
 {\small
 \begin{verbatim}
   N = 0 -> 1 + pre(N)
-  A = 42 -> pre(Fib)
-  Fib = if N <= 1 then 1 else pre(Fib) + pre(A)
+  F2 = 42 -> pre(F1)
+  F1 = 42 -> pre(Fib)
+  Fib = if N <= 1 then 1 else F1 + F2
 \end{verbatim}
 }
 A wellformed ${\Eqs} \cdot G$ is straightforward to implement in
@@ -160,9 +161,9 @@ Section \ref{sec:synthesis}.
 \newsavebox{\flt}
 \begin{lrbox}{\flt}
   \begin{lstlisting}[style=agree,numbers=left] -- start user
-    -- start user definitions 
+    -- start user definitions
     eq policy : bool =
-      WELL_FORMED_AUTOMATION_RESPONSE(Input); 
+      WELL_FORMED_AUTOMATION_RESPONSE(Input);
     -- stop user definitions
 
     guarantee "Filter output is well-formed" :
@@ -267,7 +268,7 @@ We now discuss in some detail the monitor.
 \subsubsection{Monitor specification}
 BriefCASE generates everything but the
 \konst{eq}-statements in \linesref{line:mon-assume}{line:mon-policy} of
-\figref{fig:monitor}. 
+\figref{fig:monitor}.
 The
 \texttt{alert} variable defined on \lineref{line:mon-alert} depends
 not just on the policy but also on configuration details supplied when
