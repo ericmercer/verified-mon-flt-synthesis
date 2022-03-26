@@ -1,31 +1,17 @@
+Before discussing the final steps in synthesis, we take a moment to discuss how code-contracts, and any AGREE specification in general, can be traditionally tested to build assurance.
 Writing and proving properties about AGREE specifications is hard not just because it is a formal process but  because it reasons about constraints that define the entire input space for a component, and the entire output space, at once.
 The case studies showed that engineers, and formal method practitioners, make mistakes writing these specifications especially if the computation or temporal reasoning is complex.
-It is difficult to reason about the whole of the specification to understand the defined behavior of a component or system.
-A natural consequence of this inherent complexity is that the AGREE analysis proves out, but that proof is about a flawed specification.
-The AGREE analysis, and synthesized component, is only as good as the specifications.
-As the saying goes, \emph{garbage in means garbage out}.
 
-The case studies found four common mistakes in specifications: contradictions, vacuity, under-specification, and missed corner cases.
-Contradictions arise from inconsistent contracts that state conflicting constraints in any given moment invalidating the verification results: a property can be proved true and it can be proved false.
+Four common mistakes in specifications have been observed: contradictions, vacuity, under-specification, and missed corner cases.
+Contradictions arise from inconsistent contracts that state conflicting constraints in any given moment invalidating the verification results.
 Vacuity is a common pitfall with implication when the left hand side is always false making the implication true. 
-Vacuity is referred to as the \emph{block of wood} problem because a system that does nothing passes verification with implications.
-
 Under-specification is very challenging because verification is not able to prove anything (or it can prove everything in the case of existential properties) so nothing is actually known after verification except that the system is under-specified. 
-The tell-tale symptom of underspecification is that AGREE verification is not able to prove anything about a property: it is not true and it is not false.
-The property stated in the positive fails and the property stated in the negative fails.
 Missed corner cases is a common problem to all disciplines.
-It is especially hard here because there is no easy way break down, and check, specifications in a case by case input analysis.
+It is especially hard here because there is no direct way to provide test input and check test output.
 
-AGREE already detects, and reports, contradicting and inconsistent contracts, but it does not check for vacuity and under-specification, and missed corner cases is always an issue.
-The case studies navigated these challenges by writing a specification, synthesizing it to code with SPLAT, and then running unit 
-tests on the synthesized code in a testing harness.
-The synthesized code is known to precisely capture the meaning of the specification, so the tests directly reflect the behavior of the specification in much the same way as compiled code is assumed correct.
-The designers are then able to iteratively test and refine the specifications into a final form.
-The process is inefficient, requires an additional, unneeded, test harness, the code is proved correct by SPLAT after all, and steps outside the MBE environment using the implementation, rather than the model, to analyze and understand the system model.
-
-There needs to be a bridge between the formal model in AGREE with its proof of system properties and more traditional reasoning with test that is a well established method for building assurance.
-Classical black-box and white-box test coverage should be, and are, equally applicable to formal reasoning as traditional engineering in regards to developing, and eventually proving, the correctness of a specification.
-AGREE is able to provide such a testing framework.
+AGREE already detects, and reports, contradicting and inconsistent contracts, but it does not check for vacuity and under-specification.
+The tempting approach to check these issues is to use the synthesize path and then apply traditional testing.
+Such an approach adds extra steps that are not needed as it is possible to bridge the formal model in AGREE with its proof system to traditional reasoning with test.
 
 Unit tests are created in AGREE by writing a system specification that assumes the test input and then guarantees the test output.
 The system is then implemented with the component under test and its specification.
@@ -96,8 +82,3 @@ AGREE proves the test correct.
 This AGREE test method is effective for detecting vacuity, under-specified behavior, and missed corner cases.
 It enables designers to iteratively develop specifications inside the MBE framework using AGREE, and it builds assurance that the specification reflects the desired behavior with black-box, white-box, and other test coverage metrics.
 These same tests can be synthesized to the backend implementation for traditional testing.
-
-Traditional testing is important for the implementations of components that are not high-assurance.
-The behavior of regular components must be modeled in AGREE since they are part of any system implementation, and their specifications provide input to high-assurance components.
-Like the high-assurance components, these specifications must be meaningful in modeling the representative component.
-Testing is an effective means for validating such specifications, and AGREE can use the existing tests from the component implementation to check the specifications, and it can generate additional tests that probe the behavior of the component implementation when writing the specifications.
