@@ -63,7 +63,7 @@ omitting the temporal operators:
 
 The temporal operators deal with time in more significant ways. The
 value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time
-$t-1$ (at time zero, \konst{pre} is undefined).  
+$t-1$ (at time zero, \konst{pre} is undefined).
 A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time zero; otherwise it is $e_2$.
 Followed-by is often used to give a value to a stream in the first step so that subsequent steps are able to use $\konst{pre}(e)$.
 \[
@@ -76,14 +76,21 @@ Followed-by is often used to give a value to a stream in the first step so that 
 
 Although basic, these definitions can be used to define higher-level
 past-time operators from PLTL such as \konst{Once} and \konst{Since}.
-These are defined relative to their corresponding bound output stream $o$.
+These can be expressed in a recursive style as follows:
+%% \[
+%%    \begin{array}{rcl}
+%%       \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\konst{false} \to \konst{pre}(o))}^E_t \\
+%%       \sem{\konst{Since}(a, b)}^E_t & = & \sem{b \vee (a and (\konst{false} \to \konst{pre}(o)))}^E_t \\
+%%    \end{array}
+%% \]
 \[
-   \begin{array}{rcl}
-      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\konst{false} \to \konst{pre}(o))}^E_t \\
-      \sem{\konst{Since}(a, b)}^E_t & = & \sem{b \vee (a and (\konst{false} \to \konst{pre}(o)))}^E_t \\
+\begin{array}{rcl}
+ \konst{Once}(b) & = & b \vee \konst{pre}(\konst{Once}(b)) \\
+ \konst{Since}(a, b) & = & b \lor (a \land \konst{pre}(\konst{Since}(a, b))
    \end{array}
 \]
-$\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the current moment.
-$\konst{Since}(a, b)$ is true if $a$ has been true in all moments up to the present one since $b$ most recently became true.
-These both refer the their bound output stream $o$ to know if they were true or false in their previous step.
+
+$\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the
+current moment.  $\konst{Since}(a, b)$ is true if $a$ has been true in
+all moments up to the present one since $b$ most recently became true.
 All other past-time operators of PLTL can be defined similarly.
