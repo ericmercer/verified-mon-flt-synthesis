@@ -1,4 +1,4 @@
-# Compsitional Reasoning with AGREE
+# Compositional Reasoning with AGREE
 @InProceedings{10.1007/978-3-642-28891-3_13,
 author="Cofer, Darren
 and Gacek, Andrew
@@ -164,15 +164,16 @@ year = {2017},
 issue_date = {January 2018},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
-volume = {2},
-number = {POPL},
 url = {https://doi.org/10.1145/3158139},
 doi = {10.1145/3158139},
 abstract = {Software contracts allow programmers to state rich program properties using the full expressive power of an object language. However, since they are enforced at runtime, monitoring contracts imposes significant overhead and delays error discovery. So contract veri cation aims to guarantee all or most of these properties ahead of time, enabling valuable optimizations and yielding a more general assurance of correctness. Existing methods for static contract verification satisfy the needs of more restricted target languages, but fail to address the challenges unique to those conjoining untyped, dynamic programming, higher-order functions, modularity, and statefulness. Our approach tackles all these features at once, in the context of the full Racket system—a mature environment for stateful, higher-order, multi-paradigm programming with or with- out types. Evaluating our method using a set of both pure and stateful benchmarks, we are able to verify 99.94% of checks statically (all but 28 of 49, 861).  Stateful, higher-order functions pose significant challenges for static contract verification in particular. In the presence of these features, a modular analysis must permit code from the current module to escape permanently to an opaque context (unspecified code from outside the current module) that may be stateful and therefore store a reference to the escaped closure. Also, contracts themselves, being predicates wri en in unrestricted Racket, may exhibit stateful behavior; a sound approach must be robust to contracts which are arbitrarily expressive and interwoven with the code they monitor. In this paper, we present and evaluate our solution based on higher-order symbolic execution, explain the techniques we used to address such thorny issues, formalize a notion of behavioral approximation, and use it to provide a mechanized proof of soundness.},
-journal = {Proc. ACM Program. Lang.},
+journal = {Proceedings of the ACM on Programming Languages},
+volume = {2},
+number = {POPL},
 month = dec,
 articleno = {51},
 numpages = {30},
+pages = {51:1--51:30},
 keywords = {symbolic execution, Higher-order contracts}
 }
 
@@ -238,7 +239,7 @@ isbn="978-3-540-45212-6"
 
 @inproceedings{10.1145/41625.41641,
 author = {Caspi, P. and Pilaud, D. and Halbwachs, N. and Plaice, J. A.},
-title = {LUSTRE: A Declarative Language for Real-Time Programming},
+title = {{LUSTRE}: A Declarative Language for Real-Time Programming},
 year = {1987},
 isbn = {0897912152},
 publisher = {Association for Computing Machinery},
@@ -247,13 +248,13 @@ url = {https://doi.org/10.1145/41625.41641},
 doi = {10.1145/41625.41641},
 abstract = {LUSTRE is a synchronous data-flow language for programming systems which interact with their environments in real-time. After an informal presentation of the language, we describe its semantics by means of structural inference rules. Moreover, we show how to use this semantics in order to generate efficient sequential code, namely, a finite state automaton which represents the control of the program. Formal rules for program transformation are also presented.},
 booktitle = {Proceedings of the 14th ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages},
-pages = {178–188},
+pages = {178--188},
 numpages = {11},
 location = {Munich, West Germany},
 series = {POPL '87}
 }
 
-@ARTICLE{97300,  author={Halbwachs, N. and Caspi, P. and Raymond, P. and Pilaud, D.},  journal={Proceedings of the IEEE},   title={The synchronous data flow programming language LUSTRE},   year={1991},  volume={79},  number={9},  pages={1305-1320},  doi={10.1109/5.97300}}
+@ARTICLE{97300,  author={Halbwachs, N. and Caspi, P. and Raymond, P. and Pilaud, D.},  journal={Proceedings of the IEEE},   title={The synchronous data flow programming language {LUSTRE}},   year={1991},  volume={79},  number={9},  pages={1305--1320},  doi={10.1109/5.97300}}
 
 @article{10.1145/1379023.1375674,
 author = {Biernacki, Dariusz and Cola\c{c}o, Jean-Louis and Hamon, Gregoire and Pouzet, Marc},
@@ -277,9 +278,9 @@ keywords = {type systems, synchronous languages, real-time systems, semantics, c
 
 @article{10.1145/2345141.2248426,
 author = {G\'{e}rard, L\'{e}onard and Guatto, Adrien and Pasteur, C\'{e}dric and Pouzet, Marc},
-title = {A Modular Memory Optimization for Synchronous Data-Flow Languages: Application to Arrays in a Lustre Compiler},
+title = {A Modular Memory Optimization for Synchronous Data-Flow Languages: Application to Arrays in a {L}ustre Compiler},
 year = {2012},
-issue_date = {MAY 2012},
+issue_date = {May 2012},
 publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
 volume = {47},
@@ -467,7 +468,7 @@ url           = {https://cps-vo.org/hcss2020/slind}
                Magnus O. Myreen and
                Yong Kiam Tan},
   title     = {Do you have space for dessert? A verified space cost semantics for {CakeML} programs},
-  journal   = {Proc. ACM Program. Lang. (OOPSLA)},
+  journal   = {Proceedings of the 2020 ACM Object-Oriented Programming, Systems, Languages, and Applications Conference (OOPSLA)},
   volume    = {4},
   pages     = {204:1--204:29},
   year      = {2020},
@@ -565,9 +566,9 @@ url           = {https://cps-vo.org/hcss2020/slind}
     journal = {Logic Journal of the IGPL},
     volume = {8},
     number = {1},
-    pages = {55-85},
+    pages = {55--85},
     year = {2000},
-    month = {01},
+    month = {January},
     abstract = "{A sound and complete axiomatic system and a tableau-based decision procedure are presented for propositional temporal logic over linear and discrete time models. The axiomatic system and decision procedure are presented for the full logic, including the past operators, but contain a clear identification of the parts whose omission yields axiomatization and a decision procedure for the future fragment. The paper summarizes work of over 20 years and is intended to provide a definitive reference to the version of propositional temporal logic used for the specification and verification of reactive systems.}",
     issn = {1367-0751},
     doi = {10.1093/jigpal/8.1.55},
@@ -588,7 +589,7 @@ issn = {0362-1340},
 url = {https://doi.org/10.1145/62139.62141},
 doi = {10.1145/62139.62141},
 journal = {SIGPLAN Notices},
-month = {jan},
+month = {January},
 pages = {17--34},
 numpages = {18}
 }
@@ -634,10 +635,10 @@ isbn="978-3-030-89159-6"
 
 @ARTICLE{9734792,
   author={Cofer, Darren and Amundson, Isaac and Babar, Junaid and Hardin, David and Slind, Konrad and Alexander, Perry and Hatcliff, John and Robby, Robby and Klein, Gerwin and Lewis, Corey and Mercer, Eric and Shackleton, John},
-  journal={IEEE Security   Privacy}, 
+  journal={IEEE Security \& Privacy}, 
   title={Cyberassured Systems Engineering at Scale}, 
   year={2022},
   volume={},
   number={},
-  pages={2-14},
+  pages={2--14},
   doi={10.1109/MSEC.2022.3151733}}
