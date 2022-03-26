@@ -55,10 +55,10 @@ connection between the original contract---and verification results of
 the AGREE model checker being run on it---and code generated from
 specifications of leaf level cyber-components. It also provides the
 root meaning at the base of a chain of translation steps moving from
-an AGREE contract to a CakeML executables.
+an AGREE contract to a CakeML executable.
 
 The first step in the chain maps the contract to a code-focused
-representation. Assume given a code contract
+representation. Assume a code contract
 $(I,O,A,\mathit{Eqs} \cup G \cup P,\emptyset)$, environment $E$, and
 time $t$. The \emph{evaluation} of $\mathit{Eqs}$ followed by the
 evaluation of $G$ results in a new environment $E'$ where the stream
@@ -106,12 +106,11 @@ triple of the form
 \]
 This accords with intuition, namely that AGREE is a kind of
 `program-free program logic'; by pulling out a program $(\mathit{Eqs}
-\cdot G)$ from a code contract we find ourselves in the tepid
-bathwater of imperative program verification. For example, at this
+\cdot G)$ from a code contract we find ourselves in the domain of imperative program verification. For example, at this
 point one could apply a verification condition generator to help break
 down the proof obligation. In order to use the code contract result in
-system contract verifcation conditions, one has to show that the code
-contract result implies the system verification condtion.
+system contract verification conditions, one has to show that the code
+contract result implies the system verification condition.
 
 \subsubsection*{Wellformedness}
 Stream-based evaluation allows values arbitrarily `deep in the past'
@@ -126,7 +125,7 @@ a variable are only possible until the variable is updated. In
 informal terms, this means that ${\Eqs}\cdot G$ in a code contract
 must be such that:
 \begin{itemize}
-\item \konst{fby} only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
+\item Followed-by only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
 \item $\konst{pre}(e)$ is allowed only when $e$ is a variable; and
 \item $\konst{pre}(v)$ is allowed only before the defining equation $v = e$ (and may occur in $e$).
 \end{itemize}
@@ -161,8 +160,10 @@ Section \ref{sec:synthesis}.
 \newsavebox{\flt}
 \begin{lrbox}{\flt}
   \begin{lstlisting}[style=agree,numbers=left] -- start user
-  definitions eq policy : bool =
-  WELL_FORMED_AUTOMATION_RESPONSE(Input); -- stop user definitions
+    -- start user definitions 
+    eq policy : bool =
+      WELL_FORMED_AUTOMATION_RESPONSE(Input); 
+    -- stop user definitions
 
     guarantee "Filter output is well-formed" :
       if event(Input) and policy then
@@ -259,17 +260,15 @@ that defines everything about the component behavior, leaving only the
 component behavior (policy) to be specified.
 
 Code contracts for the filter and monitor are shown in
-\figref{fig:filter} and \figref{fig:monitor}.\footnote{KLS: do we discuss wellformedness anywhere?} In general, the
-\konst{eq}-statements of a code contract keep track of
-state and provide data values from which to compute values to place on
-the outputs.
+\figref{fig:filter} and \figref{fig:monitor}.
+The filter is direct: it defines the policy according to the well-formed requirement for data.
+We now discuss in some detail the monitor.
 
 \subsubsection{Monitor specification}
 BriefCASE generates everything but the
 \konst{eq}-statements in \linesref{line:mon-assume}{line:mon-policy} of
-\figref{fig:monitor}.  As with the filter, the guarantees
-completely define the output, as required for synthesis, in terms of
-the policy and the alert.  The
+\figref{fig:monitor}. 
+The
 \texttt{alert} variable defined on \lineref{line:mon-alert} depends
 not just on the policy but also on configuration details supplied when
 the component is specified.  At configuration
@@ -290,8 +289,8 @@ otherwise increments by one.
 The latency bound for the monitor is defined by the constant
 \texttt{MAX\_LATENCY} on \lineref{line:mon-const}.  Here the constant
 is set to one to be consistent with the system specification from the
-previous section.  At time 0 the policy is trivial: a response
-requires an accompanying request.  After time 0, if a request is
+previous section.  At time zero the policy is trivial: a response
+requires an accompanying request.  After time zero, if a request is
 pending in the current time step, then the latency must still be under
 the bound, and if there is a response, then it closes a request now or
 a pending request from earlier in time.

@@ -64,7 +64,7 @@ omitting the temporal operators:
 The temporal operators deal with time in more significant ways. The
 value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time
 $t-1$ (at time zero, \konst{pre} is undefined).  
-A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time 0; otherwise it is $e_2$.
+A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time zero; otherwise it is $e_2$.
 Followed-by is often used to give a value to a stream in the first step so that subsequent steps are able to use $\konst{pre}(e)$.
 \[
 \begin{array}{rcl}
@@ -79,8 +79,8 @@ past-time operators from PLTL such as \konst{Once} and \konst{Since}.
 These are defined relative to their corresponding bound output stream $o$.
 \[
    \begin{array}{rcl}
-      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\mathit{false} \to \konst{pre}(o))}^E_t \\
-      \sem{\konst{Since}(a, b)}^E_t & = & \sem{b \vee (a and (\mathit{false} \to \konst{pre}(o)))}^E_t \\
+      \sem{\konst{Once}(b)}^E_t & = & \sem{b \vee (\konst{false} \to \konst{pre}(o))}^E_t \\
+      \sem{\konst{Since}(a, b)}^E_t & = & \sem{b \vee (a and (\konst{false} \to \konst{pre}(o)))}^E_t \\
    \end{array}
 \]
 $\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the current moment.
