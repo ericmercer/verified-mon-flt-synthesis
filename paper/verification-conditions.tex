@@ -9,12 +9,21 @@
 \newcommand{\component}{\ensuremath{c}}
 
 The AGREE specification language, and semantics, are inspired by the Lustre language \cite{10.1145/41625.41641}.
-Lustre reasons over a synchronous data-flow model where the inputs and outputs of
+Lustre semantics are synchronous data-flow where the inputs and outputs of
 components are streams.
 Informally, streams assign values to expressions at each point in time.
 AGREE contracts express relationships between input and output streams by assuming a set of allowed input streams and then guaranteeing a corresponding set of allowed output streams.
 Output for streams not included in the assumed input is undefined. 
 
+A component is defined by its ports in AADL.
+There are three types of AADL ports: data ports, event data ports, and event ports.
+A data port is a sampled port: the data can be read at anytime.
+An event data port indicates when data is present with an event.
+An event port has no data and only signals the presence or absence of the event.
+Event based ports are not buffered in our application here.
+An AGREE contracts defines properties of the input to output behavior of a component's ports.
+
+A system implementation is given by is implementing components and connections between their ports.
 When considering a system of components,
 data flows through the components in dependency order, with inputs
 being propagated to outputs through all contracts until they stabilize
