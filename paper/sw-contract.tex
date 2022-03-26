@@ -39,6 +39,8 @@ guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
   \label{fig:sw}
 \end{figure}
 
+The actual surface syntax for AGREE that is embedded in OSATE is slightly different than the formal semantics in the previous section.
+The mapping between the two is straightforward.
 The AGREE specification for the SW component in the example of
 Section~\ref{sec:example} is given in \figref{fig:sw}.  The
 specification uses \texttt{eq} statements to define variables local to
@@ -55,35 +57,25 @@ The \texttt{assume} statement is a string description followed by a predicate.
 Those on \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2} are implications requiring that when data is present it is well-formed.
 The well-formed predicates themselves are defined elsewhere using AGREE functions.
 
-The assumption on \lineref{line:sw-assume-3} constrains when a request can arrive by reasoning about the \emph{state} of the contract.
-Streams are associated with every expression in AGREE, meaning that expressions are defined through time, and are therefore stateful.
-When writing assumptions and guarantees, it is important to differentiate pre-state, before a contract updates its state, and post-state, after a contract updates its state, in response to the current input. AGREE provides the \texttt{pre} operator to make that distinction.
-
-The \texttt{pre} operator returns the previous value of the enclosed expression by looking back one step in time on the expression's stream.
+The assumption on \lineref{line:sw-assume-3} constrains when a request can arrive by reasoning about the \emph{state} of the contract defined be the associated streams.
+When writing assumptions and guarantees, it is important to differentiate pre-state, before a contract updates its state, and post-state, after a contract updates its state, in response to the current input.
+The \texttt{pre} naturally makes that distinction.
 In general, assumptions regarding state should be evaluated in the pre-state of the component with the current inputs, and guarantees regarding state should be evaluated on the post-state of the component given the current inputs.
-Guarantees should use the \texttt{pre} operator anytime they need to reason about the current state relative to the previous state.
+Additionally, guarantees should use \texttt{pre} anytime they need to reason about the current state relative to the previous state.
 
-The assumption on \lineref{line:sw-assume-3} uses a \emph{followed-by} operator, \texttt{->}, to \emph{guard} the \texttt{pre} operator at time 0.
-A followed-by expression defines what happens at the first instance of the stream, time 0, and then what follows after.
-Here the assumption is \texttt{true} at time 0 and then it is the truth value of the implication in all future instances.
-The followed-by guards the \texttt{pre} because expressions are undefined before time 0 and the followed-by prevents the \texttt{pre} from being evaluated before time 1.
-So after time 0, the assumption depends on the presence of a request and the pre-state of the component.
-
-The stream semantics in AGREE mean that it is possible to use PLTL operators that look back in time.
-The \texttt{Historically} operator is the same as $\historically$ defined previously; it is true if the enclosed expression has been true in all moments up to the present one.
-The \texttt{Since} operator is true if the first expression has been true in all moments up to the present one since the second expression most recently became true.
-The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}--\emph{not request since start}.
+The assumption on \lineref{line:sw-assume-3} uses a followed-by expression so it is \texttt{true} at time zero and then it is the truth value of the implication in all future instances.
+The followed-by guards the \texttt{pre} as mentioned previously;
+thus after time zero, the assumption depends on the presence of a request and the pre-state of the component.
+The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---\emph{not request since start}.
 
 The guarantees on \linesref{line:sw-guarantee-1}{line:sw-guarantee-3} coincide events and assert well-formed output.
 The guarantees on \linesref{line:sw-guarantee-4}{line:sw-guarantee-6} define temporal properties of the component.
 \lineref{line:sw-guarantee-4} insists that a start happens with a request or one step after a request.
 The guarantee uses the assumption on \lineref{line:sw-assume-3} and does not check for two requests in a row without a start as the assumption precludes that input behavior.
-It differentiates with the followed-by operator what is required at time 0, the start must coincide with the request, with what is required after time 0, the start must coincide with the request or is a response to a request one step earlier.
+It differentiates with the followed-by what is required at time zero, the start must coincide with the request, with what is required after time zero, the start must coincide with the request or is a response to a request one step earlier.
 The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
 
 \lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound.
 Together with \lineref{line:sw-guarantee-4} the contract model allows for non-alerting and alerting behavior.
-The last guarantee ensures that alert is persistent.
-The \texttt{Once} operator is true if the enclosed expression has ever been true before, or in, the current moment.
 \lineref{line:sw-guarantee-6} ensures if alert has ever happened, then it is happening in the present moment.
-These six guarantees define the behavior of the SW component under the three assumptions.
+These six guarantees define the behavior of the SW component under the three assumptions and correspond to the informal descriptions given in \secref{sec:example}.

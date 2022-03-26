@@ -177,36 +177,14 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 \subsection{Formal contract for the example system}
 \input{sw-contract}
 
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item \sout{Add in the AGREE specification for the system}
-  \item \sout{Add in the AGREE verification conditions (e.g., similar to those in the Scheduled Components NFM submission)}
-  \item \sotu{Add reference to the Liskov principle of safe-substitution when stating that the system contract is a sound abstraction of the implementation.}
-  \item Add back in a few sentences on the contract for the filter since those have been removed with the addition of the formal definitions.
-\end{compactitem}
-\fi
-
 \section{Code contracts for cyber components}
 \label{sec:code-contracts}
 \input{high-assurance-contracts}
 
+
 \section{Testing Specifications with AGREE}
 \label{sec:testing}
 \input{testing}
-
-%% \section{Synthesis from code contracts}
-%% \label{sec:semantics}
-%% \input{semantics}
-
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item Add in intuitive definition or AGREE leaf-component semantics
-  \item State well-formed theorem
-  \item State correctness theorem or any key theorems to the synthesis proof
-\end{compactitem}
-\fi
 
 \section{Synthesis to CakeML}
 \label{sec:synthesis}
