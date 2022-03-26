@@ -132,25 +132,25 @@ must be such that:
 For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be
 defined, albeit in a non-wellformed manner, by
 {\small
-\begin{verbatim}
+\begin{lstlisting}[style=agree]
   Fib = 1 -> pre(1 -> Fib + pre Fib)
-\end{verbatim}
+\end{lstlisting}
 }
 \noindent or by (again non-wellformed)
 {\small
-\begin{verbatim}
+\begin{lstlisting}[style=agree]
   N = 0 -> 1 + pre(N)
   Fib = if N <= 1 then 1 else pre(Fib) + pre(pre(Fib))
-\end{verbatim}
+\end{lstlisting}
 }
 \noindent or by (wellformed):
 {\small
-\begin{verbatim}
+\begin{lstlisting}[style=agree]
   N = 0 -> 1 + pre(N)
   F2 = 42 -> pre(F1)
   F1 = 42 -> pre(Fib)
   Fib = if N <= 1 then 1 else F1 + F2
-\end{verbatim}
+\end{lstlisting}
 }
 A wellformed ${\Eqs} \cdot G$ is straightforward to implement in
 conventional programming languages, as we will see in
