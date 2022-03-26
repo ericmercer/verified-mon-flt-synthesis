@@ -57,11 +57,18 @@ The \texttt{assume} statement is a string description followed by a predicate.
 Those on \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2} are implications requiring that when data is present it is well-formed.
 The well-formed predicates themselves are defined elsewhere using AGREE functions.
 
-The assumption on \lineref{line:sw-assume-3} constrains when a request can arrive by reasoning about the \emph{state} of the contract.
-When writing assumptions and guarantees, it is important to differentiate pre-state, before a contract updates its state, and post-state, after a contract updates its state, in response to the current input.
-The \texttt{pre} naturally makes that distinction by looking back one step in the stream.
-In general, assumptions regarding state should be evaluated in the pre-state of the component with the current inputs, and guarantees regarding state should be evaluated on the post-state of the component given the current inputs.
-Additionally, guarantees should use \texttt{pre} anytime they need to reason about the current state relative to the previous state.
+The assumption on \lineref{line:sw-assume-3} constrains when a request
+can arrive by reasoning about the \emph{state} of the contract defined
+by the associated streams.  When writing assumptions and guarantees,
+it is important to differentiate pre-state, before a contract updates
+its state, and post-state, after a contract updates its state, in
+response to the current input.  The \texttt{pre} naturally makes that
+distinction.  In general, assumptions regarding state should be
+evaluated in the pre-state of the component with the current inputs,
+and guarantees regarding state should be evaluated on the post-state
+of the component given the current inputs.  Additionally, guarantees
+should use \texttt{pre} anytime they need to reason about the current
+state relative to the previous state.
 
 The assumption on \lineref{line:sw-assume-3} uses a followed-by expression so it is \texttt{true} at time zero and then it is the truth value of the implication in all future instances.
 The followed-by guards the \texttt{pre} as mentioned previously;
