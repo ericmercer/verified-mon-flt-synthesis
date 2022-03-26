@@ -30,7 +30,6 @@ being propagated to outputs through all contracts until they stabilize
 (i.e., they cannot propagate further). Therefore, the subcomponent contracts, and
 thus the top-level model, must be acyclic. 
 Cyclic systems are made acyclic by breaking cycles with delays.
-That is to say that input at the cut point reasons about previous input data rather than the current input data.
 Once the data propagation
 has stabilized, the model proceeds to the next input data in the input
 streams. It is worth noting that the semantics do not model computation or communication
