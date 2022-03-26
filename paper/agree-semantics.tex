@@ -85,9 +85,9 @@ These can be expressed in a recursive style as follows:
 %% \]
 \[
 \begin{array}{rcl}
- \konst{Once}(b) & = & b \vee \konst{pre}(\konst{Once}(b)) \\
- \konst{Since}(a, b) & = & b \lor (a \land \konst{pre}(\konst{Since}(a, b))
-   \end{array}
+\konst{Once}(b) & = & b \to b \vee \konst{pre}(\konst{Once}(b)) \\
+\konst{Since}(a, b) & = & b \to b \lor (a \land \konst{pre}(\konst{Since}(a, b))
+\end{array}
 \]
 
 $\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the

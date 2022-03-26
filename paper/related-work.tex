@@ -1,9 +1,26 @@
 Assume-guarantee reasoning for compositional verification in reactive systems is well-studied \cite{10.1007/978-3-642-28891-3_13, agree2013, 10.1145/2658982.2527272, 10.1007/978-3-319-17524-9_7}. Automated proofs of realizability for assume-guarantee reasoning are useful for engineers implementing components in the system \cite{10.1007/978-3-319-17524-9_13, 10.1007/978-3-319-29613-5_7}. Algorithms for %actual
 component synthesis for Lustre models using k-induction or IC3/PDR provide an automated path from the assume-guarantee reasoning to an actual satisfying node implementation \cite{katis2017synthesis, 10.1007/978-3-319-89963-3_10}. These algorithms synthesize code in the Lustre modeling language but do not provide a path to a low-level implementation that could be fielded.
 
-Contracts are similar to assume-guarantee reasoning except they target programming languages. They are often more expressive than assume-guarantee reasoning being stateful and higher-order \cite{10.1145/583852.581484}. As contracts are often written in the target language, synthesizing monitors is not a problem but comes with %significant 
+Contracts are similar to assume-guarantee reasoning except they target programming languages. They are often more expressive than assume-guarantee reasoning being stateful and higher-order \cite{10.1145/583852.581484}. As contracts are often written in the target language, synthesizing monitors is not a problem but comes with %significant
 overhead \cite{10.1007/978-3-642-28869-2_11}. A monitor for a contract can be removed when it can be statically proven that the code preserves the contract under all possible inputs and executions \cite{10.1145/3158139}.
 
-Data-flow semantics are well studied \cite{10.1145/41625.41641,97300, 10.1145/1379023.1375674,10.1145/2345141.2248426,10.1007/978-3-540-45212-6_10}. State machine semantics can be added to synchronous data-flow \cite{10.1145/1086228.1086261}. The idea is to translate imperative constructs into equivalent synchronous data flow constructs. The resulting Lustre can then be compiled. The goal is to provide a seamless connection between pure data-flow and pure control design.
+Data-flow semantics are well studied \cite{10.1145/41625.41641,97300,
+10.1145/1379023.1375674,10.1145/2345141.2248426,10.1007/978-3-540-45212-6_10}. State
+machine semantics can be added to synchronous
+data-flow \cite{10.1145/1086228.1086261}. The idea is to translate
+imperative constructs into equivalent synchronous data flow
+constructs. The resulting Lustre can then be compiled. The goal is to
+provide a seamless connection between pure data-flow and pure control
+design.
 
-There is a fully verified compiler that takes Lustre and turns it into a binary executable that is specified and verified in Coq \cite{10.1145/3140587.3062358}. The key is in combining infinite sequences of data-flow models with incremental manipulation of memories akin to an imperative model. CompCert is used on the backend to create the final rendered executable.
+There is a fully verified compiler that takes Lustre and turns it into
+a binary executable that is specified and verified in
+Coq \cite{10.1145/3140587.3062358}. The key is in combining infinite
+sequences of data-flow models with incremental manipulation of
+memories akin to an imperative model. CompCert is used on the backend
+to create the final rendered executable. The work is quite similar to
+ours in providing a verified compilation chain from Lustre. However,
+there are significant differences: first, they tackle a more
+comprehensive subset of Lustre than our work. We have been able to
+work effectively with a relatively simple core language, \eg, without
+\emph{clocking} features, and this aligns with our contract language, so that, as well as generating behaviorally equivalent code, we also can show that the generated code meets a logical specification that is a leaf-level claim in a system-wide correctness argument conducted by compositional reasoning in AGREE.
