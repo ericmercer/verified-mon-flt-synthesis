@@ -32,8 +32,9 @@ b & ::= & v \mid c \mid a \mid \neg b
 \end{array}
 \]
 There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
-and formulas. Lastly, there are temporal operators $\konst{pre}(-)$ (i.e., \emph{yesterday} in PLTL),
-\emph{followed-by} $(-) \to (-)$, and $\konst{Hist}(-)$.
+and formulas. Lastly, there are temporal operators \emph{previously} $\konst{pre}(-)$,
+\emph{followed-by} $(-) \to (-)$, and historically $\konst{Hist}(-)$.
+These temporal operators are sufficient to define all other past-time operators \cite{monitor}.
 
 The semantics of terms and formulas, as mentioned in the previous section, is in terms of \emph{streams of
 values}. Values encompass at least booleans and numbers, but can be
@@ -89,8 +90,7 @@ These can be expressed in a recursive style as follows:
 \konst{Since}(a, b) & = & b \to b \lor (a \land \konst{pre}(\konst{Since}(a, b))
 \end{array}
 \]
-
-$\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the
+\noindent $\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the
 current moment.  $\konst{Since}(a, b)$ is true if $a$ has been true in
 all moments up to the present one since $b$ most recently became true.
-All other past-time operators of PLTL can be defined similarly.
+All other past-time operators of PLTL can be defined similarly \cite{monitor}.
