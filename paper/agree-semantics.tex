@@ -11,18 +11,19 @@ system-level contract to the filter and monitor components, which rely
 on the notion of a \emph{code contract} to support code generation.
 \end{comment}
 
+We now give an overview of a formal model for AGREE syntax and
+semantics.  The discussion then becomes more concrete, showing by
+example, how the AGREE language is used to specify the properties of
+the SW system introduced in \secref{sec:example}.  Any implementation
+of the SW system must guarantee the specification output under the
+system assumptions.
 
-We now give an overview of a formal model for AGREE syntax and semantics.
-The discussion then becomes more concrete, showing by example, how the AGREE language is used to specify the properties of the SW system introduced in \secref{sec:example}.
-Any implementation of the SW system must guarantee the specification output under the system assumptions.
-
-The syntax of AGREE is
-essentially that of quantifier-free first order predicate logic
-supplemented with a few temporal operators. The terms (\emph{e}) are
-arithmetic expressions built from variables ($v$) and numeric and
-boolean literals ($c$), while formulas (\emph{b}) are built using
-logical connectives from atomic formulas (\emph{a}) based on the
-familiar comparison operators.
+The syntax of AGREE is essentially that of quantifier-free first order
+predicate logic supplemented with a few temporal operators. The terms
+(\emph{e}) are arithmetic expressions built from variables ($v$) and
+numeric and boolean literals ($c$), while formulas (\emph{b}) are
+built using logical connectives from atomic formulas (\emph{a}) based
+on the familiar comparison operators.
 \[
 \begin{array}{rcl}
 e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
@@ -32,18 +33,20 @@ b & ::= & v \mid c \mid a \mid \neg b
 \end{array}
 \]
 There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
-and formulas. Lastly, there are temporal operators \emph{previously} $\konst{pre}(-)$,
-\emph{followed-by} $(-) \to (-)$, and historically $\konst{Hist}(-)$.
-These temporal operators are sufficient to define all other past-time operators \cite{monitor}.
+and formulas. To support port handling, there is a predicate
+$\konst{event}(p)$, which tests if an event (or event-data) port $p$ is
+signaled. Lastly, there are temporal operators \emph{previously}
+$\konst{pre}(-)$, \emph{followed-by} $(-) \to (-)$, and historically
+$\konst{Hist}(-)$.
 
-The semantics of terms and formulas, as mentioned in the previous section, is in terms of \emph{streams of
-values}. Values encompass at least booleans and numbers, but can be
-readily extended to include records and arrays. A value stream is a
-total function from time (natural numbers including 0) to values:
+The semantics of terms and formulas, as mentioned in the previous
+section, is in terms of \emph{streams of values}. Values encompass at
+least booleans and numbers, but can be readily extended to include
+records and arrays. A value stream is a total function from time
+(natural numbers including 0) to values:
 \[
  \konst{stream} = \mathbb{N}_0 \to \konst{value}
 \]
-
 Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$
 binding variable names to value streams, the semantics $\sem{-}^E_t$
 of terms and formulas defines the meaning of compound syntax in terms

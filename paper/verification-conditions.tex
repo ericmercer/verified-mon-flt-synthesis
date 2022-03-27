@@ -8,33 +8,36 @@
 \newcommand{\components}{\ensuremath{C}}
 \newcommand{\component}{\ensuremath{c}}
 
-The AGREE specification language, and semantics, are inspired by the Lustre language \cite{10.1145/41625.41641}.
-Lustre semantics are synchronous data-flow where the inputs and outputs of
-components are streams.
-Informally, streams assign values to expressions at each point in time.
-AGREE contracts express relationships between input and output streams by assuming a set of allowed input streams and then guaranteeing a corresponding set of allowed output streams.
-Output for streams not included in the assumed input is undefined. 
+The AGREE specification language, and semantics, are inspired by the
+Lustre language \cite{10.1145/41625.41641}. Lustre semantics are
+synchronous data-flow where the inputs and outputs of components are
+streams.  Informally, streams assign values to expressions at each
+point in time.  AGREE contracts express relationships between input
+and output streams by assuming a set of allowed input streams and then
+guaranteeing a corresponding set of allowed output streams.
 
-A component is defined by its ports in AADL.
-There are three types of AADL ports: data ports, event data ports, and event ports.
-A data port is a sampled port: the data can be read at anytime.
+\subsection{Components}
+A system implementation is described by its subcomponents plus
+connections between their ports.  When considering a system of
+components, data flows through the components in dependency order,
+with inputs being propagated to outputs through all contracts until
+they stabilize (i.e., they cannot propagate further). Therefore, the
+subcomponent contracts, and thus the top-level model, must be acyclic.
+Cyclic systems are made acyclic by breaking cycles with delays.  Once
+the data propagation has stabilized, the model proceeds to the next
+input data in the input streams. It is worth noting that the semantics
+do not model computation or communication delay. The output of one
+contract is seen at the input of any downstream contract in the same
+step of the input data stream.
+
+An component in AGREE is described relative to its \emph{ports}, a
+concept inherited from AADL.  There are three types of AADL ports:
+\emph{event} ports, \emph{data} ports, and \emph{event data} ports.
+An event port has no data and only signals occurrence (or not) of the
+event. A data port is a sampled port: the data can be read at anytime.
 An event data port indicates when data is present with an event.
-An event port has no data and only signals the presence or absence of the event.
-Event based ports are not buffered in our application here.
-An AGREE contracts defines properties of the input to output behavior of a component's ports.
 
-A system implementation is given by is implementing components and connections between their ports.
-When considering a system of components,
-data flows through the components in dependency order, with inputs
-being propagated to outputs through all contracts until they stabilize
-(i.e., they cannot propagate further). Therefore, the subcomponent contracts, and
-thus the top-level model, must be acyclic. 
-Cyclic systems are made acyclic by breaking cycles with delays.
-Once the data propagation
-has stabilized, the model proceeds to the next input data in the input
-streams. It is worth noting that the semantics do not model computation or communication
-delay. The output of one contract is seen at the input of any
-downstream contract in the same step of the input data stream.
+\subsection{Contracts and verification conditions}
 
 From the system and component contracts, AGREE generates a set of
 verification conditions to show that a system's component
@@ -43,12 +46,13 @@ is then invoked to prove or disprove the verification
 conditions. The contracts and verification conditions are expressed in
 \emph{past-time linear temporal logic} (PLTL) \cite{10.1093/jigpal/8.1.55}.
 
-PLTL is a logic enhanced with temporal operators able to
-reason about the truth values of formulas through time.
-It combines past-time operators that reason over the history of computation up to a point (PTLTL) and future-time operators that reason over the computation that follows that point (LTL).
-Its semantics
-are defined relative to a point in time $i$, a finite trace of
-system states $\pi = s_0, s_1, \ldots, s_i$, and some logic formula $f$.
+PLTL is a logic enhanced with temporal operators able to reason about
+the truth values of formulas through time.  It combines past-time
+operators that reason over the history of computation up to a point
+(PTLTL) and future-time operators that reason over the computation
+that follows that point (LTL).  Its semantics are defined relative to
+a point in time $i$, a finite trace of system states $\pi = s_0, s_1,
+\ldots, s_i$, and some logic formula $f$.
 
 The two PLTL operators necessary for the AGREE generated verification
 conditions are $\globally$ that looks forward in time along
@@ -74,7 +78,7 @@ by its own tuple $(\inputs_\component, \outputs_\component,
 components and their connections, $\mathbb{I}_\component$ is defined
 to be the set of components providing input to some component
 $\component$ in the system, and $\mathbb{O}$ is defined to be the set
-of components that provide the output for the system.  
+of components that provide the output for the system.
 
 A system is
 \emph{correct} if and only if for all components $c \in C$ the
@@ -89,14 +93,15 @@ following two verification conditions hold:
             \bigwedge_{\component^\prime \in \mathbb{O}} \guarantees_{\component^\prime})
             \implies \guarantees)
 \end{equation}
-The conditions from \eqref{eq:assumes} verify the input assumptions on each component under
-the system assumptions and upstream component guarantees.  They check
-if the component guarantees and system assumptions are strong enough
-to imply input assumptions on all immediate downstream components.
-The condition in \eqref{eq:guarantees} checks the output guarantees of the system under the
-system assumptions and component guarantees that provide the output.
-It checks if the guarantees on components providing primary outputs
-are strong enough to imply the system guarantees.
+The conditions from \eqref{eq:assumes} verify the input assumptions on
+each component under the system assumptions and upstream component
+guarantees.  They check if the component guarantees and system
+assumptions are strong enough to imply input assumptions on all
+immediate downstream components.  The condition in
+\eqref{eq:guarantees} checks the output guarantees of the system under
+the system assumptions and component guarantees that provide the
+output.  It checks if the guarantees on components providing primary
+outputs are strong enough to imply the system guarantees.
 
 If all the verification conditions hold (AGREE uses $k$-inductive
 model checking to automatically prove or disprove each generated
