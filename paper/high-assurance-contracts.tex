@@ -264,7 +264,7 @@ component behavior (policy) to be specified.
 Code contracts for the filter and monitor are shown in
 \figref{fig:filter} and \figref{fig:monitor}.
 The filter is direct: it defines the policy according to the well-formed requirement for data.
-We now discuss in some detail the monitor.
+We now discuss the monitor in some detail.
 
 \subsubsection{Monitor specification}
 BriefCASE generates everything but the
@@ -301,8 +301,8 @@ The policy definition only works if there is never more than one
 outstanding request at a time; otherwise, the latency counter resets
 incorrectly.  That requirement is encoded in the assumption on
 \lineref{line:mon-assume} and is the same assumption used for the
-system input.  The policy can be written without needing the
-assumption, but it is much simpler to write with the assumption.
+system input.  The policy can be written without the assumption, 
+but the policy is much simpler to write with the assumption.
 
 As shown in \figref{fig:hardened-certificate}, the cyber-hardened
 system passes AGREE verification.  That means that the high-assurance
@@ -311,5 +311,5 @@ data, spontaneous responses, or delayed responses.  Synthesis must
 generate precise implementations of the high-assurance component
 specifications for the AGREE verification result to apply to the
 deployed system.  Precise in this context means that the
-implementations match the input to output relations defined in the
+implementations match the input-to-output relations defined in the
 specifications.
