@@ -105,45 +105,47 @@ triple of the form
 \set{\konst{Hist}(A)}\; (\mathit{Eqs} \cdot G) \; \set{P}
 \]
 This accords with intuition, namely that AGREE is a kind of
-`program-free program logic'; by pulling out a program $(\mathit{Eqs}
-\cdot G)$ from a code contract we find ourselves in the domain of imperative program verification. For example, at this
+`program-free program logic'; by pulling out a program
+$(\mathit{Eqs}\cdot G)$ from a code contract we find ourselves in the
+domain of imperative program verification. For example, at this
 point one could apply a verification condition generator to help break
 down the proof obligation. In order to use the code contract result in
 system contract verification conditions, one has to show that the code
 contract result implies the system verification condition.
 
-\subsubsection*{Wellformedness}
+\subsubsection*{Imperative code contracts}
 Stream-based evaluation allows values arbitrarily `deep in the past'
 to be accessed by use of $\konst{pre}(-)$. However, the programming
-languages being targeted by SPLAT do not directly support streams.  We
-are currently developing a means of translating away such deep
-temporal accesses by the introduction of intermediate variables. For
-now, we focus on the notion of \emph{wellformed} equations that needs
-to hold. The guiding intuition is that a wellformed {\Eqs} allows
-access at most one step in the past, and accesses of a past value for
-a variable are only possible until the variable is updated. In
-informal terms, this means that ${\Eqs}\cdot G$ in a code contract
-must be such that:
+languages targeted by SPLAT do not directly support streams.  We are
+developing a translation to eliminate such deep temporal accesses by
+the introduction of intermediate variables. The essential property the
+translation needs to satisfy is a syntactic restriction ---call
+it \emph{Pascalish}---that supports easy translation to standard
+imperative languages.  The guiding intuition is that a Pascalish
+{\Eqs} allows access at most one step in the past, and accesses to a
+past value of a variable are only possible until the variable is
+updated. In informal terms, this means that ${\Eqs}\cdot G$ in a code
+contract has the following properties:
 \begin{itemize}
 \item Followed-by only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
 \item $\konst{pre}(e)$ is allowed only when $e$ is a variable; and
 \item $\konst{pre}(v)$ is allowed only before the defining equation $v = e$ (and may occur in $e$).
 \end{itemize}
 For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be
-defined, albeit in a non-wellformed manner, by
+defined, albeit in a non-Pascalish manner, by
 {\small
 \begin{lstlisting}[style=agree]
   Fib = 1 -> pre(1 -> Fib + pre Fib)
 \end{lstlisting}
 }
-\noindent or by (again non-wellformed)
+\noindent or by (again non-Pascalish)
 {\small
 \begin{lstlisting}[style=agree]
   N = 0 -> 1 + pre(N)
   Fib = if N <= 1 then 1 else pre(Fib) + pre(pre(Fib))
 \end{lstlisting}
 }
-\noindent or by (wellformed):
+\noindent or by (Pascalish):
 {\small
 \begin{lstlisting}[style=agree]
   N = 0 -> 1 + pre(N)
@@ -151,8 +153,7 @@ defined, albeit in a non-wellformed manner, by
   F1 = 42 -> pre(Fib)
   Fib = if N <= 1 then 1 else F1 + F2
 \end{lstlisting}
-}
-A wellformed ${\Eqs} \cdot G$ is straightforward to implement in
+} A Pascalish ${\Eqs} \cdot G$ is straightforward to implement in
 conventional programming languages, as we will see in
 Section \ref{sec:synthesis}.
 
