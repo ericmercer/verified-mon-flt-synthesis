@@ -4,24 +4,24 @@ either gracefully recover or safely shut down as requirements dictate.
 The DARPA Cyber Assured Systems Engineering program is developing
 tools for design, analysis, and verification that enable systems
 engineers to design-in cyber-resiliency in a Model-Based Systems
-Engineering environment.  This paper describes automated model
+Engineering (MBSE) environment.  This paper describes automated model
 transformations that introduce high-assurance cyber-resiliency
-components into a system, in particular filters and monitors that
-prevent malicious input and detect supply chain attacks, respectively.
-A formal specification in the form of a code-contract defines each high-assurance component and is
-used to verify that the component addresses system level cyber
-requirements.  Implementations for these high-assurance components are
-directly synthesized from their code-contracts, and are automatically
-proven to preserve the exact meaning of the code-contract all the way
-down to the binary code level.  The model transformations are
-integrated into the Open Source AADL Tool Environment (OSATE).  The
-paper further reports on two case studies, one by formal method experts 
-and the other by non-experts,
-applying cyber-resiliency model
-transformations to two different systems. 
-One is a UAV system that uses the Air Force Research
-Laboratory's OpenUxAS services for route planning.
-The other is a tablet used for inflight communication between pilots in an Apache helicopter.
-In each case study, the model transformations add filters, to guard against malformed
-input, as well as monitors, to guard against spoofing and other malicious behavior.
-The case studies show the MBSE is feasible in real-world systems engineering.
+components into a system; in particular, filters that guard against
+malformed input, as well as monitors that guard against
+spoofing and other malicious behavior.  A formal specification in the
+form of a code contract defines each high-assurance component and is
+used to verify that the component addresses system-level cyber
+requirements.  Implementations for these high-assurance components
+are directly synthesized from their code contracts, and are
+automatically proven to preserve the exact meaning of the code
+contract all the way down to the binary code level.  The model
+transformations are integrated into the Open Source AADL 
+Tool Environment (OSATE).  We further report on two case
+studies, one by formal method experts and the other by non-experts,
+applying model transformations to two different systems to improve
+cyber resiliency using high-assurance filters and monitors.  One is a
+UAV system utilizing the Air Force Research Laboratory's
+OpenUxAS services for route planning.  The other is a tablet used for
+situational awareness in a CH-47F Chinook helicopter application.
+The case studies demonstrate that our MBSE approach is feasible in
+real-world systems engineering.
