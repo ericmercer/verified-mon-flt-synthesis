@@ -122,7 +122,7 @@ the introduction of intermediate variables. The essential property the
 translation needs to satisfy is a syntactic restriction ---call
 it \emph{Pascalish}---that supports easy translation to standard
 imperative languages.  The guiding intuition is that a Pascalish
-{\Eqs} allows access at most one step in the past, and accesses to a
+{\Eqs} accesses at most one step in the past; also, accesses to a
 past value of a variable are only possible until the variable is
 updated. In informal terms, this means that ${\Eqs}\cdot G$ in a code
 contract has the following properties:
