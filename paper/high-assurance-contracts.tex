@@ -273,7 +273,7 @@ detail.
 \subsubsection{Monitor specification}
 The monitor policy is given by the \konst{eq}-statements in \linesref{line:mon-assume}{line:mon-policy} of
 \figref{fig:monitor}.
-\lineref{line:mon-alert}. The \texttt{alert} variable
+\lineref{line:mon-alert}: The \texttt{alert} variable
 (distinct from the \texttt{Alert} port) depends not just on the policy
 but also on configuration details supplied when the component is
 specified.  At configuration time, \texttt{is\_latched} has been set
@@ -281,7 +281,7 @@ to \konst{true}, thus making the alert persistent, meaning that once
 the alert is raised, it is always raised; otherwise, it is the
 complement of the policy value in the current step.
 
-\lineref{line:mon-pre-pending}, \lineref{line:mon-pending}, and \lineref{line:mon-latency}.
+\lineref{line:mon-pre-pending}, \lineref{line:mon-pending}, and \lineref{line:mon-latency}:
 The monitor policy is defined by marking when a request is not
 satisfied, \texttt{isPending}, and
 counting the number of steps between requests, \texttt{latency}.  
@@ -292,11 +292,11 @@ response--to be read as \emph{there is no response since the most recent request
 otherwise increments by one. 
 The \texttt{preIsPending} is needed to make the contract Pascalish since since the current and previous value of \texttt{isPending} are used in the definition of \texttt{policy}.
 
-\lineref{line:mon-policy}. 
+\lineref{line:mon-policy}: 
 The policy makes sure the latency is bounded whenever there is a pending request, and it it makes sure that a response is a result of a request.
 The initial step differentiates from later steps in only needing to be sure a response is a result of a request.
 
-\lineref{line:mon-const}. The latency bound for the monitor is defined by the constant
+\lineref{line:mon-const}: The latency bound for the monitor is defined by the constant
 \texttt{MAX\_LATENCY}.  Here the constant
 is set to one to be consistent with the system specification from the
 previous section.  At time zero the policy is trivial: a response
@@ -305,7 +305,7 @@ pending in the current time step, then the latency must still be under
 the bound, and if there is a response, then it closes a request now or
 a pending request from earlier in time.
 
-\lineref{line:mon-assume}. The policy definition only works if there is never more than one
+\lineref{line:mon-assume}: The policy definition only works if there is never more than one
 outstanding request at a time; otherwise, the latency counter resets
 incorrectly.  That requirement is encoded in the assumption and is the same assumption used for the
 system input.  The policy can be written without the assumption,

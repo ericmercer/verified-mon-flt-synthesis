@@ -74,11 +74,11 @@ AGREE proves that the component implements the test, and the Liskov substitution
 The test checks if the monitor output coincides with the response that comes one step after the request.
 It also checks that the alarm does not fire.
 \begin{compactitem}
-\item \lineref{line:tst-index}. An index to use to define the test input and expected test output through time.
-\item \lineref{line:tst-assume-1} and \lineref{line:tst-assume-2}. The test input. These define when the request and response message events should appear relative to the index.
-\item \lineref{line:tst-guarantee-1} and \lineref{line:tst-guarantee-2}. The expected test output. 
+\item \lineref{line:tst-index}: An index to use to define the test input and expected test output through time.
+\item \lineref{line:tst-assume-1} and \lineref{line:tst-assume-2}: The test input. These define when the request and response message events should appear relative to the index.
+\item \lineref{line:tst-guarantee-1} and \lineref{line:tst-guarantee-2}: The expected test output. 
 The test additionally proves that nothing happens after the initial test input and expected output, \ie, no more input is provided and no more output is generated.
-\item \linesref{line:tst-imp-start}{line:tst-imp-end}. The implementation with the component under test (\lineref{line:tst-imp-comp}).
+\item \linesref{line:tst-imp-start}{line:tst-imp-end}: The implementation with the component under test (\lineref{line:tst-imp-comp}).
 \end{compactitem}
 \figref{fig:test-output} is the AGREE output for the test, showing that it passes. 
 
