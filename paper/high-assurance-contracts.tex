@@ -195,10 +195,9 @@ Section \ref{sec:synthesis}.
     eq isPending : bool = Since(not rsp, req and not rsp);*\label{line:mon-pending}*
     eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);*\label{line:mon-latency}*
 
-    eq policy : bool = (rsp => req) ->
+    eq policy : bool = (rsp => req) -> *\label{line:mon-policy}*
                          (    (isPending => latency < MAX_LATENCY)
                           and (rsp => (req or pre(isPending))));
-    *\label{line:mon-policy}*
     -- stop user definitions
 
     eq alert : bool = (not policy) -> *\label{line:mon-alert}*
