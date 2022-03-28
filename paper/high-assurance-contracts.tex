@@ -192,12 +192,13 @@ Section \ref{sec:synthesis}.
     eq rsp : bool = event(Response);
     eq req : bool = event(Request);
 
+    eq preIsPending : bool = pre(isPending);*\label{line:mon-pre-pending}*
     eq isPending : bool = Since(not rsp, req and not rsp);*\label{line:mon-pending}*
     eq latency : int = 0 -> (if req then 0 else pre(latency) + 1);*\label{line:mon-latency}*
 
     eq policy : bool = (rsp => req) -> *\label{line:mon-policy}*
                          (    (isPending => latency < MAX_LATENCY)
-                          and (rsp => (req or pre(isPending))));
+                          and (rsp => (req or preIsPending)));
     -- stop user definitions
 
     eq alert : bool = (not policy) -> *\label{line:mon-alert}*
@@ -280,7 +281,7 @@ to \konst{true}, thus making the alert persistent, meaning that once
 the alert is raised, it is always raised; otherwise, it is the
 complement of the policy value in the current step.
 
-\lineref{line:mon-pending} and \lineref{line:mon-latency}.
+\lineref{line:mon-pre-pending}, \lineref{line:mon-pending}, and \lineref{line:mon-latency}.
 The monitor policy is defined by marking when a request is not
 satisfied, \texttt{isPending}, and
 counting the number of steps between requests, \texttt{latency}.  
@@ -288,7 +289,12 @@ The \texttt{isPending} variable is true
 whenever there is a request that does not coincide with a
 response--to be read as \emph{there is no response since the most recent request without a corresponding response}.  The
 \texttt{latency} variable starts at zero, resets on every request, and
-otherwise increments by one.
+otherwise increments by one. 
+The \texttt{preIsPending} is needed to make the contract Pascalish since since the current and previous value of \texttt{isPending} are used in the definition of \texttt{policy}.
+
+\lineref{line:mon-policy}. 
+The policy makes sure the latency is bounded whenever there is a pending request, and it it makes sure that a response is a result of a request.
+The initial step differentiates from later steps in only needing to be sure a response is a result of a request.
 
 \lineref{line:mon-const}. The latency bound for the monitor is defined by the constant
 \texttt{MAX\_LATENCY}.  Here the constant
