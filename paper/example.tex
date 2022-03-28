@@ -24,16 +24,17 @@ model for SW is in \figref{fig:example}. SW is loosely based on one of
 the case studies in Section~\ref{sec:case-study}.  The source for the
 entire model is found at \cite{repo}.
 
-From time to time, SW receives an \texttt{AutomationRequest} message,
-forwarding it to a route planner (AI). The function of AI is to
+From time to time, SW receives a message on \texttt{AutomationRequest},
+forwarding it to a route planner (AI). The function of AI is to 
 compute the flight path (a list of waypoints) for the UAV, outputting
 the resulting \emph{mission command} on \texttt{AutomationResponse}.
 The waypoint manager (WM) receives the mission command from AI and
 starts the UAV flying the mission by putting an \emph{event} on the
 \texttt{Start} output port, continuing to issue waypoints to the UAV
 flight controller on the \texttt{Waypoint} port as the UAV location
-changes.\footnote{\konst{KLS}:What about Alert? When raised, is it
-persistent, where is it computed?}  The AI component is third-party
+updates with messages on \texttt{AirVehicleLocation}.
+An event is repeatedly generated on \texttt{Alert} if there is no
+mission command from a request. The AI component is third-party
 software and WM is a legacy component.
 
 %% that cannot be modified so it critically relies on
@@ -53,14 +54,14 @@ contracts for SW are discussed in greater detail in
 The AGREE contracts for the initial system in \figref{fig:example},
 and its implementing components, both assume and guarantee the absence
 of any malicious, or unspecified, component behavior.  More precisely,
-the contract for SW assumes that its inputs are well-formed and that
+the contract for SW assumes that its inputs are \emph{well-formed} and that
 there is never more than one automation request pending at a time.
-(\emph{Well-formed} generally refers to a syntactic restriction on
+Well-formed generally refers to a syntactic restriction on
 data at a port. For example, a waypoint is well-formed if it falls
 within bounds for latitude, longitude, and altitude.)  The guarantees
 for SW ensure that
 \begin{compactitem}
-\item a start includes a waypoint;\footnote{\konst{KLS}: needs clarification; Start is just an event port.}
+\item a start coincides with a new waypoint message being output;
 \item a start is within one cycle of an automation request and if not, then it persistently alerts;
 \item new waypoints coincide with air vehicle location updates; and
 \item all outputs are well-formed.
@@ -73,7 +74,7 @@ in the same cycle.  The legacy WM contract guarantees the following if
 its input assumptions hold:
 \begin{compactitem}
   \item it generates a start from a response from the AI and always in the same cycle;
-  \item the start always comes with a waypoint; and
+  \item the start always coincides with a waypoint being output; and
   \item any further waypoints coincide with air vehicle location updates.
 \end{compactitem}
 These initial specifications pass AGREE verification, meaning that the
@@ -88,7 +89,7 @@ component as \emph{untrusted} after the analysis, and the contract for
 AI is modified by removing all guarantees on its outputs to reflect
 its untrusted status.  The AI output is now unconstrained in the
 assume-guarantee reasoning of AGREE and is able to generate any value
-on its output stream at anytime.
+on its output at anytime.
 
 The output from the AGREE analysis using the untrusted AI
 specification is shown in \figref{fig:example-certificate}.  The red
@@ -97,7 +98,7 @@ guarantees that do not hold, and each failure comes with a
 corresponding counter-example.  The results are not unexpected given
 the AI route planner's unconstrained behavior.
 
-For example, the first violation is that the automation response from
+For example, the first violation is that the mission command on \texttt{AutomationResponse} from
 the AI to the WM is no longer guaranteed to be well-formed.  The
 consequence of that failing input assumption is that the WM outputs
 are no longer guaranteed; they are effectively unconstrained.  These
@@ -131,7 +132,7 @@ shown in \figref{fig:hardened}, to isolate the AI component and prevent it from 
 A filter enforces an invariant over
 each datum in the data stream by not forwarding input to its output if
 that input violates the filter invariant.  The auto-generated AGREE
-specification states that only well-formed inputs are passed to the
+code-contract specification states that only well-formed inputs are passed to the
 output.  The system developer must further define the filtering
 policy, but it is usually based on the existing assumptions made by
 downstream components that consume the filter output.
@@ -139,12 +140,13 @@ downstream components that consume the filter output.
 A monitor captures a relation on input data over time and is thus able
 to reason about the temporal, and other invariant, properties of that input.  A monitor raises
 an alert if the specified properties are ever violated.  The
-AGREE specification for the monitor in our example states that an
+AGREE code-contract specification for the monitor in our example states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
 request or in the next step after the request.  As with the filter,
 the system designer provides the policy, and that policy is typically
 based on existing the assumptions and guarantees of the SW system and its implementing components.
+AGREE code-contract specifications are discussed in detail in \secref{sec:code-contracts}.
 
 The AGREE analysis of the cyber-hardened implementation is shown in
 \figref{fig:hardened-certificate}. AGREE has generated high-level
@@ -156,7 +158,7 @@ synthesized.
 
 \subsection{Code synthesis}
 High-assurance components are automatically synthesized by SPLAT from
-the AGREE specifications to equivalent programs in the CakeML
+the AGREE code-contract specifications to equivalent programs in the CakeML
 language.
 %% Too strong at the moment!
 %The synthesis toolchain generates a proof that equates the
@@ -165,7 +167,7 @@ language.
  In other words, for any set of input streams that meet the
  component's contract assumptions, the output streams produced from
  the synthesized CakeML code exactly match those defined by the
- high-assurance component's guarantees.  The CakeML compiler rovides
+ high-assurance component's guarantees.  The CakeML compiler provides
  verified compilation to binaries for several different platforms,
  meaning that the resulting binaries exactly preserve the meaning of
  the original CakeML code \cite{cakeml}.
