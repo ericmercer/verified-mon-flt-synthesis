@@ -132,7 +132,7 @@ shown in \figref{fig:hardened}, to isolate the AI component and prevent it from 
 A filter enforces an invariant over
 each datum in the data stream by not forwarding input to its output if
 that input violates the filter invariant.  The auto-generated AGREE
-code-contract specification states that only well-formed inputs are passed to the
+code contract specification states that only well-formed inputs are passed to the
 output.  The system developer must further define the filtering
 policy, but it is usually based on the existing assumptions made by
 downstream components that consume the filter output.
@@ -140,13 +140,13 @@ downstream components that consume the filter output.
 A monitor captures a relation on input data over time and is thus able
 to reason about the temporal, and other invariant, properties of that input.  A monitor raises
 an alert if the specified properties are ever violated.  The
-AGREE code-contract specification for the monitor in our example states that an
+AGREE code contract for the monitor in our example states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
 request or in the next step after the request.  As with the filter,
 the system designer provides the policy, and that policy is typically
 based on existing the assumptions and guarantees of the SW system and its implementing components.
-AGREE code-contract specifications are discussed in detail in \secref{sec:code-contracts}.
+AGREE code contracts are discussed in detail in \secref{sec:code-contracts}.
 
 The AGREE analysis of the cyber-hardened implementation is shown in
 \figref{fig:hardened-certificate}. AGREE has generated high-level
@@ -158,7 +158,7 @@ synthesized.
 
 \subsection{Code synthesis}
 High-assurance components are automatically synthesized by SPLAT from
-the AGREE code-contract specifications to equivalent programs in the CakeML
+the AGREE code contracts to equivalent programs in the CakeML
 language.
 %% Too strong at the moment!
 %The synthesis toolchain generates a proof that equates the
