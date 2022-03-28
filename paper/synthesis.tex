@@ -1,17 +1,59 @@
 Synthesis maps from model and specifications to code. The SPLAT tool
 traverses the system architecture looking for occurrences of high
 assurance components specified by code contracts; for each such
-occurrence it generates a CakeML program. Starting from the semantics
-of the code contract described in Section \ref{sec:code-contracts}
-a sequence of semantics-preserving steps are taken:
-\begin{itemize}
-\item $\sem{{\Eqs}\cdot G}$ yields a function on arbitrary depth streams
-\item transform to function over depth-1 streams (wellformedness)
-\item transform to logic function
-\item attach buffer handling to inputs and outputs (contig type parsing)
-\item translate to CakeML
-\item run CakeML compiler
-\end{itemize}
+occurrence it generates a CakeML program. More generally, SPLAT supports
+three kinds of behavioral specification from which to generate
+code. In increasing order of expressiveness, these are:
+
+\paragraph{Regular expressions.} Often the well-formedness of data on connections
+can be enforced by matching against a regular expression. In other
+words, the data can be characterized by a \emph{regular language}. As
+is well known, regular expressions can be translated to efficient
+deterministic finite state machine (DFA)
+implementations. In \cite{formal-filter-synth-langsec,case-verified-filter}
+we report on the creation and application of filters from a verified
+regular expression-to-DFA compiler.
+
+\paragraph{Contiguity types\cite{contiguity-types}.}
+A contiguity type, like regular expressions, is effective at
+describing data at the network message level, \eg, as flat
+strings. The notation is however more expressive, being able to
+declare many kinds of so-called \emph{self-describing} messages, \ie,
+those where message structure is dependent on data held elsewhere in
+the message. Figure \ref{fig:filter-spec} gives a contiguity type
+specification for the welll-formed waypoints of our example system. We
+have formalized and verified a contiguity type matcher. The matcher
+code has been used in our case studies.
+
+\paragraph{AGREE code contracts.} When full computational power is needed, we can use the
+expressive power of AGREE code contracts to write arbitrarily complex
+filter or monitor operations, as we have already seen. Our formal
+model of AGREE syntax and semantics is applied to extract code
+contracts and map them to equivalent logic functions.
+
+\noindent For each of these three approaches, we take the following steps to
+arrive at an executable.
+
+\begin{enumerate}
+\item Map from specification to computable function in logic, producing
+a proof of equivalence.
+\item Add parsers and printers (specified by contiguity types) for input and output.
+\item Map to CakeML and add calls to input/output library routines via
+      the CakeML foreign function interface.
+\item Invoke the CakeML compiler.
+\end{enumerate}
+
+%% Starting from the semantics of the code contract described in
+%% Section \ref{sec:code-contracts} a sequence of semantics-preserving
+%% steps are taken:
+%% \begin{itemize}
+%% \item $\sem{{\Eqs}\cdot G}$ yields a function on arbitrary depth streams
+%% \item transform to Pascalish
+%% \item transform to logic function
+%% \item attach buffer handling to inputs and outputs (contig type parsing)
+%% \item translate to CakeML
+%% \item run CakeML compiler
+%% \end{itemize}
 
 In the following, we examine further details in both filter and
 monitor synthesis.
@@ -24,16 +66,17 @@ input that the filter policy admits pass unchanged to the output port;
 all others are dropped (not passed on). We have investigated two kinds
 of filter. In the first, a relatively shallow scan of the input
 suffices to enforce the policy. For example, we have used the
-expressive power of Contiguity Types \cite{contiguity-types} to
-enforce \emph{lightweight} bounds constraints on GPS coordinates in
-UxAS messages. On the other hand, a filter may need to parse the input
-buffer into a data structure specified in AGREE and apply a
-user-defined \emph{wellformedness} property, also specified in AGREE,
-to the data. Arbitrarily complex wellformedness checks can be made in
-this way. \figref{fig:filter-spec} shows a combination where the
-checking specified by {\small\verb+WELL_FORMED_AUTOMATION_RESPONSE+}
-depends on an underlying check specified by the contiguity type
-checking bounds on waypoints.
+expressive power of regular expressions and Contiguity
+Types \cite{contiguity-types} to enforce \emph{lightweight} bounds
+constraints on GPS coordinates in UxAS messages. On the other hand, a
+filter may need to parse the input buffer into a data structure
+specified in AGREE and apply a user-defined \emph{wellformedness}
+property, also specified in AGREE, to the data. Arbitrarily complex
+wellformedness checks can be made in this
+way. \figref{fig:filter-spec} shows a combination where the checking
+specified by {\small\verb+WELL_FORMED_AUTOMATION_RESPONSE+} depends on
+an underlying check specified by the contiguity type checking bounds
+on waypoints.
 
 The verdict of a filter is made and performed within one thread
 invocation. Thus, in its given time slice, the
@@ -62,13 +105,14 @@ computation could be badly written and fail at runtime. In such cases,
 the filter should recover and yield control without passing the input
 onwards. In these cases, the filter is behaving as it should, but we
 must also guard against situations in which a \emph{correctly
-  specified} filter fails at runtime. This kind of defect arises when
+specified} filter fails at runtime. This kind of defect arises when
 the filter \emph{ought} to accept a message, but lack of resources
 results in the filter failing to do so. For example, the parse of a
 message might need more space than has been allocated; another example
 could be if the time slice provided by the scheduler is too short for
 the wellformedness computation to finish. Thus resource bounds need to
-be included in the correctness argument.
+be included in the correctness argument. Some preliminary work on this
+has been done in CakeML \cite{cakeml-space-cost}.
 
 \end{remark}
 
@@ -144,18 +188,18 @@ an alert output when the relation is violated.
 
 \subsection{Monitor Generation}
 
-
 Monitors are intended to track and analyze the externally visible
-behavior of system components through time. Therefore, they require
-more extensive computational ability than filters. In particular, our
-basic notion of a monitor is that it embodies a predicate over its
-input and output streams, and is able to access the value of a stream at any
-earlier point in time, if necessary. Monitors commonly use state to
-keep track of earlier values, unlike filters which, for us, are
-typically stateless components. (However, there is nothing in our
-approach that forbids stateful filters: they can be realized by
-monitors.) A monitor specification is mapped by code generation to a
-state transformation function of the following abstract type:
+behavior of system components through time. Therefore, they tend to
+require more extensive computational ability than filters. In
+particular, our basic notion of a monitor is that it embodies a
+relation over its input and output streams, and is able to access the
+value of a stream at any earlier point in time, if necessary. Monitors
+commonly use state to keep track of earlier values, unlike filters
+which, for us, are typically stateless components. (However, there is
+nothing in our approach that forbids stateful filters: they can be
+realized by monitors.) A monitor specification is mapped by code
+generation to a state transformation function of the following
+abstract type:
 \[
 \konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
 \]
