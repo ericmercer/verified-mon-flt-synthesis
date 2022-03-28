@@ -39,50 +39,84 @@ guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
   \label{fig:sw}
 \end{figure}
 
-The actual surface syntax for AGREE that is embedded in OSATE is slightly different than the formal semantics in the previous section.
-The mapping between the two is straightforward.
-The AGREE specification for the SW component in the example of
-Section~\ref{sec:example} is given in \figref{fig:sw}.  The
-specification uses \texttt{eq} statements to define variables local to
-the contract specification.  For
-example, \lineref{line:sw-event-def-start} defines the \texttt{req}
-variable to be equivalent to the \texttt{event} expression.
+%% The actual surface syntax for AGREE that is embedded in OSATE is
+%% slightly different than the formal semantics in the previous section.
+%% The mapping between the two is straightforward.
 
-All the named ports in the corresponding AADL component are in the scope of the specification, and there are additional implicit boolean \emph{event} inputs (or outputs) associated with event ports.
-An \texttt{event} expression refers to that implicit input (or output) boolean value and is true when data is present on the named port and false otherwise.
-\linesref{line:sw-event-def-start}{line:sw-event-def-end} create local variables that are true when data is present on the corresponding event ports for the component.
-The local variables here are purely for convenience in writing the specification.
+%% The
+%% specification uses \texttt{eq} statements to define variables local to
+%% the contract specification.  For
+%% example, \lineref{line:sw-event-def-start} defines the \texttt{req}
+%% variable to be equivalent to the \texttt{event} expression.
 
-The \texttt{assume} statement is a string description followed by a predicate.
-Those on \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2} are implications requiring that when data is present it is well-formed.
-The well-formed predicates themselves are defined elsewhere using AGREE functions.
+%% All the named
+%% ports in the corresponding AADL component are in the scope of the
+%% specification, and there are additional implicit boolean \emph{event}
+%% inputs (or outputs) associated with event ports.  An \texttt{event}
+%% expression refers to that implicit input (or output) boolean value and
+%% is true when data is present on the named port and false otherwise.
 
-The assumption on \lineref{line:sw-assume-3} constrains when a request
-can arrive by reasoning about the \emph{state} of the contract defined
-by the associated streams.  When writing assumptions and guarantees,
-it is important to differentiate pre-state, before a contract updates
-its state, and post-state, after a contract updates its state, in
-response to the current input.  The \texttt{pre} naturally makes that
-distinction.  In general, assumptions regarding state should be
-evaluated in the pre-state of the component with the current inputs,
-and guarantees regarding state should be evaluated on the post-state
-of the component given the current inputs.  Additionally, guarantees
-should use \texttt{pre} anytime they need to reason about the current
-state relative to the previous state.
+%% An \texttt{assume} statement is a string description followed by a
+%% predicate.
 
-The assumption on \lineref{line:sw-assume-3} uses a followed-by expression so it is \texttt{true} at time zero and then it is the truth value of the implication in all future instances.
-The followed-by guards the \texttt{pre} as mentioned previously;
-thus after time zero, the assumption depends on the presence of a request and the pre-state of the component.
-The assumption on \lineref{line:sw-assume-3} is that if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it is after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---\emph{not request since start}.
+%% When writing assumptions and guarantees,
+%% it is important to differentiate pre-state, before a contract updates
+%% its state, and post-state, after a contract updates its state, in
+%% response to the current input.  The \texttt{pre} naturally makes that
+%% distinction.  In general, assumptions regarding state should be
+%% evaluated in the pre-state of the component with the current inputs,
+%% and guarantees regarding state should be evaluated on the post-state
+%% of the component given the current inputs.  Additionally, guarantees
+%% should use \texttt{pre} anytime they need to reason about the current
+%% state relative to the previous state.
 
-The guarantees on \linesref{line:sw-guarantee-1}{line:sw-guarantee-3} coincide events and assert well-formed output.
-The guarantees on \linesref{line:sw-guarantee-4}{line:sw-guarantee-6} define temporal properties of the component.
-\lineref{line:sw-guarantee-4} insists that a start happens with a request or one step after a request.
-The guarantee uses the assumption on \lineref{line:sw-assume-3} and does not check for two requests in a row without a start as the assumption precludes that input behavior.
-It differentiates with the followed-by what is required at time zero, the start must coincide with the request, with what is required after time zero, the start must coincide with the request or is a response to a request one step earlier.
-The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
+%% This condition constrains when a request
+%% can arrive by reasoning about the \emph{state} of the contract defined
+%% by the associated streams. The assumption uses a followed-by
+%% expression so it is \texttt{true} at time zero and then it is the
+%% truth value of the implication in all future instances.  The
+%% followed-by guards the \texttt{pre} as mentioned previously; thus
+%% after time zero, the assumption depends on the presence of a request
+%% and the pre-state of the component.  The assumption
+%% on \lineref{line:sw-assume-3} is that
 
-\lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound.
-Together with \lineref{line:sw-guarantee-4} the contract model allows for non-alerting and alerting behavior.
-\lineref{line:sw-guarantee-6} ensures if alert has ever happened, then it is happening in the present moment.
-These six guarantees define the behavior of the SW component under the three assumptions and correspond to the informal descriptions given in \secref{sec:example}.
+
+The AGREE specification for the SW component in
+Section~\ref{sec:example} is given in \figref{fig:sw}.
+\linesref{line:sw-event-def-start}{line:sw-event-def-end} define
+local variables that are true when data is present on the
+corresponding event ports for the component.  These variables are
+purely for notational convenience. The contract has three assumptions:
+\begin{itemize}
+\item \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2}.
+When input is present it is well-formed. The well-formed predicates
+are defined elsewhere using AGREE functions.
+
+\item \lineref{line:sw-assume-3}. If there is an incoming request,
+it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)},
+or it arrives after the component has output a start event in response to a previous
+request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---to be read as \emph{not
+request since start}.
+\end{itemize}
+
+The contract has six guarantees:
+\begin{itemize}
+\item \linesref{line:sw-guarantee-1}{line:sw-guarantee-3}
+coincide events and assert well-formed output.\footnote{\konst{KLS}:I am confused about the ``coincide events''.}
+\item \lineref{line:sw-guarantee-4} insists that a start happens with a request or one step after a request. At time zero the start must coincide
+with the request; after that, the start must coincide with the request
+or else is a response to a request one step earlier.  The guarantee
+works with the assumption on \lineref{line:sw-assume-3} and thus does
+not have to check for two requests in a row without a start, since the
+assumption precludes that input behavior. The guarantee also does not
+force the start to always happen, it only says that if it does happen,
+it is under the defined conditions.
+
+\item \lineref{line:sw-guarantee-5} forces the alert to sound if the start does not arrive within the one-step bound. Together with \lineref{line:sw-guarantee-4} this allows
+for non-alerting and alerting behavior.
+\item \lineref{line:sw-guarantee-6} guarantees that, if an alert has ever happened,
+it continues to happen.
+\end{itemize}
+These six guarantees define the behavior of the SW component under the
+three assumptions and correspond to the informal descriptions given
+in \secref{sec:example}.

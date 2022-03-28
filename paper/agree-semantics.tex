@@ -39,6 +39,7 @@ signaled. Lastly, there are temporal operators \emph{previously}
 $\konst{pre}(-)$, \emph{followed-by} $(-) \to (-)$, and historically
 $\konst{Hist}(-)$.
 
+\subsection{Semantics}
 The semantics of terms and formulas, as mentioned in the previous
 section, is in terms of \emph{streams of values}. Values encompass at
 least booleans and numbers, but can be readily extended to include
@@ -67,9 +68,10 @@ omitting the temporal operators:
 
 The temporal operators deal with time in more significant ways. The
 value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time
-$t-1$ (at time zero, \konst{pre} is undefined).
-A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time zero; otherwise it is $e_2$.
-Followed-by is often used to give a value to a stream in the first step so that subsequent steps are able to use $\konst{pre}(e)$.
+$t-1$ (at time zero, \konst{pre} is undefined).  A followed-by, $e_1
+\to e_2$, evaluates to $e_1$ at time zero; otherwise it is $e_2$.
+Followed-by is typically used to give a value to a stream in the first
+step so that subsequent steps are able to use $\konst{pre}(e)$.
 \[
 \begin{array}{rcl}
 \sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
@@ -97,3 +99,17 @@ These can be expressed in a recursive style as follows:
 current moment.  $\konst{Since}(a, b)$ is true if $a$ has been true in
 all moments up to the present one since $b$ most recently became true.
 All other past-time operators of PLTL can be defined similarly \cite{monitor}.
+
+\paragraph{AGREE notation.}
+AGREE uses ASCII notation for the mathematical syntax we have
+defined. The following table spells out the mapping.
+\[
+\begin{tabular}{l|l|l}
+ Operation & Math. notation & AGREE \\ \hline
+ followed-by &  $e \to e$          & e \verb+->+ e  \\
+ logical implication &  $e \imp e$ & e \verb+=>+ e \\
+ if-and-only-if &  $e \iff e$      & e \verb+<=>+ e \\
+ variable definition & $v = e$     & \konst{eq} v\ e \\
+ Historically  & $\konst{Hist}(b)$ & \konst{Historically}(b) \\
+\end{tabular}
+\]
