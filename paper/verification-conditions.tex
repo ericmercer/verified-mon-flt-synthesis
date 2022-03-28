@@ -118,9 +118,8 @@ The expanded property lists in \figref{fig:example-certificate} and
 \figref{fig:hardened-certificate} are the results from verifying or
 disproving the above verification conditions.  The additional
 unexpanded results at the bottom of the figures prove
-\emph{self-consistency} in the contracts.\emph{Needs a definition?}  It is not uncommon to
-accidentally write contracts that are self-contradicting.  For
-example, a contract may guarantee an output be two different values in
-the same moment of time.  AGREE generates additional verification
+\emph{self-consistency} in the contracts.
+A contract is self-consistent if it does not guarantee two different values in the same moment of time, \ie, the contract is not self-contradicting.
+AGREE generates additional verification
 conditions that prove each component contract, and the composition of
 contracts, self-consistent.
