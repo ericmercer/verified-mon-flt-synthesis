@@ -3,11 +3,12 @@ discuss how code contracts, and any AGREE specification in general, can be tradi
 Writing and proving properties about AGREE specifications is hard not just because it is a formal process but  because it reasons about constraints that define the entire input space for a component, and the entire output space, at once.
 The case studies showed that engineers, and formal method practitioners, make mistakes writing these specifications especially if the computation or temporal reasoning is complex.
 
-There are three common mistakes in specifications, aside from self-consistency that is already checked, that have been observed: vacuity, under-specification, and missed corner cases.
-Vacuity is a common pitfall with implication when the left hand side is always false making the implication true. 
-Under-specification is very challenging because verification is not able to prove anything (or it can prove everything in the case of existential properties) so nothing is actually known after verification except that the system is under-specified. 
+We have observed three common types of mistakes in specifications (aside from self-consistency, which is
+already checked): vacuity, under-specification, and missed corner cases.
+Vacuity is a common pitfall with implication when the left hand side is always false, making the implication true. 
+Under-specification is very challenging, as a verifier in the face of under-specification is not able to prove anything (or it can prove everything in the case of existential properties), so nothing is actually known after verification except that the system is under-specified. 
 Missed corner cases is a common problem to all disciplines.
-It is especially hard here because there is no direct way to provide test input and check test output.
+It is an especially difficult challenge here because there is no direct way to provide test input and check test output.
 
 The tempting approach is to use the synthesis path to check these issues with traditional testing.
 Such an approach adds extra steps that are not needed, as it is
