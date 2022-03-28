@@ -24,7 +24,7 @@ model for SW is in \figref{fig:example}. SW is loosely based on one of
 the case studies in Section~\ref{sec:case-study}.  The source for the
 entire model is found at \cite{repo}.
 
-From time to time, SW receives a message on \texttt{AutomationRequest},
+From time to time, SW receives a message on the \texttt{AutomationRequest} input,
 forwarding it to a route planner (AI). The function of AI is to 
 compute the flight path (a list of waypoints) for the UAV, outputting
 the resulting \emph{mission command} on \texttt{AutomationResponse}.
@@ -77,7 +77,7 @@ its input assumptions hold:
   \item the start always coincides with a waypoint being output; and
   \item any further waypoints coincide with air vehicle location updates.
 \end{compactitem}
-These initial specifications pass AGREE verification, meaning that the
+These initial specifications pass verification, meaning that the
 contract composition of the components with the system satisfies all
 component input assumptions and system output guarantees.
 
