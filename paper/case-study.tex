@@ -20,11 +20,13 @@ For this application, UxAS accepts three types of messages.  The \textit{Operati
 Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.  We perform a formal analysis using the AGREE tool (which is integrated with the BriefCASE environment) to verify that the model satisfies the contracts.  For the initial version of our design, the verification passes.
 %
 Although we are satisfied with the results of the formal verification using AGREE, we have not yet analyzed the design for cyber-vulnerabilities.
-In BriefCASE, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.  The tools generate a list of new requirements corresponding to cyber vulnerabilities found in the design,
-and we need to satisfy these requirements by modifying the design.
+In BriefCASE, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.
+The tools generate a list of new requirements corresponding to cyber vulnerabilities found in the model,
+and we need to satisfy these requirements by modifying the model.
 %  To satisfy these requirements we need to mitigate the vulnerabilities discovered by the analysis by modifying the design.
 %
-For example, because we annotated the open-source UxAS component as \texttt{uncontrolled} (colored red in \figref{fig:sw-initial}), the cyber analysis tools generate requirements for ensuring that unverified or malicious code (which could potentially be embedded in the component) will not impact other processes.
+For example, because we annotated the open-source UxAS component as \texttt{uncontrolled} (colored red in \figref{fig:sw-initial}),
+the cyber analysis tools generate requirements for ensuring that unverified or malicious code (which could potentially be embedded in the component) will not impact other processes.
 
 In total, seven cyber requirements are generated and imported into our model.  These include four \textit{wellformedness} requirements, two requirements for \textit{monitoring} the behavior of the open-source UxAS component, and an \textit{attestation} requirement for ensuring the Ground Station software has not been tampered with.  Requirements are imported into the model as goals in a Resolute assurance case \cite{resolute-destion}.  Because we can run Resolute at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
 
