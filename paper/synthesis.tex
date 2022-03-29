@@ -57,7 +57,7 @@ that takes input and state as parameters and returns an updated state
 and output. Thus the environment $\mathit{Env}$ holding all previous
 values of each variable can be replaced by \emph{parameters}, each of
 which is able to hold only one data element. Assuming
-$\mathit{Env}' = \konst{strmStep}\;t\; \mathit{Env}$, we can formally show that
+$\mathit{Env}' = \konst{strmStep}\;t\; \mathit{Env}$, we can formally prove that
 \[
 \vdash (\mathit{Env}' \vert_{\mathbb{S}},
  \mathit{Env}' \vert_{\mathbb{O}}) =
@@ -76,17 +76,9 @@ from stream semantics to logic function to CakeML evaluation semantics
 in a property-preserving way. Once in CakeML, further necessary
 features can be added, namely imperative variables for storing state
 between component invocations, also invocations of the (verified) foreign
-function interface of CakeML. Finally, the CakeML compiler can be
+function interface of CakeML \cite{cakeml-monadic}. Finally, the CakeML compiler can be
 applied to the program. It delivers an executable which can be shown
 to preserve the original contract.
-
-
-%% where the $\mathit{state}$ parameters to the function are just the
-%% variables defined in ${\Eqs}$, obtained by projecting out the
-
-%%  = \mathit{Env}\vert_{\mathbb{I}}$ $\mathit{input}
-%%  = \mathit{Env}\vert_{\mathbb{I}}$ $\mathit{input}
-%%  = \mathit{Env}\vert_{\mathbb{I}}$
 
 
 \subsection{Generating CakeML}
@@ -155,26 +147,6 @@ then it yields control; otherwise:
 
 \item The filter yields control.
 \end{enumerate}
-
-\begin{remark}[Partiality]
-
-Partiality is an important consideration: steps 2 and 3 above can
-fail; the data might not be parseable or the wellformedness
-computation could be badly written and fail at runtime. In such cases,
-the filter should recover and yield control without passing the input
-onwards. In these cases, the filter is behaving as it should, but we
-must also guard against situations in which a \emph{correctly
-specified} filter fails at runtime. This kind of defect arises when
-the filter \emph{ought} to accept a message, but lack of resources
-results in the filter failing to do so. For example, the parse of a
-message might need more space than has been allocated; another example
-could be if the time slice provided by the scheduler is too short for
-the wellformedness computation to finish. Thus resource bounds need to
-be included in the correctness argument. Some preliminary work that
-could support formal proofs of such bounds has been done for
-CakeML \cite{cakeml-space-cost}.
-
-\end{remark}
 
 
 \newsavebox{\contig}
@@ -248,31 +220,32 @@ an alert output when the relation is violated.
 
 \subsection{Monitor Generation}
 
-Monitors are intended to track and analyze the externally visible
-behavior of system components through time. Therefore, they tend to
-require more extensive computational ability than filters. In
-particular, our basic notion of a monitor is that it embodies a
-relation over its input and output streams, and is able to access the
-value of a stream at any earlier point in time, if necessary. Monitors
-commonly use state to keep track of earlier values, unlike filters
-which, for us, are typically stateless components. (However, there is
-nothing in our approach that forbids stateful filters: they can be
-realized by monitors.) A monitor specification is mapped by code
-generation to a state transformation function of the following
-abstract type:
+%% Monitors are intended to track and analyze the externally visible
+%% behavior of system components through time. Therefore, they tend to
+%% require more extensive computational ability than filters. In
+%% particular, our basic notion of a monitor is that it embodies a
+%% relation over its input and output streams, and is able to access the
+%% value of a stream at any earlier point in time, if necessary. Monitors
+%% commonly use state to keep track of earlier values, unlike filters
+%% which, for us, are typically stateless components. (However, there is
+%% nothing in our approach that forbids stateful filters: they can be
+%% realized by monitors.)
+As discussed above, a monitor specification is
+mapped to a state transformation function
 %
 \[
-\konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
+\konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}.
 \]
-The \konst{stepFn} works as follows:
+which computes as follows:
 \begin{enumerate}
 
-\item Each input is parsed into data of the type specified by the port
+\item Each input buffer is parsed into data of the type specified by the port
   type;
 
 \item New values for the state variables are computed, in dependency
-  order. The discussion above on initialization now comes into
-  play. Suppose the variable declarations have the following form:
+  order. At this point variables defined by \emph{followd-by} are
+  dealt with. Suppose the variable definitions have the following
+  form:
 \[
 \begin{array}{l}
   v_1 = i_1 \longrightarrow e_1 \\
@@ -280,22 +253,14 @@ The \konst{stepFn} works as follows:
   v_n = i_n \longrightarrow e_n \\
 \end{array}
 \]
-In the generated code, for the first invocation of \konst{stepFn} only,
+In the generated function, for the first invocation of \konst{stateStep} only,
 the initializations are executed in order:
 \[
-\begin{array}{l}
-  v_1 = i_1; \\
-  \cdots \\
-  v_n = i_n; \\
-\end{array}
+  v_1 = i_1; \cdots ;  v_n = i_n;
 \]
-In all subsequent steps, the \emph{non-initialization} assignments are performed:
+In all later invocations, the \emph{non-initialization} assignments are performed, also in order:
 \[
-\begin{array}{l}
-  v_1 = e_1; \\
-  \cdots \\
-  v_n = e_n; \\
-\end{array}
+  v_1 = e_1; \cdots ; v_n = e_n; \\
 \]
 
 \item Values of the outputs are computed;
@@ -311,7 +276,7 @@ Section~\ref{sec:example} is displayed in \figref{fig:monitor-cakeml}.
 \newsavebox{\monFn}
 \begin{lrbox}{\monFn}
 \begin{lstlisting}[style=myML]
-fun stepFn (response,request)
+fun stateStep (response,request)
     (rsp,req,preIsPending,isPending,latency,policy,alert)
 let val stateVars' =
       if !initStep then
@@ -374,18 +339,35 @@ an obligation on the system that the scheduler follows some sensible
 partial order of component activation and allows each component
 sufficient time for its computation.  Activating a monitor component
 takes the form of the following pseudo-code, in which the monitor
-evaluates the \konst{stepFn} on its current inputs and the current
+evaluates the \konst{stateStep} on its current inputs and the current
 values of the state variables, returning the new state and the output
 values.
 \[
 \begin{array}{ll}
  \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
  (v_1,\ldots) & = \konst{readState}() ; \\
- ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stepFn} ((i_1,\ldots),(v_1,\ldots)) ; \\
+ ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stateStep} ((i_1,\ldots),(v_1,\ldots)) ; \\
  \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
  \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
 \end{array}
 \]
+
+\paragraph{Partiality.} Partiality is an important consideration for both filters and
+monitors: the input data might not be parseable or the wellformedness
+computation of a filter could be badly written and fail at runtime. In
+such cases, the filter should recover and yield control without
+passing the input onwards. For these failure cases, the filter is
+behaving as it should, but we must also guard against situations in
+which a \emph{correctly specified} filter or monitor fails at
+runtime. This kind of defect arises when a filter, for
+example, \emph{ought} to accept a message, but lack of resources
+results in the filter failing to do so. For example, the parse of a
+message might need more space than has been allocated; another example
+could be if the time slice provided by the scheduler is too short for
+the wellformedness computation to finish. Thus resource bounds need to
+be included in the correctness argument. Some preliminary work that
+could support formal proofs of such bounds has been done for
+CakeML \cite{cakeml-space-cost}.
 
 %% \subsection{Component Behavior}
 
