@@ -168,7 +168,7 @@ Section \ref{sec:synthesis}.
     -- start user definitions
     eq policy : bool =
       WELL_FORMED_AUTOMATION_RESPONSE(Input);
-    -- stop user definitions
+    -- end user definitions
 
     guarantee "Filter output is well-formed" :
       if event(Input) and policy then
@@ -199,7 +199,7 @@ Section \ref{sec:synthesis}.
     eq policy : bool = (rsp => req) -> *\label{line:mon-policy}*
                          (    (isPending => latency < MAX_LATENCY)
                           and (rsp => (req or preIsPending)));
-    -- stop user definitions
+    -- end user definitions
 
     eq alert : bool = (not policy) -> *\label{line:mon-alert}*
                         ((is_latched and pre(alert)) or not policy);
@@ -261,7 +261,7 @@ These components were added, one at a time, by
 BriefCASE creates all the needed AADL for the new high-assurance
 component, and its connections in the system implementation, as part
 of the transformation.  It also creates a default code contract with
-appropriate output guarantees leaving only the component behavior 
+appropriate output guarantees leaving only the component behavior
 (policy) to be specified.
 
 Code contracts for the filter and monitor are shown in
@@ -271,53 +271,60 @@ well-formed requirement for data.  We now discuss the monitor in some
 detail.
 
 \subsubsection{Monitor specification}
-The monitor policy is given by the \konst{eq}-statements in \linesref{line:mon-assume}{line:mon-policy} of
-\figref{fig:monitor}.
-\lineref{line:mon-alert}: The \texttt{alert} variable
-(distinct from the \texttt{Alert} port) depends not just on the policy
-but also on configuration details supplied when the component is
-specified.  At configuration time, \texttt{is\_latched} has been set
-to \konst{true}, thus making the alert persistent, meaning that once
-the alert is raised, it is always raised; otherwise, it is the
-complement of the policy value in the current step.
 
-\lineref{line:mon-pre-pending}, \lineref{line:mon-pending}, and \lineref{line:mon-latency}:
-The monitor policy is defined by marking when a request is not
-satisfied, \texttt{isPending}, and
-counting the number of steps between requests, \texttt{latency}.  
-The \texttt{isPending} variable is true
-whenever there is a request that does not coincide with a
-response--to be read as \emph{there is no response since the most recent request without a corresponding response}.  The
+The monitor informally behaves as follows: if the \emph{policy} is
+obeyed in the current step, and the alert has not yet been raised,
+then the \texttt{Response} input is sent out on \texttt{Output}, and
+the \texttt{Alert} output stays
+low \lineref{line:mon-alert}. Otherwise \texttt{Alert} goes high and
+stays high, and there is nothing sent henceforth on \texttt{Output}.
+
+The \texttt{alert} variable (distinct from the \texttt{Alert} port)
+depends not just on the policy but also on the
+\texttt{is\_latched} constant, which has been set at configuration time.
+Since \texttt{is\_latched} is \konst{true}, the alert is persistent,
+meaning that once the alert is raised, it is always raised; otherwise,
+it is the complement of the policy value in the current step.
+
+The monitor policy is defined by marking, with variable \texttt{isPending},
+when a request is made but not yet satisfied, and by counting the
+number of steps (\texttt{latency}) between
+requests. See \linesref{line:mon-pre-pending}{line:mon-latency}:
+The \texttt{isPending} variable is true whenever there is a request
+that does not coincide with a response, \ie, \texttt{isPending} holds
+when \emph{there is no response since the most recent request without
+a corresponding response}.  The
 \texttt{latency} variable starts at zero, resets on every request, and
-otherwise increments by one. 
-The \texttt{preIsPending} is needed to make the contract Pascalish since since the current and previous value of \texttt{isPending} are used in the definition of \texttt{policy}.
+otherwise increments by one.  Note that the \texttt{preIsPending}
+variable is a temporary needed to make the contract \emph{Pascalish};
+otherwise, the current and previous value of \texttt{isPending} would
+be simulataneously accessed in the definition of \texttt{policy}.
 
-\lineref{line:mon-policy}: 
-The policy makes sure the latency is bounded whenever there is a pending request, and it it makes sure that a response is a result of a request.
-The initial step differentiates from later steps in only needing to be sure a response is a result of a request.
+The policy (\lineref{line:mon-policy}) makes sure the latency is
+bounded whenever there is a pending request, and it ensures that a
+response is a result of a request.  The initial step differentiates
+from later steps in only needing to be sure a response is a result of
+a request, both happening in the initial step.
 
-\lineref{line:mon-const}: The latency bound for the monitor is defined by the constant
-\texttt{MAX\_LATENCY}.  Here the constant
-is set to one to be consistent with the system specification from the
+The latency bound for the monitor is defined by the constant
+\texttt{MAX\_LATENCY} (\lineref{line:mon-const}).  In this example the
+constant is set to one to be consistent with the system specification from the
 previous section.  At time zero the policy is trivial: a response
 requires an accompanying request.  After time zero, if a request is
 pending in the current time step, then the latency must still be under
 the bound, and if there is a response, then it closes a request now or
 a pending request from earlier in time.
 
-\lineref{line:mon-assume}: The policy definition only works if there is never more than one
+The policy definition only works if there is never more than one
 outstanding request at a time; otherwise, the latency counter resets
-incorrectly.  That requirement is encoded in the assumption and is the same assumption used for the
-system input.  The policy can be written without the assumption,
-but the policy is much simpler to write with the assumption.
+incorrectly.  That requirement is encoded in the assumption
+(\lineref{line:mon-assume}) and is the same assumption used for the
+system input.  In fact, the policy can be written without the assumption, but
+the policy is much simpler to write with the assumption.
 
 As shown in \figref{fig:hardened-certificate}, the cyber-hardened
 system passes AGREE verification.  That means that the high-assurance
 components protect the WM from the untrusted AI generating malformed
 data, spontaneous responses, or delayed responses.  Synthesis must
-generate faithful implementations of the code contracts for the AGREE verification result to apply to the
-deployed system.
-
-%%   Precise in this context means that the
-%% implementations match the input-to-output relations defined in the
-%% specifications.
+generate faithful implementations of the code contracts for the AGREE
+verification result to apply to the deployed system.

@@ -288,36 +288,48 @@ Section~\ref{sec:example} is displayed in \figref{fig:monitor-cakeml}.
 \newsavebox{\monFn}
 \begin{lrbox}{\monFn}
 \begin{lstlisting}[style=myML]
-stepFn (Request,Response)
-       (req,rsp,current,previous,policy,alert) =
+fun stepFn (response,request)
+    (rsp,req,preIsPending,isPending,latency,policy,alert)
 let val stateVars' =
-     if !initStep then
-        let val req = event(Request)
-            val rsp = event(Response)
-            val current = (req = rsp)
-            val previous = req and not(rsp)
-            val policy = current or previous
-            val alert = not policy
-            val () = (intStep := False)
-        in (req,rsp,current,previous,policy,alert)
-        end
-     else
-        let val req = event(Request)
-            val rsp = event(Response)
-            val current = (req = rsp)
-            val previous = pre(req and not rsp) and (not req and rsp)
-            val policy = current or previous
-            val alert = (is_latched and pre(alert)) or not(policy)
-        in (req,rsp,current,previous,policy,alert)
-        end
-    val (_,rsp',_,_,_,alert') = stateVars'
-    val Alert = if alert' then Some () else None
-    val Output =
-       if alert' then None else
-       if rsp'   then Some Response
-       else None
+      if !initStep then
+      let val rsp = Option.isSome response
+          val req = Option.isSome request
+          val preIsPending = False
+          val isPending = req andalso not rsp
+          val latency = 0
+          val policy = (if rsp then req else True)
+          val alert = not(policy)
+          val () = (initStep := False)
+      in
+        (rsp,req,preIsPending,isPending,latency,policy,alert)
+      end
+      else
+      let ...
+          val rsp = Option.isSome response
+          val req = Option.isSome request
+          val preIsPending = pre isPending
+          val isPending = (req andalso not rsp) orelse
+                          ((not rsp) andalso pre isPending)
+          val latency = (if req then 0 else (pre latency + 1)
+          val policy =
+            ((if isPending then
+                (latency < Defs.max_latency) else True)
+              andalso
+              (if rsp then
+                 (req orelse preIsPending) else True))
+          val alert = (Defs.is_latched andalso (pre alert))
+                      orelse not(policy)
+      in
+        (rsp,req,preIsPending,isPending,latency,policy,alert)
+      end
+   val (rsp',_,_,_,_,_,alert') = stateVars'
+   val alertPort = if alert' then Some () else None
+   val outputPort =
+     if alert' then None else
+     if rsp' then Some response
+     else None
 in
-   (stateVars', (Alert,Output))
+   (stateVars', (alertPort,outputPort))
 end
 \end{lstlisting}
 \end{lrbox}
