@@ -32,10 +32,10 @@ b & ::= & v \mid c \mid a \mid \neg b
             \mid b \; \set{\land,\lor,\imp,\iff}\; b
 \end{array}
 \]
-There is also a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
-and formulas. To support port handling, there is a predicate
+AGREE includes a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
+and formulas. To support port handling, AGREE defines a predicate
 $\konst{event}(p)$, which tests if an event (or event-data) port $p$ is
-signaled. Lastly, there are temporal operators \emph{previously}
+signaled. Lastly, AGREE supports temporal operators \emph{previously}
 $\konst{pre}(-)$, \emph{followed-by} $(-) \to (-)$, and historically
 $\konst{Hist}(-)$.
 
@@ -106,10 +106,14 @@ defined. The following table spells out the mapping.
 \[
 \begin{tabular}{l|l|l}
  Operation & Math. notation & AGREE \\ \hline
- followed-by &  $e \to e$          & e \verb+->+ e  \\
- logical implication &  $e \imp e$ & e \verb+=>+ e \\
- if-and-only-if &  $e \iff e$      & e \verb+<=>+ e \\
- variable definition & $v = e$     & \konst{eq} v\ e \\
- Historically  & $\konst{Hist}(b)$ & \konst{Historically}(b) \\
+ followed-by &  $e \to e$          & \verb+e -> e+  \\
+ logical implication &  $e \imp e$ & \verb+e => e+ \\
+ if-and-only-if &  $e \iff e$      & \verb+e <=> e+ \\
+ logical and &  $e \land e$      & \verb+e and e+ \\
+ logical or &  $e \lor e$      & \verb+e or e+ \\
+ logical not & $\neg b$      & \verb+not b+ \\
+ variable definition & $v = e$     & \verb+eq v e+ \\
+ Previously  & $\konst{pre}(b)$ & \verb+pre(b)+ \\
+ Historically  & $\konst{Hist}(b)$ & \verb+Historically(b)+ \\
 \end{tabular}
 \]
