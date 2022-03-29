@@ -1,9 +1,15 @@
 Synthesis maps from model and specifications to code. The SPLAT tool
 traverses the system architecture looking for occurrences of high
 assurance components specified by code contracts; for each such
-occurrence it generates a CakeML program. More generally, SPLAT supports
-three kinds of behavioral specification from which to generate
-code. In increasing order of expressiveness, these are:
+occurrence it generates a CakeML program. SPLAT supports three kinds
+of behavioral specification from which to generate code. In increasing
+order of expressiveness, these are: regular expressions, contiguity
+types, and AGREE specifications. In earlier work we have described how
+regular expressions and contiguity types are used as specification
+languages for verified filter implementations. In the present paper,
+we extend this \emph{specification oriented} approach to the
+Turing-complete specifications of AGREE.  We give a short review of
+that previous work before going into detail on AGREE.
 
 \paragraph{Regular expressions.} Often the well-formedness of data on connections
 can be enforced by matching against a regular expression. In other
@@ -11,27 +17,80 @@ words, the data can be characterized by a \emph{regular language}. As
 is well known, regular expressions can be translated to efficient
 deterministic finite state machine (DFA)
 implementations. In \cite{formal-filter-synth-langsec,case-verified-filter}
-we report on the creation and application of filters from a verified
-regular expression-to-DFA compiler.
+we report on the creation and application of table-based DFA filters
+from a verified regular expression-to-DFA compiler. The latter paper
+offers a fully-worked out example synthesizing a regular expression
+filter and formally proving that it meets an infinitary behavioral
+specification.
 
 \paragraph{Contiguity types\cite{contiguity-types}.}
-A contiguity type, like regular expressions, is effective at
+Contiguity types, similar to regular expressions, are effective at
 describing data at the network message level, \eg, as flat
-strings. The notation is however more expressive, being able to
+strings. The notation is however much more expressive, being able to
 declare many kinds of so-called \emph{self-describing} messages, \ie,
 those where message structure is dependent on data held elsewhere in
 the message. Figure \ref{fig:filter-spec} gives a contiguity type
 specification for the welll-formed waypoints of our example system. We
-have formalized and verified a contiguity type matcher. The matcher
-code has been used in our case studies.
+have formalized and verified a contiguity type matcher, which has been
+extensively applied throughout our case studies.
 
-\paragraph{AGREE code contracts.} When full computational power is needed, we can use the
-expressive power of AGREE code contracts to write arbitrarily complex
-filter or monitor operations, as we have already seen. Our formal
-model of AGREE syntax and semantics is applied to extract code
-contracts and map them to equivalent logic functions.
+\subsection{Compiling from code contracts}
 
-\noindent For each of these three approaches, we take the following steps to
+When full computational power is needed, we can use the expressive
+power of AGREE code contracts to write arbitrarily complex filter or
+monitor operations, as we have already seen. Our formal model of AGREE
+syntax and semantics is applied to extract code contracts and map them
+to equivalent logic functions. In particular, given a code contract with
+functionality ${\Eqs}\cdot G$, input ports $\mathbb{I}$, state
+variables $\mathbb{S}$, and output ports $\mathbb{O}$, the semantics
+given in Section \ref{sec:code-contracts} can be applied to create a
+function
+\[
+ \konst{strmStep} : \mathbb{N}_0 \to \mathit{Env} \to \mathit{Env} = \sem{{\Eqs}\cdot G}
+\]
+Assume ${\Eqs}\cdot G$ is \emph{Pascalish}, \ie, sequentially
+imperative. Then we can direcctly create a corresponding logic function
+\[
+\konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}
+\]
+that takes input and state as parameters and returns an updated state
+and output. Thus the environment $\mathit{Env}$ holding all previous
+values of each variable can be replaced by \emph{parameters}, each of
+which is able to hold only one data element. Assuming
+$\mathit{Env}' = \konst{strmStep}\;t\; \mathit{Env}$, we can formally show that
+\[
+\vdash (\mathit{Env}' \vert_{\mathbb{S}},
+ \mathit{Env}' \vert_{\mathbb{O}}) =
+\konst{stateStep} (\mathit{Env}\vert_{\mathbb{I}(t)},
+                   \mathit{Env}\vert_{\mathbb{S}(t)})
+\]
+In other words, projecting out the state and output components from
+$\konst{strmStep}\;t\; \mathit{Env}$ equals the result of
+applying \konst{stateStep} on the input and state components of
+$\mathit{Env}$ at time $t$. This theorem connects the stream semantics
+of the code contract to a pure logic function over the values
+appearing in the stream. From this point we can use tools in the
+CakeML eco-system to jump from the setting of higher order logic to
+CakeML abstract syntax \cite{cakeml-translator}. Thus we have moved
+from stream semantics to logic function to CakeML evaluation semantics
+in a property-preserving way. Once in CakeML, further necessary
+features can be added, namely imperative variables for storing state
+between component invocations, also invocations of the (verified) foreign
+function interface of CakeML. Finally, the CakeML compiler can be
+applied to the program. It delivers an executable which can be shown
+to preserve the original contract.
+
+
+%% where the $\mathit{state}$ parameters to the function are just the
+%% variables defined in ${\Eqs}$, obtained by projecting out the
+
+%%  = \mathit{Env}\vert_{\mathbb{I}}$ $\mathit{input}
+%%  = \mathit{Env}\vert_{\mathbb{I}}$ $\mathit{input}
+%%  = \mathit{Env}\vert_{\mathbb{I}}$
+
+
+\subsection{Generating CakeML}
+For any of the three specification languages, we take the following general steps to
 arrive at an executable.
 
 \begin{enumerate}
@@ -79,8 +138,8 @@ an underlying check specified by the contiguity type checking bounds
 on waypoints.
 
 The verdict of a filter is made and performed within one thread
-invocation. Thus, in its given time slice, the
-following steps must be completed:
+invocation. Thus, in its given time slice, the following steps must be
+completed:
 
 \begin{enumerate}
 
@@ -111,8 +170,9 @@ results in the filter failing to do so. For example, the parse of a
 message might need more space than has been allocated; another example
 could be if the time slice provided by the scheduler is too short for
 the wellformedness computation to finish. Thus resource bounds need to
-be included in the correctness argument. Some preliminary work on this
-has been done in CakeML \cite{cakeml-space-cost}.
+be included in the correctness argument. Some preliminary work that
+could support formal proofs of such bounds has been done for
+CakeML \cite{cakeml-space-cost}.
 
 \end{remark}
 
@@ -200,48 +260,11 @@ nothing in our approach that forbids stateful filters: they can be
 realized by monitors.) A monitor specification is mapped by code
 generation to a state transformation function of the following
 abstract type:
+%
 \[
 \konst{stepFn} : \mathit{input} \times \mathit{stateVars} \to \mathit{stateVars} \times \mathit{output}
 \]
-
-The system scheduler \emph{activates} components in some order. It is
-an obligation on the system that the scheduler follows some sensible
-partial order of component activation and allows each component
-sufficient time for its computation.  Activating a monitor component
-takes the form of the following pseudo-code, in which the monitor
-evaluates the \konst{stepFn} on its current inputs and the current
-values of the state variables, returning the new state and the output
-values.
-\[
-\begin{array}{ll}
- \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
- (v_1,\ldots) & = \konst{readState}() ; \\
- ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stepFn} ((i_1,\ldots),(v_1,\ldots)) ; \\
- \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
- \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
-\end{array}
-\]
-
-\subsubsection{Initialization}
-
-A monitor may need to accumulate a certain minimum number of
-observations before being able to make a meaningful assessment of
-behavior. Until that threshold is attained, the monitor is essentially
-in its \emph{initialization} phase. In order for correct code to
-be generated, monitor specifications need to spell out the values of
-output ports when in their initialization phases. For example, suppose a
-monitor does some kind of differential assessment of inputs at
-adjacent time slices, alerting when (say) the measured location of a
-UAV at times $t$ and $t+1$ is such that the distance between the two
-locations is unusually large. Such a monitor needs two measurements
-before making its first judgement, but at the time of its first
-output, only one measurement will have been made. The specification
-must then explicitly state the correct value for the first output.
-
-\subsubsection{Step function}
-
 The \konst{stepFn} works as follows:
-
 \begin{enumerate}
 
 \item Each input is parsed into data of the type specified by the port
@@ -344,6 +367,26 @@ end
   \label{fig:monitor-cakeml}
 \end{figure}
 
+\subsection{Incorporation into system execution}
+
+The system scheduler \emph{activates} components in some order. It is
+an obligation on the system that the scheduler follows some sensible
+partial order of component activation and allows each component
+sufficient time for its computation.  Activating a monitor component
+takes the form of the following pseudo-code, in which the monitor
+evaluates the \konst{stepFn} on its current inputs and the current
+values of the state variables, returning the new state and the output
+values.
+\[
+\begin{array}{ll}
+ \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
+ (v_1,\ldots) & = \konst{readState}() ; \\
+ ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stepFn} ((i_1,\ldots),(v_1,\ldots)) ; \\
+ \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
+ \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
+\end{array}
+\]
+
 %% \subsection{Component Behavior}
 
 %% Intuitively, for monitor specification $s$, \konst{stepFn} is the
@@ -353,3 +396,21 @@ end
 %% constraints, iterating \konst{stepFn} produces a $\pi$ s.t. $\pi \in
 %% \Lang{s}$; and taking the union over all input sequences and
 %% initial states produces $\Lang{s}$ itself.
+
+%% \subsubsection{Initialization}
+
+%% A monitor may need to accumulate a certain minimum number of
+%% observations before being able to make a meaningful assessment of
+%% behavior. Until that threshold is attained, the monitor is essentially
+%% in its \emph{initialization} phase. In order for correct code to
+%% be generated, monitor specifications need to spell out the values of
+%% output ports when in their initialization phases. For example, suppose a
+%% monitor does some kind of differential assessment of inputs at
+%% adjacent time slices, alerting when (say) the measured location of a
+%% UAV at times $t$ and $t+1$ is such that the distance between the two
+%% locations is unusually large. Such a monitor needs two measurements
+%% before making its first judgement, but at the time of its first
+%% output, only one measurement will have been made. The specification
+%% must then explicitly state the correct value for the first output.
+
+% \subsubsection{Step function}
