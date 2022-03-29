@@ -13,14 +13,17 @@ constructs. The resulting Lustre can then be compiled. The goal is to
 provide a seamless connection between pure data-flow and pure control
 design.
 
-There is a fully verified compiler that takes Lustre and turns it into
-a binary executable that is specified and verified in
-Coq \cite{10.1145/3140587.3062358}. The key is in combining infinite
-sequences of data-flow models with incremental manipulation of
-memories akin to an imperative model. CompCert is used on the backend
-to create the final rendered executable. The work is quite similar to
+A fully verified compiler has been developed that takes Lustre and compiles
+it into assembly code, specified and verified in Coq \cite{10.1145/3140587.3062358}.
+The key is in combining infinite sequences of data-flow models with incremental
+manipulation of memories akin to an imperative model. CompCert is used on the
+backend to create the final rendered executable. The work is quite similar to
 ours in providing a verified compilation chain from Lustre. However,
-there are significant differences: first, they tackle a more
+there are significant differences: notably, they tackle a more
 comprehensive subset of Lustre than our work. We have been able to
 work effectively with a relatively simple core language, \eg, without
-\emph{clocking} features, and this aligns with our contract language, so that, as well as generating behaviorally equivalent code, we also can show that the generated code meets a logical specification that is a leaf-level claim in a system-wide correctness argument conducted by compositional reasoning in AGREE.
+\emph{clocking} features.  This subset aligns with our contract language, and
+allows us to generate behaviorally equivalent code so we can show that the
+generated code meets its logical specification.  This, in turn,
+can be used as a leaf-level claim in a system-wide correctness argument
+conducted by compositional reasoning in AGREE.
