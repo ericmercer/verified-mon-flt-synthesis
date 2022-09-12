@@ -63,6 +63,9 @@
 
 \hyphenation{op-tical net-works semi-conduc-tor Cake-ML}
 
+% Comment macros
+\newcommand{\egm}[1]{\textcolor{orange}{egm: #1}}
+
 \newcommand{\konst}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\imp}{\Rightarrow}
 \newcommand{\set}[1]{\ensuremath{\{ {#1} \}}}
@@ -76,6 +79,13 @@
 \newcommand{\secref}[1]{Sec.~\ref{#1}}
 \newcommand{\lineref}[1]{Line~\ref{#1}}
 \newcommand{\linesref}[2]{Lines~\ref{#1}--\ref{#2}}
+
+% Acronym macros
+\newcommand{\brfcs}{BriefCASE}
+\newcommand{\aggr}{AGREE}
+\newcommand{\splt}{SPLAT}
+\newcommand{\ckml}{CakeML}
+
 % \newcommand{\eqref}[1]{Eq.~\ref{#1}}
 
 % Latex trickery for infix div operator, from stackexchange
@@ -184,7 +194,6 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 \section{Code contracts for cyber components}
 \label{sec:code-contracts}
 \input{high-assurance-contracts}
-
 
 \section{Testing Specifications with AGREE}
 \label{sec:testing}
