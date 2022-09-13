@@ -5,7 +5,7 @@
     \end{tabular}
   \end{center}
 \caption{AGREE failure certificate for initial design.}
-\label{fig:example-certificate}
+\label{fig:flowchart}
 \end{figure*}
 
 \begin{figure*}[h]
@@ -38,7 +38,11 @@
   Send to SPLAT to get verified CakeML code. 
 }
 
-We now describe a simple software system, named SW, for route planning
+\figref{fig:flowchart} illustrates a simplified \brfcs\ workflow with the shaded boxes representing the contributions discussed in this manuscript: test contracts, code contracts, and SPLAT synthesis.
+The unshaded boxes are the existing tools that generate evidence for the assurance case.
+The rest of this section follows an illustrative example through the workflow.
+
+The baseline AADL model is a simple software system, named SW, for route planning
 and automated control of a UAV. A picture of the AADL architectural
 model for SW is in \figref{fig:example}. SW is loosely based on one of
 the case studies in Section~\ref{sec:case-study}.  The source for the
@@ -62,17 +66,9 @@ software and WM is a legacy component.
 %% behavior.
 
 The expected behavior of the SW system, and the components
-implementing the system, is modeled with AGREE contract
-specifications.  The contracts constrain input with assumptions and
-state properties of output with guarantees.  AGREE performs model
-checking on this assume-guarantee system to hierarchically prove that
-the SW component obeys all contract obligations under all possible
-finite input streams.  The AGREE analysis, contract language, and
-contracts for SW are discussed in greater detail in
-\secref{sec:agree} and \secref{sec:agree-semantics}.
-
-The AGREE contracts for the initial system in \figref{fig:example},
-and its implementing components, both assume and guarantee the absence
+implementing the system, are modeled with AGREE contract
+specifications.  
+These contracts assume and guarantee the absence
 of any malicious, or unspecified, component behavior.  More precisely,
 the contract for SW assumes that its inputs are \emph{well-formed} and that
 there is never more than one automation request pending at a time.
@@ -100,25 +96,23 @@ its input assumptions hold:
 These initial specifications pass verification, meaning that the
 contract composition of the components with the system satisfies all
 component input assumptions and system output guarantees.
+AGREE background and the baseline contracts are discussed in detail in \secref{sec:agree} and \secref{sec:agree-semantics}.
 
-\subsection{Detecting and addressing vulnerabilities}
-A cyber-vulnerability analysis, however, identifies the potential of a
+\subsection{Adding cyber requirements}
+
+A cyber-vulnerability analysis identifies the potential of a
 supply chain attack through the AI route planner (provided by a
-third-party vendor without source code).  BriefCASE marks the
-component as \emph{untrusted} after the analysis, and the contract for
-AI is modified by removing all guarantees on its outputs to reflect
-its untrusted status.  The AI output is now unconstrained in the
+third-party vendor without source code).  Based on the analysis, the designer adds a requirement that the system must guard agaist malicious AI behavior, marks the component as \emph{untrusted}, and removes all output guarantees from its contract.  The AI output is now unconstrained in the
 assume-guarantee reasoning of AGREE and is able to generate any value
-on its output at anytime.
+on its output at anytime. 
 
 The output from the AGREE analysis using the untrusted AI
 specification is shown in \figref{fig:example-certificate}.  The red
 exclamation points designate component assumptions or system output
 guarantees that do not hold, and each failure comes with a
-corresponding counter-example.  The results are not unexpected given
-the AI route planner's unconstrained behavior.
+corresponding counter-example.  
 
-For example, the first violation is that the mission command on \texttt{AutomationResponse} from
+The first violation is that the mission command on \texttt{AutomationResponse} from
 the AI to the WM is no longer guaranteed to be well-formed.  The
 consequence of that failing input assumption is that the WM outputs
 are no longer guaranteed; they are effectively unconstrained.  These
@@ -139,46 +133,55 @@ level outputs.
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-      \includegraphics[scale=0.4]{hardened-certificate.png}
+      \includegraphics[scale=0.38]{agree-test-output.png} \\
+      (a) \\ \\
+      \includegraphics[scale=0.4]{hardened-certificate.png} \\
+      (b)    
     \end{tabular}
   \end{center}
-  \caption{AGREE verification certificate for cyber-hardened design.}
+  \caption{AGREE verification certificates. (a) Test contract verification results. (b) Cyber-hardened design verification results.}
   \label{fig:hardened-certificate}
 \end{figure}
 
-The system designer now uses BriefCASE to cyber-harden SW by inserting
+\emph{Adding high assurance components}
+
+The system designer now uses \brfcs\ to cyber-harden SW by inserting
 high-assurance components in the form of a filter and a monitor, as
-shown in \figref{fig:hardened}, to isolate the AI component and prevent it from violating the WM component input assumptions.
+shown in \figref{fig:hardened}.
+These isolate the AI component and prevent it from violating the WM component input assumptions.
 A filter enforces an invariant over
-each datum in the data stream by not forwarding input to its output if
-that input violates the filter invariant.  The auto-generated AGREE
-code contract specification states that only well-formed inputs are passed to the
-output.  The system developer must further define the filtering
-policy, but it is usually based on the existing assumptions made by
+each datum in the data stream by not forwarding input to its output if the invariant does not hold.
+\brfcs\ generates the initial code contract for the filter which the designer completes by writing the invariant property.
+That property it is usually based on the existing assumptions made by
 downstream components that consume the filter output.
 
 A monitor captures a relation on input data over time and is thus able
 to reason about the temporal, and other invariant, properties of that input.  A monitor raises
-an alert if the specified properties are ever violated.  The
-AGREE code contract for the monitor in our example states that an
+an alert if the specified properties are ever violated.  
+As with the filter, \brfcs\ generates a template code contract that is completed by the designer with the desired behavior that is typically defined by the SW system and its implementing component contracts. 
+The code contract in our example states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
-request or in the next step after the request.  As with the filter,
-the system designer provides the policy, and that policy is typically
-based on existing the assumptions and guarantees of the SW system and its implementing components.
-AGREE code contracts are discussed in detail in \secref{sec:code-contracts}.
+request or in the next step after the request.  
+Code contracts are discussed in detail in \secref{sec:code-contracts}.
+
+Code contracts for high assurance components can be arbitrarily complex since they can have persistent state that evolves over time.
+Test contracts allow the designer to validate the behavior, and general input to output properties, of a code contract through unit testing.
+For example, one of the test contracts for the monitor is that it should not alert and pass its input when the monitor sees the \texttt{AutomationReponse} one step after it sees the \texttt{AutomationRequest}.
+Test contracts are discussed in detail in \secref{sec:test-contracts}.
 
 The AGREE analysis of the cyber-hardened implementation is shown in
-\figref{fig:hardened-certificate}. AGREE has generated high-level
-evidence justifying the claim that the high-assurance components
-guarantee the correct behavior of the SW implementation in the
-presence of the untrusted AI route planner.  Having passed AGREE
-verification, the high-assurance components are ready to be
+\figref{fig:hardened-certificate}.
+\figref{fig:hardened-certificate}(a) is the test contract results and \figref{fig:hardened-certificate}(b) is the hardened system composition.
+Here AGREE has generated high-level
+evidence justifying the claim that the high-assurance components meet their intended purposes.
+Having passed AGREE verification, the high-assurance components are ready to be
 synthesized.
 
-\subsection{Code synthesis}
+\subsection{Synthesizing code from code contracts}
+
 High-assurance components are automatically synthesized by SPLAT from
-the AGREE code contracts to equivalent programs in the CakeML
+the code contracts to equivalent programs in the CakeML
 language.
 %% Too strong at the moment!
 %The synthesis toolchain generates a proof that equates the
@@ -208,3 +211,4 @@ counterparts;
 \end{compactitem}
 \noindent Support and automation for these aspects of the design process are
 discussed in other works \cite{gearcase2020, dcrypps2019, 10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17, sel4-2009, scheduled-agree, 9734792}.
+Synthesis from code contracts is discussed in detail in \secref{sec:sythesis}.

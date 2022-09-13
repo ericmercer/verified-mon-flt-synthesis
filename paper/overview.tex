@@ -53,7 +53,9 @@ AGREE verifies the \emph{consistency} of the composition of the component and su
 The contributions discussed in this manuscript relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
 This manuscript defines a \emph{code contract} language that is a subset of the AGREE language with sequential evaluation semantics as opposed to the existing parallel semantics of AGREE.
 The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the contract composition of the model. 
-As such, the behavior of a high assurance component is defined by the designer in a code contract, and AGREE proves that the code contract meets its intended purpose in two ways: first, its input to output definition is satisfied, and second, in the system composition, it satisfies associated cyber-requirements.
+This manuscript further defines a stylized \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
+As such, the behavior of a high assurance component is defined by the designer in a code contract, and then using the existing AGREE model checker, test contracts prove the desired code contract behavior, and once the designer is satisfied that is correct, the system composition is verified to conclude that the contract meets its intended purpose.
+dressing associated cyber-requirements.
 
 Showing that a component is properly implemented is accomplished through formal synthesis from the code contract.
 The Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
