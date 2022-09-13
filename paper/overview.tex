@@ -27,18 +27,17 @@ Evidential statements must exist to address the added cyber requirements in orde
 	\item \textbf{Proxy}: enable HTTPS message inspection 
 	\item \textbf{seL4}: transform component definitions for the seL4 secure micro kernel
 \end{compactitem}
-Transformations update the AADL model architecture with new components and the assurance case with new evidential statements for the associated goal.
-Filters, monitors, and gates are considered high assurance components that require formal reasoning in building the assurance case.
-This manuscript discusses how these high assurance components are specified and synthesized with the requisite evidence for the assurance case.
+Transformations update the AADL model architecture with new components and the assurance case with new required evidential statements.
 
-When \brfcs\ inserts a filter, monitor, or gate, high assurance component, it requires evidence that the component is 
+Filters, monitors, and gates are considered high assurance components that require formal reasoning in building the assurance case.
+When added to a system, \brfcs\ requires evidence that the component is 
 \begin{compactenum}
 	\item connected in the model, 
 	\item cannot be bypassed, 
 	\item meets its intended purpose, and
 	\item is properly implemented.
 \end{compactenum}
-Information flow analysis provides evidence for the first two properties while synthesis provide evidence for the last two properties.
+Information flow analysis provides evidence for the first two properties while synthesis provides evidence for the last two properties.
 
 The Awas~\cite{awas} AADL information flow analyzer and visualizer provides evidence that high assurance components are connected and not bypassed in the model.
 The High Assurance Modeling and Rapid engineering for embedded systems tool (HAMR) generates component infrastructure and integration code implementing the semantics of AADL-compliant thread scheduling, thread dispatching, port-based communication, and real-time scheduling \cite{hamr}.
@@ -46,15 +45,17 @@ Along with the code generation, HAMR constructs a proof that all AADL modeled fl
 HAMR relies on the seL4 microkernel for its proofs.
 The seL4 microkernel, among other security properties, provides strong isolation between components ensuring that there are no communication channels outside of what is defined \cite{sel4-sosp09, sel4-tocs14, sel4-cacm18}.
 
-This manuscript discusses the aspects of \brfcs\ concerning evidence that the component meets its intended purpose and is properly implemented.
 The Assume Guarantee Reasoning Environment (AGREE) is a compositional, assume-guarantee-style, model checker for AADL models \cite{compositional-analysis-agree,nfm:agree}. 
-AGREE attempts to prove properties about one layer of the architecture using properties allocated to subcomponents.
-The composition is performed in terms of \emph{contracts} provided for each component that state the component's \emph{assumptions} on inputs and \emph{guarantees} on outputs under the assumptions.
-AGREE verifies the \emph{consistency} of the composition of the component contracts: output guarantees must be strong enough to satisfy input assumptions of downstream components and input assumptions of a system along with the output guarantees of its \emph{sub}-components must be strong enough to satisfy its output guarantees.
+AGREE attempts to prove properties about one layer of the architecture using properties allocated to sub-components.
+The composition is performed in terms of \emph{contracts} provided for each component and sub-component that state \emph{assumptions} on inputs and \emph{guarantees} on outputs under the assumptions.
+AGREE verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy destination constraints.
 
-The behavior of a high assurance component is specified by the designer in a \emph{code contract}.
-A code contract is a subset of the AGREE language with formally defined semantics needed for code synthesis as apposed to only compositional reasoning.
-AGREE proves that the code contract meets its intended purpose in the system composition by satisfying the associated cyber-requirements.
-Then the Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
+The contributions discussed in this manuscript relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
+Regarding intended purpose, this manuscript defines a \emph{code contract} language that is a subset of the AGREE language with sequential evaluation semantics as opposed to the existing parallel semantics of AGREE.
+The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the composition. 
+As such, the behavior of a high assurance component is defined by the designer in a code contract, and AGREE proves that the code contract meets its intended purpose in the system composition by satisfying the associated cyber-requirements.
+
+Showing that a componest is properly implemented is accomplished through formal synthesis from the code contract.
+The Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
 The CakeML compiler is verified to generate binary implementations that are equivalent in semantics to the original input program \cite{cakeml}.
 It proves that the resulting binary exactly preserves the meaning of the original contract to assure that the component is properly implemented.
