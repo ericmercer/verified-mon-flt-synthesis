@@ -23,10 +23,10 @@ SPLAT~\cite{slind-hcss2020},~\cite{formal-filter-synth-langsec}
 
 Formal
 verification that the transformed system model meets its requirements
-is accomplished via AGREE~\cite{agree2013} (Assume Guarantee Reasoning
+is accomplished via \agr~\cite{agree2013} (Assume Guarantee Reasoning
 Environment).
 %The AGREE analysis \emph{assumes} properties on the inputs of a given component of the system, and attempts to formally prove the conjectured \emph{guarantees} of the output.
-AGREE is a {\em compositional assume-guarantee} style model checker
+\agr\ is a {\em compositional assume-guarantee} style model checker
 for AADL models that attempts to prove properties about one layer of
 an architecture using properties allocated to its subcomponents.
 Cyber-resilient code implementing the verified model is then
@@ -44,25 +44,25 @@ being propagated to downstream components, and (2) the insertion of a
 monitor to detect (and alert) unexpected behaviors arising from
 untrusted components. These transformations not only change the
 architecture of the model by adding in new components; they also
-generate a formal specification in the form of a \emph{code contract} in the AGREE language for their intended behavior. 
+generate a formal specification in the form of a \emph{code contract} in the \agr\ language for their intended behavior. 
 A code contract describes the computation of a high-assurance component and not just what it computes.
 These code contracts
 are sufficient for model checking to prove that---due to the newly
 included high-assurance components---the hardened system meets its
 cyber-resiliency requirements.
 
-Another novel aspect of the approach is the synthesis of the AGREE
-code contracts for the high-assurance components to CakeML, a verified
+Another novel aspect of the approach is the synthesis of the \agr\ 
+code contracts for the high-assurance components to \ckml, a verified
 compiler implementation for the functional programming language
 ML \cite{cakeml}. This paper describes in detail the synthesis path
-from code contracts to CakeML code, providing a formal framework in
-which to argue correctness. CakeML then provides a verified
+from code contracts to \ckml\ code, providing a formal framework in
+which to argue correctness. \ckml\ then provides a verified
 compilation path to several different target binaries (and also
-proving that the meaning of the CakeML source code is exactly
+proving that the meaning of the \ckml\ source code is exactly
 preserved in the final binaries). Assuming that the execution schedule
 of the deployed cyber-hardened system is as intended by the AADL
 model, and that the HAMR-generated communication fabric delivers
-messages between components as expected, the AGREE model checking
+messages between components as expected, the \agr\ model checking
 results then hold for the deployed system, \ie, the system will detect
 and prevent the indicated cyber-vulnerabilities over all possible
 finite inputs. Preliminary work has shown how to lift this result to
@@ -80,10 +80,10 @@ formal specifications, and a means to show that the synthesis is
 correct.
 
 The approach is illustrated by a simple example in
-\secref{sec:example}. AGREE verification and specification are
+\secref{sec:example}. \agr\ verification and specification are
 presented in \secref{sec:agree} and \secref{agree-semantics}.
 Code contracts are defined in \secref{sec:code-contracts} with a method
-for testing code contracts in the AGREE framework before synthesis given
+for testing code contracts in the \agr\ framework before synthesis given
 \secref{sec:testing}.
 The synthesis pathway is covered in Section~\ref{sec:synthesis}. A
 case study applying these transformations to an Unmanned Aerial
@@ -96,9 +96,9 @@ system is significantly more complex than the simple example and shows
 the viability of the modeling approach to a full-scale industrial
 design.
 
-The BriefCASE tools are open source and publicly
+The \brfcs\ tools are open source and publicly
 available \cite{fmide}, as is the motivating example \cite{repo}, and
 the full UxAS model with its deployment in seL4 \cite{phase2, camkes}.
-Videos demonstrating the use of the BriefCASE tools to build the UAV
+Videos demonstrating the use of the \brfcs\ tools to build the UAV
 example presented in Section~\ref{sec:case-study} are also
 available \cite{case}.
