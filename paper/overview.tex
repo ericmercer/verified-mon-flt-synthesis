@@ -8,7 +8,7 @@
 
 The BriefCASE OSATE environment, \figref{fig:tool-arch}, provides designers with workflow and tool support for developing products with inherent cyber-resiliency.
 It starts with the development of a baseline AADL model of the system architecture that defines the desired functionality.
-This baseline model can be evaluated using existing tools such as resource usage, information flow, latency analysis, etc. for validation.
+This model can be evaluated using existing tools such as resource usage, information flow, latency analysis, etc. for validation.
 
 \brfcs\ integrates additional tools into OSATE to analyze, identify, and address cybersecurity vulnerabilities in the baseline AADL model (top of \figref{fig:tool-arch}).
 \brfcs\ provides access to analysis tools that examine the model, report potential cyber vulnerabilities,
@@ -30,30 +30,30 @@ Evidential statements must exist to address the added cyber requirements in orde
 Transformations update the AADL model architecture with new components and the assurance case with new required evidential statements.
 
 Filters, monitors, and gates are considered high assurance components that require formal reasoning in building the assurance case.
-When added to a system, \brfcs\ requires evidence that the component is 
+When added to a system, \brfcs\ requires evidence that such components are 
 \begin{compactenum}
 	\item connected in the model, 
 	\item cannot be bypassed, 
-	\item meets its intended purpose, and
-	\item is properly implemented.
+	\item meet their intended purposes, and
+	\item are properly implemented.
 \end{compactenum}
-Information flow analysis provides evidence for the first two properties while synthesis provides evidence for the last two properties.
+Information flow analysis provides evidence for the first two properties while model checking and code synthesis provide evidence for the last two properties.
 
-The Awas~\cite{awas} AADL information flow analyzer and visualizer provides evidence that high assurance components are connected and not bypassed in the model.
-The High Assurance Modeling and Rapid engineering for embedded systems tool (HAMR) generates component infrastructure and integration code implementing the semantics of AADL-compliant thread scheduling, thread dispatching, port-based communication, and real-time scheduling \cite{hamr}.
-Along with the code generation, HAMR constructs a proof that all AADL modeled flows are in the implementation and that no extraneous flows have been added to the implementation.
+The Awas AADL information flow analyzer and visualizer provides evidence that high assurance components are connected and not bypassed in the model \cite{awas}.
+The High Assurance Modeling and Rapid engineering for embedded systems tool (HAMR) generates from the model component infrastructure and integration code implementing the semantics of AADL-compliant thread scheduling, thread dispatching, port-based communication, and real-time scheduling \cite{hamr}.
+Along with that code generation, HAMR constructs a proof that all flows in the AADL model are in the implementation and that no extraneous flows have been added to the implementation.
 HAMR relies on the seL4 microkernel for its proofs.
 The seL4 microkernel, among other security properties, provides strong isolation between components ensuring that there are no communication channels outside of what is defined \cite{sel4-sosp09, sel4-tocs14, sel4-cacm18}.
 
 The Assume Guarantee Reasoning Environment (AGREE) is a compositional, assume-guarantee-style, model checker for AADL models \cite{compositional-analysis-agree,nfm:agree}. 
 AGREE attempts to prove properties about one layer of the architecture using properties allocated to sub-components.
 The composition is performed in terms of \emph{contracts} provided for each component and sub-component that state \emph{assumptions} on inputs and \emph{guarantees} on outputs under the assumptions.
-AGREE verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy destination constraints.
+AGREE verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy the destination constraints.
 
 The contributions discussed in this manuscript relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
-Regarding intended purpose, this manuscript defines a \emph{code contract} language that is a subset of the AGREE language with sequential evaluation semantics as opposed to the existing parallel semantics of AGREE.
-The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the composition. 
-As such, the behavior of a high assurance component is defined by the designer in a code contract, and AGREE proves that the code contract meets its intended purpose in the system composition by satisfying the associated cyber-requirements.
+This manuscript defines a \emph{code contract} language that is a subset of the AGREE language with sequential evaluation semantics as opposed to the existing parallel semantics of AGREE.
+The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the contract composition of the model. 
+As such, the behavior of a high assurance component is defined by the designer in a code contract, and AGREE proves that the code contract meets its intended purpose in two ways: first, its input to output definition is satisfied, and second, in the system composition, it satisfies associated cyber-requirements.
 
 Showing that a component is properly implemented is accomplished through formal synthesis from the code contract.
 The Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
