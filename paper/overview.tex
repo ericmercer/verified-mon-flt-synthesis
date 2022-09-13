@@ -11,7 +11,7 @@ It starts with the development of a baseline AADL model of the system architectu
 This baseline model can be evaluated using existing tools such as resource usage, information flow, latency analysis, etc. for validation.
 
 \brfcs\ integrates additional tools into OSATE to analyze, identify, and address cybersecurity vulnerabilities in the baseline AADL model (top of \figref{fig:tool-arch}).
-\brfcs\ provides access to analysis tools that examine AADL models, report potential cyber vulnerabilities,
+\brfcs\ provides access to analysis tools that examine the model, report potential cyber vulnerabilities,
 and suggest requirements for mitigation \cite{dcrypps2019,gearcase2020}.
 Designers add these requirements to the \brfcs\ project requirements repository. 
 A key part of the requirements management in \brfcs\ is a corresponding assurance case that provides evidence, computed directly from the model or by supporting analysis tools, showing how each requirement is satisfied.
@@ -55,7 +55,7 @@ Regarding intended purpose, this manuscript defines a \emph{code contract} langu
 The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the composition. 
 As such, the behavior of a high assurance component is defined by the designer in a code contract, and AGREE proves that the code contract meets its intended purpose in the system composition by satisfying the associated cyber-requirements.
 
-Showing that a componest is properly implemented is accomplished through formal synthesis from the code contract.
+Showing that a component is properly implemented is accomplished through formal synthesis from the code contract.
 The Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
 The CakeML compiler is verified to generate binary implementations that are equivalent in semantics to the original input program \cite{cakeml}.
 It proves that the resulting binary exactly preserves the meaning of the original contract to assure that the component is properly implemented.
