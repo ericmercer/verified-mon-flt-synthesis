@@ -6,7 +6,7 @@
 	\label{fig:tool-arch} 
 \end{figure*}
 
-The BriefCASE OSATE environment, \figref{fig:tool-arch}, provides designers with workflow and tool support for developing products with inherent cyber-resiliency.
+The \brfcs\ OSATE environment, \figref{fig:tool-arch}, provides designers with workflow and tool support for developing products with inherent cyber-resiliency.
 It starts with the development of a baseline AADL model of the system architecture that defines the desired functionality.
 This model can be evaluated using existing tools such as resource usage, information flow, latency analysis, etc. for validation.
 
@@ -40,24 +40,25 @@ When added to a system, \brfcs\ requires evidence that such components are
 Information flow analysis provides evidence for the first two properties while model checking and code synthesis provide evidence for the last two properties.
 
 The Awas AADL information flow analyzer and visualizer provides evidence that high assurance components are connected and not bypassed in the model \cite{awas}.
-The High Assurance Modeling and Rapid engineering for embedded systems tool (HAMR) generates from the model component infrastructure and integration code implementing the semantics of AADL-compliant thread scheduling, thread dispatching, port-based communication, and real-time scheduling \cite{hamr}.
-Along with that code generation, HAMR constructs a proof that all flows in the AADL model are in the implementation and that no extraneous flows have been added to the implementation.
+The High Assurance Modeling and Rapid engineering for embedded systems tool (HAMR) generates from the model the component infrastructure and integration code that implements the semantics of AADL-compliant thread scheduling, thread dispatching, port-based communication, and real-time scheduling \cite{hamr}.
+Along with that code generation, HAMR constructs a proof that all flows in the model are in the implementation and that no extraneous flows have been added to the implementation.
 HAMR relies on the seL4 microkernel for its proofs.
 The seL4 microkernel, among other security properties, provides strong isolation between components ensuring that there are no communication channels outside of what is defined \cite{sel4-sosp09, sel4-tocs14, sel4-cacm18}.
 
-The Assume Guarantee Reasoning Environment (AGREE) is a compositional, assume-guarantee-style, model checker for AADL models \cite{compositional-analysis-agree,nfm:agree}. 
-AGREE attempts to prove properties about one layer of the architecture using properties allocated to sub-components.
+The Assume Guarantee Reasoning Environment (\agr) is a compositional, assume-guarantee-style, model checker for AADL models \cite{compositional-analysis-agree,nfm:agree}. 
+\agr\ attempts to prove properties about one layer of the model using properties allocated to sub-components.
 The composition is performed in terms of \emph{contracts} provided for each component and sub-component that state \emph{assumptions} on inputs and \emph{guarantees} on outputs under the assumptions.
-AGREE verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy the destination constraints.
+\agr\ verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy the destination constraints.
 
 The contributions discussed in this manuscript relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
-This manuscript defines a \emph{code contract} language that is a subset of the AGREE language with sequential evaluation semantics as opposed to the existing parallel semantics of AGREE.
-The sequential semantics are requisite to code synthesis and are defined such that AGREE is able to still prove consistency in the contract composition of the model. 
+This manuscript defines a \emph{code contract} language that is a subset of the \agr\ language with sequential evaluation semantics as opposed to the existing parallel semantics of \agr.
+The sequential semantics are requisite to code synthesis and are defined such that \agr\ is able to still prove consistency in the contract composition of the model. 
 This manuscript further defines a stylized \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
-As such, the behavior of a high assurance component is defined by the designer in a code contract, and then using the existing AGREE model checker, test contracts prove the desired code contract behavior, and once the designer is satisfied that is correct, the system composition is verified to conclude that the contract meets its intended purpose.
-dressing associated cyber-requirements.
+As such, the behavior of a high assurance component is defined by the designer in a code contract, and then using the existing \agr\ model checker, test contracts prove the desired code contract behavior.
+Once the designer is satisfied that the code contract is correct, the system composition is verified to conclude that the contract meets its intended purpose.
 
-Showing that a component is properly implemented is accomplished through formal synthesis from the code contract.
-The Semantic Properties of Language and Automata Theory (SPLAT) tool generates \emph{CakeML} code to implement the code contract.
-The CakeML compiler is verified to generate binary implementations that are equivalent in semantics to the original input program \cite{cakeml}.
-It proves that the resulting binary exactly preserves the meaning of the original contract to assure that the component is properly implemented.
+Showing that a component is properly implemented is accomplished through formal synthesis from the code contract (bottom of \figref{fig:tool-arch}).
+The Semantic Properties of Language and Automata Theory (\splt) tool generates \emph{\ckml} code to implement the code contract.
+\ckml\ is a functional language that includes additional proofs and tools built around it \cite{cakeml}.
+The \ckml\ compiler itself is verified to generate binary implementations that are equivalent in semantics to the original input program.
+That proof ensures that the resulting binary exactly preserves the meaning of the original code contract and assures that the component is properly implemented.
