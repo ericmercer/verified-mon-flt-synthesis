@@ -156,22 +156,6 @@
 \section{Introduction} \label{sec:intro}
 \input{intro}
 
-\ifREVISIONS
-\subsection{SOSYM Journal Details}
-The due date is \textbf{March} $22^\mathrm{nd}$, \textbf{2022}.
-Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if you don't have one), login and go to the "Author"-section, select the link "Start New Submission" under Author Dashboard and select "Special Section Paper" as the paper type, and choose "MODELS 2021 Special Issue". Also, make sure to mention the MODELS 2021 special issue in the cover letter.
-\fi
-
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item Revise the end of the abstract regarding the case studies to be consistent with what ends up in this version of the paper.
-  \item Revise the end of the introduction that discusses the case studies to be consistent with what ends up in this version of the paper.
-  \item Fix the link to the motivating example to point to the new repository once it is created. Fix in the next section too.
-  \item Add discussion on the limitation of the approach: what attacks can and cannot be covered, can valid messages be rejected, etc.
-\end{compactitem}
-\fi
-
 \section{Overview of BriefCASE}
 \label{sec:overview}
 \input{overview}
@@ -203,34 +187,9 @@ Go to \url{https://mc.manuscriptcentral.com/sosym/}. Create a new account (if yo
 \label{sec:synthesis}
 \input{synthesis}
 
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item State theorem relating the step function to the meaning of the leaf-node semantics
-\end{compactitem}
-\fi
-
 \section{Case study}
 \label{sec:case-study}
 \input{case-study}
-
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item Possible Outline:
-  \begin{compactitem}
-    \item Two case studies: phase 2 is the proof on concept on a industrial size problem while phase 3 tests if AGREE is expressive enough for stating complex properties and if designers are able to use it.
-    \item Phase 2 write up focusses on the number of components and the relative ease for AGREE to prove out and for SPLAT to synthesize. It notes that the components were relatively simple.
-    \item Phase 3 write up focusses on the shear complexity of the components and in particular the gate and the transport monitor. Here it the need for testing is is most obvious. Also obvious is the need to make AGREE more expressive and to separate AGREE into a specification and implementation language as seen in Dafny.
-    \item Make the general observation that the transforms on the AADL model to add the components and connections doesn't really save much time when compared against the time it takes to write and test the specifications. The automations is nice, but not where time is saved. Where time is saved is in the assurance case because once a specification is done, it is synthesized and proved correct for ALL inputs and ALL outputs. Not just some. Not code inspections. Not additional test requirements. All that is saved.
-  \end{compactitem}
-  \item Clarify research questions answered by the case study
-  \item Make the figures bigger
-  \item Rewrite to focus on synthesized components and the AGREE specifications
-  \item Add an interesting monitor from the TA6 model
-  \item Discuss what efforts are optimized with the automations versus a fully manual process for creating the components--how does the automated transformation affect actual time for engineers
-\end{compactitem}
-\fi
 
 \section{Related work}
 \label{sec:related-work}
