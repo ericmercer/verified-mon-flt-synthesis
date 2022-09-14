@@ -4,7 +4,7 @@
       \includegraphics[scale=0.4]{flowchart.png} \\
     \end{tabular}
   \end{center}
-\caption{AGREE failure certificate for initial design.}
+\caption{Simplified \brfcs\ workflow with the contributions detailed in this manuscript shaded.}
 \label{fig:flowchart}
 \end{figure*}
 
@@ -24,19 +24,9 @@
       \includegraphics[scale=0.4]{example-certificate.png} \\
     \end{tabular}
   \end{center}
-\caption{AGREE failure certificate for initial design.}
+\caption{\agr\ failure certificate for initial design.}
 \label{fig:example-certificate}
 \end{figure}
-
-\egm{
-  Merge the AGREE overview here into this section.
-  Condense it down to just the opening two paragraphes that currently exist in the overview section.
-  Walk through the first part of the example up to where AGREE fails because of Cyber Requirements.
-  Introduce the new figure showing its workflow.
-  Finish the example walking through the new figure. 
-  Add the tests to occur before final AGREE check.
-  Send to SPLAT to get verified CakeML code. 
-}
 
 \figref{fig:flowchart} illustrates a simplified \brfcs\ workflow with the shaded boxes representing the contributions discussed in this manuscript: test contracts, code contracts, and SPLAT synthesis.
 The unshaded boxes are the existing tools that generate evidence for the assurance case.
@@ -66,7 +56,7 @@ software and WM is a legacy component.
 %% behavior.
 
 The expected behavior of the SW system, and the components
-implementing the system, are modeled with AGREE contract
+implementing the system, are modeled with \agr\ contract
 specifications.  
 These contracts assume and guarantee the absence
 of any malicious, or unspecified, component behavior.  More precisely,
@@ -74,7 +64,7 @@ the contract for SW assumes that its inputs are \emph{well-formed} and that
 there is never more than one automation request pending at a time.
 Well-formed generally refers to a syntactic restriction on
 data at a port. For example, a waypoint is well-formed if it falls
-within bounds for latitude, longitude, and altitude.)  The guarantees
+within bounds for latitude, longitude, and altitude.  The guarantees
 for SW ensure that
 \begin{compactitem}
 \item a start coincides with a new waypoint message being output;
@@ -96,28 +86,22 @@ its input assumptions hold:
 These initial specifications pass verification, meaning that the
 contract composition of the components with the system satisfies all
 component input assumptions and system output guarantees.
-AGREE background and the baseline contracts are discussed in detail in \secref{sec:agree} and \secref{sec:agree-semantics}.
+The \agr\ verification conditions, syntax and semantics, and the baseline contracts for the example are discussed in detail in \secref{sec:agree} and \secref{sec:agree-semantics}.
 
 \subsection{Adding cyber requirements}
 
 A cyber-vulnerability analysis identifies the potential of a
-supply chain attack through the AI route planner (provided by a
-third-party vendor without source code).  Based on the analysis, the designer adds a requirement that the system must guard agaist malicious AI behavior, marks the component as \emph{untrusted}, and removes all output guarantees from its contract.  The AI output is now unconstrained in the
-assume-guarantee reasoning of AGREE and is able to generate any value
-on its output at anytime. 
+supply chain attack through the AI route planner since its third-party.  Based on the analysis, the designer adds a requirement that the system must guard against malicious AI behavior, marks the component as \emph{untrusted}, and removes all output guarantees from its contract.  The behavior of AI is now unconstrained. 
 
-The output from the AGREE analysis using the untrusted AI
-specification is shown in \figref{fig:example-certificate}.  The red
+The output from the \agr\ analysis is shown in \figref{fig:example-certificate}.  The red
 exclamation points designate component assumptions or system output
 guarantees that do not hold, and each failure comes with a
-corresponding counter-example.  
-
-The first violation is that the mission command on \texttt{AutomationResponse} from
+corresponding counter-example.  The first violation is that the mission command on \texttt{AutomationResponse} from
 the AI to the WM is no longer guaranteed to be well-formed.  The
 consequence of that failing input assumption is that the WM outputs
-are no longer guaranteed; they are effectively unconstrained.  These
-missing output guarantees from the WM lead to the rest of the failures
-in \figref{fig:example-certificate} because the WM provides the system
+are no longer guaranteed.  These
+missing guarantees lead to the rest of the failures
+in \figref{fig:example-certificate} as the WM provides the system
 level outputs.
 
 \begin{figure*}
@@ -139,76 +123,59 @@ level outputs.
       (b)    
     \end{tabular}
   \end{center}
-  \caption{AGREE verification certificates. (a) Test contract verification results. (b) Cyber-hardened design verification results.}
+  \caption{\agr\ verification certificates. (a) Test contract verification results. (b) Cyber-hardened design verification results.}
   \label{fig:hardened-certificate}
 \end{figure}
 
-\emph{Adding high assurance components}
+\subsection{Adding high assurance components}
 
+Here is where the shaded regions in \figref{fig:flowchart} come into play.
 The system designer now uses \brfcs\ to cyber-harden SW by inserting
 high-assurance components in the form of a filter and a monitor, as
 shown in \figref{fig:hardened}.
-These isolate the AI component and prevent it from violating the WM component input assumptions.
+These are intended to mitigate and report any observed malicious behavior by AI.
 A filter enforces an invariant over
 each datum in the data stream by not forwarding input to its output if the invariant does not hold.
-\brfcs\ generates the initial code contract for the filter which the designer completes by writing the invariant property.
-That property it is usually based on the existing assumptions made by
+\brfcs\ generates an initial code contract for the filter which the designer completes by writing the invariant.
+That invariant is usually based on the existing assumptions made by
 downstream components that consume the filter output.
+In this example, it is the well-formed property for the automation request.
 
-A monitor captures a relation on input data over time and is thus able
-to reason about the temporal, and other invariant, properties of that input.  A monitor raises
+A monitor captures a relation on data over time and is thus able
+to reason about the temporal, and other invariant, properties of that data.  It raises
 an alert if the specified properties are ever violated.  
-As with the filter, \brfcs\ generates a template code contract that is completed by the designer with the desired behavior that is typically defined by the SW system and its implementing component contracts. 
-The code contract in our example states that an
+As with the filter, \brfcs\ generates an initial code contract that is completed by the designer. 
+In this example, that contract states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
 request or in the next step after the request.  
 Code contracts are discussed in detail in \secref{sec:code-contracts}.
 
 Code contracts for high assurance components can be arbitrarily complex since they can have persistent state that evolves over time.
-Test contracts allow the designer to validate the behavior, and general input to output properties, of a code contract through unit testing.
-For example, one of the test contracts for the monitor is that it should not alert and pass its input when the monitor sees the \texttt{AutomationReponse} one step after it sees the \texttt{AutomationRequest}.
+Test contracts allow the designer to validate their behavior with unit testing.
+For example, one of the test contracts for the monitor is that when it sees an automation response one step after a request, then it should not alert, and it should pass the response downstream.
 Test contracts are discussed in detail in \secref{sec:test-contracts}.
 
-The AGREE analysis of the cyber-hardened implementation is shown in
+The \agr\ analysis of the cyber-hardened implementation is shown in
 \figref{fig:hardened-certificate}.
 \figref{fig:hardened-certificate}(a) is the test contract results and \figref{fig:hardened-certificate}(b) is the hardened system composition.
-Here AGREE has generated high-level
+Here \agr\ has generated high-level
 evidence justifying the claim that the high-assurance components meet their intended purposes.
-Having passed AGREE verification, the high-assurance components are ready to be
+Having passed \agr\ verification, the high-assurance components are ready to be
 synthesized.
 
 \subsection{Synthesizing code from code contracts}
 
-High-assurance components are automatically synthesized by SPLAT from
-the code contracts to equivalent programs in the CakeML
+High-assurance components are automatically synthesized by \splt\ from
+the code contracts to equivalent programs in the \ckml\
 language.
-%% Too strong at the moment!
-%The synthesis toolchain generates a proof that equates the
-%% meaning of the AGREE specification to the behavior of the CakeML
-%% program.
- In other words, for any set of input streams that meet the
- component's contract assumptions, the output streams produced from
- the synthesized CakeML code exactly match those defined by the
- high-assurance component's guarantees.  The CakeML compiler provides
- verified compilation to binaries for several different platforms,
- meaning that the resulting binaries exactly preserve the meaning of
- the original CakeML code \cite{cakeml}.
-
-Preserving the input to output relationship of streams between the
-AGREE contracts and CakeML lifts the AGREE contract verification
-results to the actual deployed system.  If the contract model
-verification succeeds, then the meaning of those results hold for the
-deployed system.  These results, however, are only valid under
-additional assumptions on the deployed system:
-\begin{compactitem}
-\item contracts for non-synthesized components accurately model their deployed
-counterparts;
-\item an appropriate schedule exists to sequence component
-  execution following the dependent data-flow in the design; and
-\item the communication fabric stitching components together works in harmony
-  with the schedule.
-\end{compactitem}
-\noindent Support and automation for these aspects of the design process are
-discussed in other works \cite{gearcase2020, dcrypps2019, 10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17, sel4-2009, scheduled-agree, 9734792}.
+In other words, for any set of input streams that meet the
+component's contract assumptions, the output streams produced from
+the synthesized \ckml\ code exactly match those defined by the contract guarantees.
+As such, the \agr\ verification results regarding the code contract apply equally to the synthesized \ckml, and thus, the resulting binaries from the \ckml\ compiler.
+This result does not extend to the whole system composition.
 Synthesis from code contracts is discussed in detail in \secref{sec:sythesis}.
+
+Extending the \agr\ verification results to the system composition requires additional guarantees not discussed in this manuscript.
+For example, among other things, contracts for non-synthesized components must be certified to accurately model their deployed counterparts, and the HAMR generated scheduler follows the dependent data-flow in the design.
+These additional guarantees are discussed in other works \cite{gearcase2020, dcrypps2019, 10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17, sel4-2009, scheduled-agree, 9734792}.
