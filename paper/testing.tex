@@ -1,26 +1,27 @@
-Before discussing the final steps in synthesis, we take a moment to
-discuss how code contracts, and any AGREE specification in general, can be traditionally tested to build assurance.
-Writing and proving properties about AGREE specifications is difficult not just because it is a formal process but because it reasons about constraints that define the entire input space for a component, and the entire output space, at once.
-Case studies have shown that engineers, as well as formal method practitioners, make mistakes writing these specifications, especially if the computation or temporal reasoning is complex.
+Writing and proving properties about code contracts is difficult because it is a formal process, and because it reasons about constraints that define the entire input space, and the entire output space, of a high-assurance component at once.
+Case studies have shown that designers, as well as formal method practitioners, make mistakes writing these contracts, especially if the computation or temporal reasoning in the contract is complex.
 
-We have observed three common types of mistakes in specifications (aside from self-consistency, which is
+We have observed three common types of mistakes in code contracts (aside from self-consistency, which is
 already checked): vacuity, under-specification, and missed corner cases.
 Vacuity is a common pitfall with implication when the left hand side is always false, making the implication true. 
-Under-specification is very challenging, as a verifier in the face of under-specification is not able to prove anything (or it can prove everything in the case of existential properties), so nothing is actually known after verification except that the system is under-specified. 
+Under-specification is very challenging, as \agr\ is not able to prove anything (or it can prove everything in the case of existential properties), so nothing is actually known after verification except that the contract is under-specified. 
 Missed corner cases is a common problem to all disciplines.
-It is an especially difficult challenge here because there is no direct way to provide test input and check test output.
+It is an especially difficult challenge here because there is no direct to exercise code contracts (e.g., there is no runtime \emph{per se}).
 
-The tempting approach is to use the synthesis path to check these issues with traditional testing.
-Such an approach adds extra steps that are not needed, as it is
-possible to bridge the formal model in AGREE, with its proof system, to
+A tempting approach to exercising code contracts directly is to use \splt\ to create the target binary and then use that runtime with with traditional testing.
+Such an approach adds extra steps, including test harneses, that are not needed, as it is
+possible to bridge the formal model in \agr, with its proof system, to
 traditional validation using tests.
-The key is to consider the component as implementing a test specification.
+The intuition for that bridge comes from the compositional reasoning in AADL and \agr. 
+Effectively, a code contract for a high assurance component should be a valid implementation of a test scenario.
+In other words, the test scenario, as expressed in a test contract, is the desired behavior of the system, and the code contract implements that behavior.
 
-Unit tests are created in AGREE by writing a system specification that assumes the test input and then guarantees the test output.
-The system is then implemented with the component under test and its specification.
-The AGREE analysis then proves if the component guarantees, given the test inputs, are strong enough to prove the guaranteed test outputs.
-Here the system assumptions strengthen the component assumptions to a single input, and the system guarantees weaken, or leave unchanged, the component output for that test input, depending on the goal of the test.
-AGREE proves that the component implements the test, and the Liskov substitution principle holds.
+A test contract defines the test scenario for the code contract to implement.
+It does this by assuming the test input and guarantying the test output akin to a unit test. 
+The code contract implementation (e.g., the subject under test).
+The \agr\ analysis then proves if the code contract, given the test inputs, is strong enough to prove the test contract outputs.
+Here the test contract assumptions strengthen the code contract assumptions to a single input, and the test contract guarantees weaken, or leave unchanged, the code contract output for that test input, depending on the goal of the test.
+In other words, according to Liskov substitution, \agr\ proves if the code contract is a safe substitution for the test contract.
 
 \newsavebox{\tst}
 \begin{lrbox}{\tst}
@@ -64,16 +65,16 @@ AGREE proves that the component implements the test, and the Liskov substitution
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-    \scalebox{0.62}{\usebox{\tst}} \\
+    \scalebox{0.60}{\usebox{\tst}} \\
     \end{tabular}
   \end{center}
-  \caption{AGREE unit test for high-assurance monitor.}
+  \caption{A unit test for the monitor with its test contract.}
   \label{fig:test}
 \end{figure}
 
-\figref{fig:test} is a unit test for the high-assurance monitor in \figref{fig:hardened}.
-The test checks if the monitor output coincides with the response that comes one step after the request.
-It also checks that the alarm does not fire.
+\figref{fig:test} is a unit test, with its test contract, for the monitor in \figref{fig:hardened}.
+The test contract checks if the monitor output coincides with the response that comes one step after the request.
+It also checks that the alarm is not output.
 \begin{compactitem}
 \item \lineref{line:tst-index}: An index to use to define the test input and expected test output through time.
 \item \lineref{line:tst-assume-1} and \lineref{line:tst-assume-2}: The test input. These define when the request and response message events should appear relative to the index.
@@ -81,18 +82,8 @@ It also checks that the alarm does not fire.
 The test additionally proves that nothing happens after the initial test input and expected output, \ie, no more input is provided and no more output is generated.
 \item \linesref{line:tst-imp-start}{line:tst-imp-end}: The implementation with the component under test (\lineref{line:tst-imp-comp}).
 \end{compactitem}
-\figref{fig:test-output} is the AGREE output for the test, showing that it passes. 
+\figref{fig:test-output} is the \agr\ output for the test, showing that it passes. 
 
-This AGREE test method is effective for detecting vacuity, under-specified behavior, and missed corner cases.
-It enables designers to iteratively develop specifications inside the MBSE framework using AGREE, and it builds assurance that the specification reflects the desired behavior with black-box, white-box, and other test coverage metrics.
-These same tests can be synthesized to the backend implementation for traditional testing.
-
-\begin{figure}
-  \begin{center}
-    \begin{tabular}{c}
-      \includegraphics[scale=0.38]{agree-test-output.png} \\
-    \end{tabular}
-  \end{center}
-  \caption{AGREE output for unit test.} 
-  \label{fig:test-output}
-\end{figure}
+Test contracts are effective in detecting vacuity, under-specified behavior, and missed corner cases.
+They enables designers to iteratively develop code contracts inside OSATE with \agr, and they build assurance that the code contract reflects the desired behavior with black-box, white-box, and other test coverage metrics.
+These same tests can be synthesized to the backend implementation for traditional testing if for example, the code contract is a model of an existing legacy binary.

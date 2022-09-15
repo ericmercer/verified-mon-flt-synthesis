@@ -8,18 +8,18 @@
 \newcommand{\components}{\ensuremath{C}}
 \newcommand{\component}{\ensuremath{c}}
 
-The AGREE specification language, and semantics, are inspired by the
+The \agr\ specification language, and semantics, are inspired by the
 Lustre language \cite{10.1145/41625.41641}. Lustre semantics are
 synchronous data-flow where the inputs and outputs of components are
 streams.  Informally, streams assign values to expressions at each
-point in time.  AGREE contracts express relationships between input
+point in time.  \agr\ contracts express relationships between input
 and output streams by assuming a set of allowed input streams and then
 guaranteeing a corresponding set of allowed output streams.
 
 \subsection{Components}
 A system implementation is described by its ports, its subcomponents,
 and the connections between ports on different subcomponents.  Ports
-in AGREE are inherited from AADL.  There are three kinds of port:
+in \agr\ are inherited from AADL.  There are three kinds of port:
 \emph{event} ports, \emph{data} ports, and \emph{event data} ports.
 An event port carries no data and only signals occurrence (or not) of the
 event. A data port is a sampled port: the data can be read at anytime.
@@ -40,9 +40,9 @@ step of the input data stream.
 
 \subsection{Contracts and verification conditions}
 
-From the system and component contracts, AGREE generates a set of
+From the system and component contracts, \agr\ generates a set of
 verification conditions to show that a system's component
-implementation is correct~\cite{agree2013}.  The AGREE model checker
+implementation is correct~\cite{agree2013}.  The \agr\ model checker
 is then invoked to prove or disprove the verification
 conditions. The contracts and verification conditions are expressed in
 \emph{past-time linear temporal logic} (PLTL) \cite{10.1093/jigpal/8.1.55}.
@@ -55,7 +55,7 @@ that follows that point (LTL).  Its semantics are defined relative to
 a point in time $i$, a finite trace of system states $\pi = s_0, s_1,
 \ldots, s_i$, and some logic formula $f$.
 
-The two PLTL operators necessary for the AGREE generated verification
+The two PLTL operators necessary for the \agr\ generated verification
 conditions are $\globally$ that looks forward in time along
 the trace and $\historically$ (historically) that looks backward in
 time along the trace.  These are defined as
@@ -104,7 +104,7 @@ the system assumptions and component guarantees that provide the
 output.  It checks if the guarantees on components providing primary
 outputs are strong enough to imply the system guarantees.
 
-If all the verification conditions hold (AGREE uses $k$-inductive
+If all the verification conditions hold (\agr\ uses $k$-inductive
 model checking to automatically prove or disprove each generated
 verification condition), then the system is said to be \emph{correct},
 meaning that the system composition meets input assumptions at each
@@ -120,6 +120,6 @@ disproving the above verification conditions.  The additional
 unexpanded results at the bottom of the figures prove
 \emph{self-consistency} in the contracts.
 A contract is self-consistent if it does not guarantee two different values in the same moment of time, \ie, the contract is not self-contradicting.
-AGREE generates additional verification
+\agr\ generates additional verification
 conditions that prove each component contract, and the composition of
 contracts, self-consistent.

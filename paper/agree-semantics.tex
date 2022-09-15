@@ -1,24 +1,4 @@
-\begin{comment}
-This section gives an abstract mathematical overview of AGREE's
-compositional reasoning system, defining assume-guarantee contracts
-and the verification conditions that AGREE checks in order to
-modularly establish overall system correctness at the model level.
-The syntax and semantics of AGREE are sketched in some detail.  The
-discussion then becomes more concrete, showing---by example---how the
-AGREE contract language is used to specify the cyber-hardened system
-of \figref{fig:hardened}. The discussion proceeds from the
-system-level contract to the filter and monitor components, which rely
-on the notion of a \emph{code contract} to support code generation.
-\end{comment}
-
-We now give an overview of a formal model for AGREE syntax and
-semantics.  The discussion then becomes more concrete, showing by
-example, how the AGREE language is used to specify the properties of
-the SW system introduced in \secref{sec:example}.  Any implementation
-of the SW system must guarantee the specification output under the
-system assumptions.
-
-The syntax of AGREE is essentially that of quantifier-free first order
+The syntax of \agr\ is essentially that of quantifier-free first order
 predicate logic supplemented with a few temporal operators. The terms
 (\emph{e}) are arithmetic expressions built from variables ($v$) and
 numeric and boolean literals ($c$), while formulas (\emph{b}) are
@@ -32,17 +12,16 @@ b & ::= & v \mid c \mid a \mid \neg b
             \mid b \; \set{\land,\lor,\imp,\iff}\; b
 \end{array}
 \]
-AGREE includes a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
-and formulas. To support port handling, AGREE defines a predicate
+\agr\ includes a conditional, $\itelse{b}{(-)}{(-)}$, for both terms
+and formulas. To support port handling, \agr\ defines a predicate
 $\konst{event}(p)$, which tests if an event (or event-data) port $p$ is
-signaled. Lastly, AGREE supports temporal operators \emph{previously}
+signaled. Lastly, \agr\ supports temporal operators \emph{previously}
 $\konst{pre}(-)$, \emph{followed-by} $(-) \to (-)$, and historically
 $\konst{Hist}(-)$.
 
 \subsection{Semantics}
-The semantics of terms and formulas, as mentioned in the previous
-section, is in terms of \emph{streams of values}. Values encompass at
-least booleans and numbers, but can be readily extended to include
+The semantics of terms and formulas is defined over \emph{streams of values}. Values encompass at
+least booleans and numbers but can be readily extended to include
 records and arrays. A value stream is a total function from time
 (natural numbers including 0) to values:
 \[
@@ -100,12 +79,11 @@ current moment.  $\konst{Since}(a, b)$ is true if $a$ has been true in
 all moments up to the present one since $b$ most recently became true.
 All other past-time operators of PLTL can be defined similarly \cite{monitor}.
 
-\paragraph{AGREE notation.}
-AGREE uses ASCII notation for the mathematical syntax we have
+\agr\ uses ASCII notation for the mathematical syntax we have
 defined. The following table spells out the mapping.
 \[
 \begin{tabular}{l|l|l}
- Operation & Math. notation & AGREE \\ \hline
+ Operation & Math. notation & \agr \\ \hline
  followed-by &  $e \to e$          & \verb+e -> e+  \\
  logical implication &  $e \imp e$ & \verb+e => e+ \\
  if-and-only-if &  $e \iff e$      & \verb+e <=> e+ \\
