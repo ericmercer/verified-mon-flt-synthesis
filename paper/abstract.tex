@@ -1,38 +1,15 @@
 Cyber-physical systems, such as avionics, must be tolerant to
-cyber-attacks in the same way they are tolerant to random faults: they
-should either gracefully recover or safely shut down as requirements dictate.
-%
-%% The DARPA Cyber Assured Systems Engineering program is developing
-%% tools for design, analysis, and verification that enable systems
-%% engineers to design-in cyber-resiliency in a Model-Based Systems
-%% Engineering (MBSE) environment.
-%
-This paper describes automated model transformations that introduce
-high-assurance cyber-resiliency components into a system; in
-particular, filters that guard against malformed input, as well as
-monitors that guard against spoofing and other malicious behavior. A
-formal specification in the form of a code contract defines each
-high-assurance component and is used to verify that the component
-addresses system-level cyber requirements. Implementations for these
+cyber-attacks in the same way they are tolerant to random faults: gracefully recover or safely shut down as requirements dictate.
+\brfcs\ is a model-based systems engineering environment that extends the Open Source AADL Tool Environment to add new design, analysis, and code generation capabilities for building cyber-resilient systems.
+This manuscript describes a mechanism implemented by \brfcs\ to create, and insert, high-assurance components into a system for cyber-resiliency.
+Such components can be filters that guard against malformed input or monitors that guard against spoofing and other malicious behavior.
+A formal specification in the form of a code contract defines each high-assurance component and is used with test contracts to verify the specified behavior.
+Once tested, the code contract is used to verify that the added component addresses system-level cyber requirements.
+Implementations for these
 high-assurance components are directly synthesized from their code
-contracts, and are backed up by proofs showing that high-level
-specifications map in a meaning-preserving way to code. The model
-transformations are integrated into the Open Source AADL Tool
-Environment (OSATE). 
-We further report a case study applying the model
-transformations to a UAV system
-utilizing the Air Force Research Laboratory's OpenUxAS services for
+contracts and are backed up by proofs showing that high-level
+specifications map in a meaning-preserving way to code.
+The manuscript further reports on a case study that used \brfcs\ to cyber-harden a UAV system by inserting high assurance components to isolate the open source Air Force Research Laboratory's OpenUxAS services for
 route planning.  The case study
-demonstrates that our MBSE approach is feasible in real-world systems
+demonstrates that synthesizing implementations from code contracts is feasible in real-world systems
 engineering.
-
-
-% We further report on two case studies, one by
-% formal method experts and the other by non-experts, applying model
-% transformations to two different systems to improve cyber resiliency
-% using high-assurance filters and monitors.  One is a UAV system
-% utilizing the Air Force Research Laboratory's OpenUxAS services for
-% route planning.  The other is a tablet used for situational awareness
-% in a CH-47F Chinook helicopter application.  The case studies
-% demonstrate that our MBSE approach is feasible in real-world systems
-% engineering.
