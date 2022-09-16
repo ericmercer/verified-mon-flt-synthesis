@@ -33,12 +33,12 @@ an application using the Collins Common Avionics Architecture System
 Early results are encouraging and are revealing ways to expand the expressiveness of the code contract language to make it easier to express iterative computation with arrays.
 
 Aside from adding expressiveness to the code contract language, future work is to formally verify every transformation step from the code contract to the final \ckml\ function that is compiled to the target binary. 
-The HOL embedding of the code contract semantics we discussed here is the starting point.
+The HOL4 embedding of the code contract semantics we discussed here is the starting point.
 The key steps are as follows:
 \begin{compactitem}
   \item Automatically add state to the code contract to remove $\konst{pre}(-)$ and prove the initial and modified contracts are equivalent for all input streams
-  \item Create a step based version of the modified code contract that does not use streams and prove it equivalent to the stream version.
-  \item Create a pure HOL4 function, suitable to \ckml\, from the step version of the code contract and prove it equivalent.
+  \item Create a step based version of the modified code contract that does not use streams and prove it equivalent to the stream version
+  \item Create a pure HOL4 function, suitable to \ckml, from the step version of the code contract and prove it equivalent
 \end{compactitem}
 We have automated in HOL4 the transformation to remove $\konst{pre}(-)$ in the first step in what we call \emph{temporal squashing}.
 We have additionally manually written proofs for every step for a set of example code contracts.
