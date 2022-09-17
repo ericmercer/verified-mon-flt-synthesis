@@ -1,77 +1,111 @@
 
-\egm{Add to introduction and related work, that what is done at Galois called Copilot. Its a stream processing langague that generates code from the specification. Copilot to C. Effectively CodeGen from Lustre. Bounds how far needed to look in past for any value.}
-In recent years, aerospace stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.  
-Thus, in addition to being fault-tolerant, safety-critical avionics systems must also be {\em cyber-resilient}.
-Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-critical systems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
+\egm{Add to introduction and related work, that what is done at
+Galois called Copilot. Its a stream processing langague that generates
+code from the specification. Copilot to C. Effectively CodeGen from
+Lustre. Bounds how far needed to look in past for any value.}
 
-Unfortunately, systems engineers are currently given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.
-They instead rely on process-oriented checklists and guidelines.
-Cyber vulnerabilities are often discovered during penetration testing late in the development process; or worse yet, they may be discovered only after the product has been fielded, necessitating extremely 
-expensive and time-consuming remediation. This is not a sustainable development model.
+In recent years, aerospace stakeholders have realized that avionics
+systems are subject to possible cyber-attacks just like other
+cyber-physical systems.
+%
+\footnote{This work was funded in part by the
+Defense Advanced Research Projects Agency (DARPA).  The views
+expressed are those of the authors and do not reflect the official
+policy or position of DARPA or the U.S. Government.}
+%
+Thus, in addition to being fault-tolerant, safety-critical avionics
+systems must also be {\em cyber-resilient}.  Cyber-resiliency means
+that the system is tolerant to cyber-attacks just as safety-critical
+systems are tolerant to random faults: they recover and continue to
+execute their mission function, or safely shut down, as requirements
+dictate.
 
-\egm{Remove DARPA junk.}
-The DARPA Cyber Assured Systems Engineering (CASE) project is targeted at developing tools for design, analysis, and verification that enable systems engineers to {\em design-in} cyber-resiliency for complex cyber-physical systems.\footnote{This work was funded in part by the Defense Advanced Research Projects Agency (DARPA).  The views expressed are those of the authors and do not reflect the official policy or position of DARPA or the U.S. Government.}
-One such tool is the Model-Based Systems Engineering (MBSE) environment called {\em BriefCASE} which is based on the Architecture Analysis and Design Language (AADL)~\cite{aadl}.  BriefCASE extends the Open Source AADL Tool Environment (OSATE) to add new design, analysis, and code generation capabilities for building cyber-resilient systems.
+Unfortunately, systems engineers are currently given few development
+tools to help answer even basic questions about potential
+vulnerabilities and ways to mitigate vulnerabilities.  They instead
+rely on process-oriented checklists and guidelines.  Cyber
+vulnerabilities are often discovered during penetration testing late
+in the development process; or worse yet, they may be discovered only
+after the product has been fielded, necessitating extremely expensive
+and time-consuming remediation. This is not a sustainable development
+model.
 
-This manuscript details how \brfcs\ facilitates inserting, specifying, testing, and synthesizing high assurance components into a system to improve its cyber-resiliency.
-These \egm{make clear what these refers to} are referred to as \emph{transforms} by \brfcs.
-Two cyber-resiliency transformations are discussed: (1) the insertion
-of a filter to prevent malformed data from a malicious actor from
-being propagated to downstream components, and (2) the insertion of a
-monitor to detect (and alert) unexpected behaviors arising from
-untrusted components.
-\brfcs\ automates inserting the components into the system, and the designer writes a \emph{code contract} for each component to define its intended behavior.
+%% The DARPA Cyber Assured Systems Engineering (CASE) project is targeted
+%% at developing tools for design, analysis, and verification that enable
+%% systems engineers to {\em design-in} cyber-resiliency for complex
+%% cyber-physical systems.
 
-A code contract is a formal specification in the Assume Guarantee Reasoning
-Environment (\agr) language.
+We have been developing the {\em BriefCASE} toolsuite to address this need.
+\brfcs\ is a Model-Based Systems Engineering (MBSE) environment
+built in the Open Source AADL\footnote{AADL is the acronym for
+Architecture Analysis and Design Language~\cite{aadl}.}  Tool
+Environment (OSATE) to add new design, analysis, and code generation
+capabilities for building cyber-resilient systems.
+
+In this paper we describe how \brfcs\ facilitates inserting,
+specifying, testing, and synthesizing high assurance components into a
+system to improve its cyber-resiliency.  The main organizing concept
+is that of an architecture-to-architecture \emph{security-improving
+transform}, achieved via the insertion of a new architectural
+component aimed at mitigating a cyber-vulnerability.  We describe two
+cyber-resiliency transformations in this paper: (1) the insertion of a
+filter to prevent malformed data from a malicious actor being
+propagated to downstream components, and (2) the insertion of a
+runtime monitor to detect (and alert) unexpected behaviors arising
+from untrusted components.
+
+A code contract is a formal specification in the Assume Guarantee
+Reasoning Environment (\agr) language.
 \agr\ is a compositional reasoning verification engine that uses \emph{contracts} on components to specify input and output properties and then prove whether or not those properties hold when given a sub-component implementation \cite{agree2013}.
-The code contract language is Turing complete allowing the designer to specify arbitrarily complex behavior.
-These contracts are unit tested for correctness with \emph{test contracts}.
-Test contracts define test scenarios to be implemented by the code contract under test. 
+The code contract language is Turing complete allowing the designer to
+specify arbitrarily complex behavior.  These contracts are unit tested
+for correctness with \emph{test contracts}.  Test contracts define
+test scenarios to be implemented by the code contract under test.
 \agr\ proves whether or not that code contract implementation is correct, enabling the designer to iteratively test the component behavior inside the \brfcs\ environment.
 Once the behavior of the code contract is verified, \agr\ proves that---due to the newly
 included high-assurance components---the hardened system meets its
 cyber-resiliency requirements.
 
-Another novel aspect of the approach discussed in this manuscript is the synthesis of the code contracts for the high-assurance components to \ckml, a verified
-compiler implementation for the functional programming language
-ML \cite{cakeml}. 
-This manuscript describes in detail the synthesis path
-from code contracts to \ckml\ code, providing a formal framework in
-which to argue correctness. \ckml\ then provides a verified
-compilation path to several different target binaries (and also
-proving that the meaning of the \ckml\ source code is exactly
-preserved in the final binaries). 
-A key contribution here is that the code contract semantics are defined in such a way that the \agr\ verification 
-results for the code contract hold for the deployed component, \ie, the component will detect
-and prevent the indicated cyber-vulnerabilities over all possible
-finite inputs. Preliminary work has shown how to lift this result to
-infinite input traces as these systems are inherently reactive and
-intended to run forever~\cite{case-verified-filter}, \cite{cakeml-space-cost}.
+Another novel aspect of our workthe approach discussed in this manuscript is
+the synthesis of the code contracts for the high-assurance components
+to \ckml, a verified compiler implementation for the functional
+programming language ML \cite{cakeml}.  This manuscript describes in
+detail the synthesis path from code contracts to \ckml\ code,
+providing a formal framework in which to argue correctness. \ckml\
+then provides a verified compilation path to several different target
+binaries (and also proving that the meaning of the \ckml\ source code
+is exactly preserved in the final binaries).  A key contribution here
+is that the code contract semantics are defined in such a way that
+the \agr\ verification results for the code contract hold for the
+deployed component, \ie, the component will detect and prevent the
+indicated cyber-vulnerabilities over all possible finite
+inputs. Preliminary work has shown how to lift this result to infinite
+input traces as these systems are inherently reactive and intended to
+run forever~\cite{case-verified-filter}, \cite{cakeml-space-cost}.
 
-The manuscript further details a 
-case study applying these transformations with \brfcs\ to an Unmanned Aerial
-Vehicle (UAV) system that uses the Air Force Research Laboratory's
-OpenUxAS services for route planning.
-OpenUxAS, as an open source product, is considered \emph{untrusted}.
-The UAV system is thus transformed to be resilient to malicious behavior that may arise in the untrusted component.
-Here the transforms add filters to guard
-against malformed input and monitors to guard against malicious flight plans from OpenUxAS. The case study
-system is complex and shows
-the viability of the approach in potential full-scale industrial
-design.
+The manuscript further details a case study applying these
+transformations with \brfcs\ to an Unmanned Aerial Vehicle (UAV)
+system that uses the Air Force Research Laboratory's OpenUxAS services
+for route planning.  OpenUxAS, as an open source product, is
+considered \emph{untrusted}.  The UAV system is thus transformed to be
+resilient to malicious behavior that may arise in the untrusted
+component.  Here the transforms add filters to guard against malformed
+input and monitors to guard against malicious flight plans from
+OpenUxAS. The case study system is complex and shows the viability of
+the approach in potential full-scale industrial design.
 
 \brfcs\ is open source and publicly available \cite{fmide} as are the examples and case study discussed in this manuscript \cite{repo, phase2, camkes, case}.
 Our approach currently applies to common cyber-vulnerabilities, such
-as overflow, lack of input validation, and supply-chain issues; however, other cyber-vulnerabilities such as
-side-channel attacks and denial of service are not yet dealt with in
-our work.  Here, we do not report on the invention of a new type of
-high-assurance component in terms of capability; instead, our contribution
-is in the automated synthesis of security-improving components from
-formal specifications and a means to show that the synthesis is
-correct.
+as overflow, lack of input validation, and supply-chain issues;
+however, other cyber-vulnerabilities such as side-channel attacks and
+denial of service are not yet dealt with in our work.  Here, we do not
+report on the invention of a new type of high-assurance component in
+terms of capability; instead, our contribution is in the automated
+synthesis of security-improving components from formal specifications
+and a means to show that the synthesis is correct.
 
-We now give a summary of the contributions detailed in this manuscript.
+We now give a summary of the contributions detailed in this
+manuscript.
 \begin{compactitem}
   \item The language and semantics of code contracts to specify the behavior of high assurance components.
   \item Test contracts as a stylized mechanism to unit test code contracts inside the \brfcs\ framework with \agr.
@@ -84,9 +118,9 @@ The rest of this manuscript is organized as follows.
 \secref{sec:example}. Essential background on \agr\ verification and specification are
 presented in \secref{sec:agree}.
 The language and semantics of code contracts are defined in \secref{sec:code-contracts}, and test contracts are defined in \secref{sec:testing}.
-The synthesis pathway is covered in Section~\ref{sec:synthesis}. 
+The synthesis pathway is covered in Section~\ref{sec:synthesis}.
 \secref{sec:case-study} discusses the case study.
-This is followed by related work in \secref{sec:related-work}. 
+This is followed by related work in \secref{sec:related-work}.
 The conclusions and future work are in \secref{sec:conclusion}.
 
 \begin{comment}
