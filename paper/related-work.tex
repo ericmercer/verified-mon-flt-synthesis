@@ -1,7 +1,7 @@
 
 %% DO NOT REMOVE --- BUT FEEL FREE TO REVISE
 %% Specifically requested by the reviewers to be included in this paper!!!
-Another model based approach to secure system architectures follows a pattern similar to \brfcs\ by inserting pre-verified components into the architecture to give certain guarantees \cite{6209212}.
+Another model based approach to secure system architectures follows a pattern similar to \brfcs\ with attestation by inserting pre-verified components into the architecture to give certain guarantees \cite{6209212}.
 In that work, the data connections are annotated with security properties as are the components.
 A secondary analysis determines if the components meet the security requirements of the data connections, and if not, inserts new security enhancing components in the connection.
 The insertion algorithm considers time cost when inserting components to preserve worst-case execution times mandated by the system.
@@ -10,7 +10,7 @@ The insertion algorithm considers time cost when inserting components to preserv
 Assume-guarantee reasoning for compositional verification in reactive systems is well-studied \cite{10.1007/978-3-642-28891-3_13, 10.1145/2658982.2527272, 10.1007/978-3-319-17524-9_7}.
 The first steps toward synthesis of leaf-component contracts determined if leaf-component contracts are realizable \cite{10.1007/978-3-319-17524-9_13, 10.1007/978-3-319-29613-5_7}.
 These led to algorithms for component synthesis from Lustre models based on realizability \cite{katis2017synthesis, 10.1007/978-3-319-89963-3_10}.
-The algorithms discover a transition relation that preserve the contract guarantees under all allowed inputs and can be directly transformed into the language intended for the system's implementation.
+The algorithms discover a transition relation that preserves the contract guarantees under all allowed inputs and can be directly transformed into the language intended for the system's implementation.
 Two such algorithms are implemented in the \agr\ verification engine \cite{jkind}.
 These synthesis algorithms take in a declarative specification that states \emph{what is to be computed}, and then they have to infer \emph{how to compute it} for the implementation.
 Code contracts are imperative, by design, so the designer specifies directly how the computation of the high-assurance component takes place thereby avoiding the question of realizability entirely.

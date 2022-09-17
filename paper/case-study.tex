@@ -17,18 +17,19 @@ For this application, UxAS accepts three types of messages.  The \textit{Operati
 	\label{fig:sw-initial}
 \end{figure}
 
-Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.  We perform a formal analysis using the \agr\ to verify that the model satisfies the contracts.  For the initial version of our design, the verification passes.
+Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.  We perform a formal analysis with \agr\ to verify that the model satisfies the contracts.  For the initial version of our design, the verification passes.
 %
 Although we are satisfied with the results of the formal verification using AGREE, we have not yet analyzed the design for cyber-vulnerabilities.
+
 In \brfcs, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.
 As the designers of the system, we reviewed the list of potential vulnerabilities, and then added new requirements to the system model.
 %  To satisfy these requirements we need to mitigate the vulnerabilities discovered by the analysis by modifying the design.
 %
-For example, the vulnerbility analysis noted that UxAS as an open source project, so we marked that component as \texttt{uncontroled} (colored red in \figref{fig:sw-initial}) and added requirements for ensuring that unverified or malicious code (which could potentially be embedded in the component) is not able impact other components.
+For example, the vulnerbility analysis noted that UxAS is an open source project, so we marked that component as \texttt{uncontroled} (colored red in \figref{fig:sw-initial}) and added requirements for ensuring that unverified or malicious code (which could potentially be embedded in the component) is not able impact other components.
 
-In total, we added seven cyber requirements from the vulnerability analysis into our model.  These include four \textit{wellformedness} requirements, two requirements for \textit{monitoring} the behavior of the open-source UxAS component, and an \textit{attestation} requirement for ensuring the Ground Station software has not been tampered with.  Requirements are imported into the model as goals in th assurance case \cite{resolute-destion}.  Because we can build the assurance case at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
+In total, we added seven cyber requirements from the vulnerability analysis into our model.  These include four wellformedness requirements on data, two requirements for monitoring the behavior of the open-source UxAS component, and an attestation requirement for ensuring the Ground Station software has not been tampered with.  Requirements are imported into the model as goals in the assurance case.  Because we can build the assurance case at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
 
-The intent of the \textit{wellformedness} requirements is to prevent
+The intent of the wellformedness requirements is to prevent
 malformed messages from causing a buffer overrun or code injection
 attack.  In the UAV design, such messages are most likely to originate
 from a remote source or the uncontrolled UxAS component.  By placing
@@ -47,7 +48,7 @@ The filter code contracts for the four UxAS connections are similar, and check t
 \end{figure}
 
 In addition to monitoring the UxAS output for malformed messages, we must also monitor for suspicious behavior.  This requires adding components for detecting that UxAS has crashed, as well as monitoring the correctness of the flight plans it produces.  The Monitor transform is applied for this class of mitigation.  We add a \textit{response} monitor to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.  And we add a \textit{geofence} monitor to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.  The Geofence Monitor is a gated monitor in that it prevents the observed automation response from reaching the Waypoint Manager if the zones are violated.
-The Geofence Monitor specification is shown in \figref{fig:geofence-monitor}.
+The Geofence Monitor code contract is shown in \figref{fig:geofence-monitor}.
 
 % \begin{figure}[h]
 % 	\centering
@@ -65,9 +66,10 @@ The Geofence Monitor specification is shown in \figref{fig:geofence-monitor}.
 
 So far, we have addressed requirements that
 %The requirements that have been addressed so far
-mitigate vulnerabilities related to malformed messages and malicious behavior \textit{on-board} the UAV.  But we also want to protect against a compromised ground station transmitting well-formed, but malicious, commands. The final cyber requirement is mitigated by a transform that adds two components to the UAV software: an Attestation Manager for evaluating remote systems like the Ground Station, and an Attestation Gate for filtering messages from sources that have not been approved by the Attestation Manager~\cite{attestation-copland}.  The Attestation Manager \ckml\ implementation is automatically inserted into the application code base by \brfcs. The Attestation Gate does require a code contract that is completely generated by the transform since it has a very specialized behavior as defined by the transform.
+mitigate vulnerabilities related to malformed messages and malicious behavior \textit{on-board} the UAV.  But we also want to protect against a compromised ground station transmitting well-formed, but malicious, commands. The final cyber requirement is mitigated by a transform that adds two components to the UAV software: an Attestation Manager for evaluating remote systems like the Ground Station, and an Attestation Gate for filtering messages from sources that have not been approved by the Attestation Manager.  The Attestation Manager \ckml\ implementation is automatically inserted into the application code base by \brfcs. The code contract for the Attestation Gate is completely generated by the transform since its behavior is specific to attestation.
 
-After transforming the model to address the cyber requirements, the software architecture now appears as shown in \figref{fig:hardened-sw}.  The green shaded components were added by the transform with the exception of the UxAS component. The added components are critical for mitigating cyber attacks.
+After transforming the model to address the cyber requirements, the software architecture now appears as shown in \figref{fig:hardened-sw}.  The shaded components (green) were added by the transform with the exception of the UxAS component (red). 
+
 After unit testing the monitors, we formally verify the model with \agr\ to show that all of the component contracts are satisfied.
 We then run \splt\ to produce provably-correct code.
 The synthesized code is output to a directory in the build file system with the location specified for each component in the model.  The corresponding correctness proof is used in our assurance case as additional evidence that the vulnerability has been properly mitigated.
@@ -97,8 +99,7 @@ On the hardened system, messages sent to the UAV were rejected by the Attestatio
 
 \paragraph{Malformed Line Search Task message} The Line Search Task message contained a waypoint with a longitude outside the permitted range to exploit vulnerabilities in the on-board software.  The wellformedness filter for Line Search Task messages prevented this message from reaching the UxAS.
 
-\paragraph{UxAS vulnerability exploit} Line Search Tasks with greater than 90 waypoints were transmitted from the Ground Station, triggering a vulnerability that crashes UxAS.   When this occurs, UxAS is unable to generate an Automation Response.
-This vulnerability is mitigated by inserting a Response Monitor that checks to see if UxAS outputs an Automation Response message shortly after receiving an Automation Request.  For this scenario, we chose for the monitor to output a status message, which would then be received by the Ground Station and an appropriate action taken.
+\paragraph{UxAS vulnerability exploit} Line Search Tasks with greater than 90 waypoints were transmitted from the Ground Station, triggering a vulnerability that crashes UxAS.   When this occurs, UxAS is unable to generate an Automation Response. The response monitor detected and signaled the Ground Station when UxAS failed to respond to the request.
 
 \paragraph{UxAS trojan modifies flight plan} A trojan embedded in UxAS attempts to cause the UAV to fly into a specified keep-out zone by modifying the mission command waypoints in the Automation Response.
 On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and returned the UAV to Home Base.

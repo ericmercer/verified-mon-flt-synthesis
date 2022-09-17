@@ -15,14 +15,14 @@ This model can be evaluated using existing tools such as resource usage, informa
 and suggest requirements for mitigation \cite{dcrypps2019,gearcase2020}.
 Designers add these requirements to the \brfcs\ project requirements repository. 
 A key part of the requirements management in \brfcs\ is a corresponding assurance case that provides evidence, computed directly from the model or by supporting analysis tools, showing how each requirement is satisfied.
-Evidential statements must exist to address the added cyber requirements in order for \brfcs\ to build the assurance case for the project.
+Evidential statements must exist to address the added cyber requirements in order for \brfcs\ to build the assurance case for the project \cite{resolute-destion}.
 
 \brfcs\ provides an extendable library of model transformations to address requirements for common cyber vulnerabilities:
 \begin{compactitem}
 	\item \textbf{Filter}: block messages that do not conform to a given specification
 	\item \textbf{Monitor}: detect and alert violations at runtime
 	\item \textbf{Gate}: block messages in the presence of an alert
-	\item \textbf{Attestation}: measure non-local software to assess trustworthiness
+	\item \textbf{Attestation}: measure non-local software to assess trustworthiness \cite{attestation-copland}
 	\item \textbf{Virtualization}: isolate components
 	\item \textbf{Proxy}: enable HTTPS message inspection 
 	\item \textbf{seL4}: transform component definitions for the seL4 secure micro kernel
@@ -50,16 +50,16 @@ Important to the contributions presented in this paper is the Assume Guarantee R
 The composition is performed in terms of \emph{contracts} provided for each component and sub-component that state \emph{assumptions} on inputs and \emph{guarantees} on outputs under the assumptions.
 \agr\ verifies the \emph{consistency} of the composition of the component and sub-component contracts meaning that in every connection the source constraints satisfy the destination constraints.
 
-The contributions discussed in this manuscript relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
-This manuscript defines a \emph{code contract} language that is a subset of the \agr\ language with sequential evaluation semantics as opposed to the existing parallel semantics of \agr.
+The contributions discussed in this paper relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented.
+This paper defines a \emph{code contract} language that is a subset of the \agr\ language with sequential evaluation semantics as opposed to the existing parallel semantics of \agr.
 The sequential semantics are requisite to code synthesis and are defined such that \agr\ is able to still prove consistency in the contract composition of the model. 
 
-This manuscript further defines a stylized \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
+This paper further defines a stylized \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
 As such, the behavior of a high assurance component is defined by the designer in a code contract, and then using the existing \agr\ model checker, test contracts prove the desired code contract behavior.
 Once the designer is satisfied that the code contract is correct, the system composition is verified to conclude that the contract meets its intended purpose.
 
 Showing that a component is properly implemented is accomplished through formal synthesis from the code contract (bottom of \figref{fig:tool-arch}).
-This manuscript presents the Semantic Properties of Language and Automata Theory (\splt) tool that generates \emph{\ckml} code to implement the code contract.
+This paper presents the Semantic Properties of Language and Automata Theory (\splt) tool that generates \emph{\ckml} code to implement the code contract.
 \ckml\ is a functional language that includes additional proofs and tools built around it \cite{cakeml}.
 The \ckml\ compiler itself is verified to generate binary implementations that are equivalent in semantics to the original input program.
 That proof ensures that the resulting binary exactly preserves the meaning of the original code contract and assures that the component is properly implemented.
