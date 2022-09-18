@@ -5,14 +5,14 @@ We have discussed transformations provided by \brfcs\ to insert, create, and syn
 A filter enforces invariant properties on data such that data that violate the invariant are not forwarded.
 A monitor detects and alerts malicious behavior in the system. 
 The actual behavior of such filters, monitors, and other high-assurance components are formally specified by code contracts.
-A code contract is a (TODO: replace dialect with subset?) dialect of the \agr\ language with formal semantics embedded in HOL4 for formal reasoning.
+A code contract is a subset of the \agr\ language with formal semantics embedded in HOL4 for formal reasoning.
 A component's code contract states assumptions on the component inputs and provides guarantees that define the component outputs in terms of the component's inputs and current state.
 The code contract language itself is Turing complete.
 
 Code contracts are validated with unit tests that are verified with the \agr\ verification engine.
 A unit test in expressed in a test contract in the \agr\ language.
 A test contract is a stylized contract that strengthens the input assumptions of a code contract to a single input and either weakens or leaves unchanged the code contract output guarantees.
-\agr\ then proves whether or not the computation expressed in the code contract (TODO: satisfies instead of implements?) implements the test contract.
+\agr\ then proves whether or not the computation expressed in the code contract satisfies the test contract.
 In this way, a designer is able to test the behavior of the code contract.
 Once the code contract is tested, the \agr\ verification engine proves whether or not the system, with the added high-assurance components, meets its cyber requirements.
 
