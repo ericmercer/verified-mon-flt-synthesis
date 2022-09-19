@@ -104,16 +104,16 @@ study system is complex and shows the viability of the approach in
 potential full-scale industrial design.
 
 {\brfcs} is open source and publicly available \cite{fmide}, as are the
-examples and case study we discussed in this paper \cite{repo,
+examples and case study we discuss in this paper \cite{repo,
 phase2, camkes, case}.
 
 \subsubsection*{Contributions and limitations}
 
 As indicated in the preceding discussion, {\brfcs} is aimed at
-addressing the lack of tool support for the the problem of enforcing
+addressing the lack of tool support for the problem of enforcing
 and implementing the class of \emph{cyber-resilience} system
 requirements.  Our approach to the problem is embedded in a
-substantial collection of tools, so it is important to clarify the
+substantial collection of tools to be wholistic in addressing cyber-resilience at the system level, so it is important to clarify the
 research impact. We see the following as the distinguishing
 contributions of this paper:
 
@@ -144,11 +144,13 @@ does not introduce a new type of high-assurance component in terms of
 capability. Instead, our contribution is in the automated synthesis of
 security-improving components from formal cyber-resilience
 specifications, paired with a verification showing that the
-synthesized implementation is correct. We have not yet tried to apply
+synthesized implementation is correct in the context of the whole system all the way down to the binary implementation. 
+
+We have not yet tried to apply
 {\brfcs} to problems outside the realm of cyber-resilience; however,
 the notions of code and test contracts, along with the system analysis
 and verified code generation facilities promise to be useful in a wide
-variety of settings.
+variety of settings. Writing code and test contracts does require a working knowledge of propositional logic but not to a degree that would exceed what would be expected in a designer. The general synthesis approach in this paper could be used outside of the \brfcs\ environment, but it would only then provide guarantees relative to the complied artifacts and not say anything about the correctness of the system composition.
 
 \subsubsection*{Organization}
 The rest of the paper is organized as follows.
