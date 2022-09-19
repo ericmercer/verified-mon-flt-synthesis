@@ -109,33 +109,31 @@ phase2, camkes, case}.
 
 \subsubsection*{Contributions and limitations}
 
-Our work is embedded in a substantial collection of tools, so it is
-important to clarify the research impact. We see the following
-as the distinguishing contributions of this paper:
+As indicated in the preceding discussion, {\brfcs} is aimed at
+addressing the lack of tool support for the the problem of enforcing
+and implementing the class of \emph{cyber-resilience} system
+requirements.  Our approach to the problem is embedded in a
+substantial collection of tools, so it is important to clarify the
+research impact. We see the following as the distinguishing
+contributions of this paper:
 
 \begin{compactitem}
   \item The language and semantics of \emph{code contracts} provide a
   means to join system-level contract analysis results (arising from
   model checking) with component implementation correctness results
-  (arising from property-preserving code generation). This provides a
-  strong formal path connecting (A) top-level system cyber-resilience
-  requirements, (B) specifications for high-assurance components inserted
-  to mitigate against specific cyber-resilience problems, and (C) synthesis
-  to a programming language with a verified compiler.
+  (arising from property-preserving code generation).
+
+\item We provide a strong formal path connecting (A) top-level system cyber-resilience
+  requirements, (B) specifications for high-assurance components
+  inserted to mitigate against specific cyber-resilience problems, and
+  (C) synthesis to a programming language with a verified compiler.
 
 \item \emph{Test contracts} as a
   stylized mechanism to unit test code contracts inside the \brfcs\
   framework with \agr.
 
-\item A synthesis path from code contracts to \ckml, supported by a formal
-   framework to argue correctness.
-
-\item A formal argument that \agr\ verification of code contracts carry over
-  to the resulting binaries from the \ckml\ compiler.
-
-\item A case
-  study that uses \brfcs\ to add cyber-resiliency to a non-trivial UAV
-  system.
+\item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency
+ to a non-trivial UAV system.
 \end{compactitem}
 
 Our approach currently applies to common cyber-vulnerabilities, such
@@ -143,13 +141,14 @@ as buffer overflow, lack of input validation, and supply-chain issues;
 however, other cyber-vulnerabilities such as side-channel attacks and
 denial of service have not yet been addressed. Moreover, this work
 does not introduce a new type of high-assurance component in terms of
-capability; instead, our contribution is in the automated synthesis of
+capability. Instead, our contribution is in the automated synthesis of
 security-improving components from formal cyber-resilience
-specifications and a means to show that the synthesis is correct. We
-have not yet tried to apply {\brfcs} to problems outside the realm of
-cyber-resilience; however, the notions of code and test contracts,
-along with the system analysis and verified code generation facilities
-promise to be useful in a wide variety of settings.
+specifications, paired with a verification showing that the
+synthesized implementation is correct. We have not yet tried to apply
+{\brfcs} to problems outside the realm of cyber-resilience; however,
+the notions of code and test contracts, along with the system analysis
+and verified code generation facilities promise to be useful in a wide
+variety of settings.
 
 \subsubsection*{Organization}
 The rest of the paper is organized as follows.
