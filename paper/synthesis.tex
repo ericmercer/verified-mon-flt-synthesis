@@ -40,43 +40,46 @@ When full computational power is needed, we can use the expressive
 power of AGREE code contracts to write arbitrarily complex filter or
 monitor operations, as we have already seen. Our formal model of AGREE
 syntax and semantics is applied to extract code contracts and map them
-to equivalent logic functions. In particular, given a code contract with
-functionality ${\Eqs}\cdot G$, input ports $\mathbb{I}$, state
+to equivalent logic functions. In particular, given a code contract
+with functionality ${\Eqs}\cdot G$, input ports $\mathbb{I}$, state
 variables $\mathbb{S}$, and output ports $\mathbb{O}$, the semantics
-given in Section \ref{sec:code-contracts} can be applied to create a
-function
+given in Section \ref{sec:code-contracts} can be applied to define a
+stream-oriented ``step'' function
+$\konst{strmStep} : \mathbb{N}_0 \to \mathit{Env} \to \mathit{Env}$ defined as
 \[
- \konst{strmStep} : \mathbb{N}_0 \to \mathit{Env} \to \mathit{Env} = \sem{{\Eqs}\cdot G}
+ \konst{strmStep}\;t \; E = \sem{\mathit{Eqs} \cdot G}^E_t
 \]
-Assume ${\Eqs}\cdot G$ is \emph{Pascalish}, \ie, sequentially
-imperative. Then we can direcctly create a corresponding logic function
+Now suppose ${\Eqs}\cdot G$ is \emph{Pascalish}, \ie, sequentially
+imperative. Then we can direcctly create a logic function
 \[
 \konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}
 \]
-that takes input and state as parameters and returns an updated state
-and output. Thus the environment $\mathit{Env}$ holding all previous
-values of each variable can be replaced by \emph{parameters}, each of
-which is able to hold only one data element. Assuming
-$\mathit{Env}' = \konst{strmStep}\;t\; \mathit{Env}$, we can formally prove that
+corresponding to \konst{strmStep} that takes input and state as
+parameters and returns an updated state and output. Thus the
+environment $\mathit{Env}$ holding all previous values of each
+variable can be replaced by \emph{parameters}, each of which is able
+to hold only one data element. Assuming $\mathit{E}'
+= \konst{strmStep}\;t\; \mathit{E}$, we can formally prove that
 \[
-\vdash (\mathit{Env}' \vert_{\mathbb{S}},
- \mathit{Env}' \vert_{\mathbb{O}}) =
-\konst{stateStep} (\mathit{Env}\vert_{\mathbb{I}(t)},
-                   \mathit{Env}\vert_{\mathbb{S}(t)})
+\vdash (\mathit{E}' \vert_{\mathbb{S}},
+ \mathit{E}' \vert_{\mathbb{O}}) =
+\konst{stateStep} (\mathit{E}\vert_{\mathbb{I}(t)},
+                   \mathit{E}\vert_{\mathbb{S}(t)})
 \]
 In other words, projecting out the state and output components from
-$\konst{strmStep}\;t\; \mathit{Env}$ equals the result of
+the result of $\konst{strmStep}\;t\; \mathit{E}$ equals the result of
 applying \konst{stateStep} on the input and state components of
-$\mathit{Env}$ at time $t$. This theorem connects the stream semantics
+$\mathit{E}$ at time $t$. This theorem connects the stream semantics
 of the code contract to a pure logic function over the values
 appearing in the stream. From this point we can use tools in the
 CakeML eco-system to jump from the setting of higher order logic to
-CakeML abstract syntax \cite{cakeml-translator}. Thus we have moved
-from stream semantics to logic function to CakeML evaluation semantics
-in a property-preserving way. Once in CakeML, further necessary
-features can be added, namely imperative variables for storing state
-between component invocations, also invocations of the (verified) foreign
-function interface of CakeML \cite{cakeml-monadic}. Finally, the CakeML compiler can be
+CakeML abstract syntax \cite{cakeml-translator}. In this way we have
+moved from stream semantics to logic function to CakeML evaluation
+semantics in a property-preserving way. Once in CakeML, further
+necessary features can be added, namely imperative variables for
+storing state between component invocations, also invocations of the
+(verified) foreign function interface of
+CakeML \cite{cakeml-monadic}. Finally, the CakeML compiler can be
 applied to the program. It delivers an executable which can be shown
 to preserve the original contract.
 
@@ -242,7 +245,7 @@ which computes as follows:
   type;
 
 \item New values for the state variables are computed, in dependency
-  order. At this point variables defined by \emph{followd-by} are
+  order. At this point variables defined by \emph{followed-by} are
   dealt with. Suppose the variable definitions have the following
   form:
 \[

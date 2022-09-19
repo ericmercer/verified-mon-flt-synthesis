@@ -5,7 +5,7 @@ Another model based approach to secure system architectures follows a pattern si
 In that work, the data connections are annotated with security properties as are the components.
 A secondary analysis determines if the components meet the security requirements of the data connections, and if not, inserts new security enhancing components in the connection.
 The insertion algorithm considers time cost when inserting components to preserve worst-case execution times mandated by the system.
-\brfcs\ has the ability to insert pre-verified components based on cyber-requirements, but does not currently have the ability to annotate connections with security properties or automatically infer where secure components need to be inserted. 
+\brfcs\ has the ability to insert pre-verified components based on cyber-requirements, but does not currently have the ability to annotate connections with security properties or automatically infer where secure components need to be inserted.
 
 Assume-guarantee reasoning for compositional verification in reactive systems is well-studied \cite{10.1007/978-3-642-28891-3_13, 10.1145/2658982.2527272, 10.1007/978-3-319-17524-9_7}.
 The first steps toward synthesis of leaf-component contracts determined if leaf-component contracts are realizable \cite{10.1007/978-3-319-17524-9_13, 10.1007/978-3-319-29613-5_7}.
@@ -31,7 +31,7 @@ A fully verified compiler has been developed that takes Lustre and compiles
 it into assembly code, specified and verified in Coq \cite{10.1145/3140587.3062358}.
 The key is in combining infinite sequences of data-flow models with incremental
 manipulation of memories akin to an imperative model. CompCert is used on the
-backend to create the final rendered executable \cite{compcert}. 
+backend to create the final rendered executable \cite{compcert}.
 This work is quite similar to
 ours in providing a verified compilation chain from Lustre. However,
 there are significant differences: notably, they tackle a more
@@ -43,14 +43,38 @@ generated code meets its logical specification.  This, in turn,
 can be used as a leaf-level claim in a system-wide correctness argument
 conducted by compositional reasoning in AGREE.
 
-CoPilot is a domain specific language for writing runtime monitors for hard real-time distributed systems embedded in Haskel and requires working Haskel knowledge to write \cite{10.1007/s11334-013-0223-x}.
-The language semantics are defined over streams, there is an interpreter for testing the behavior of the runtime monitors, and there are two backend compilers to generate C code.
-The generated C code is validated by generating random CoPilot programs, generating random input for each program, and checking consensus on output between the interpreter and C programs.
-Further assurance is accomplished with bounded model checking by showing equivalence between the code from the two compiler backends over a user defined number of steps.
-Aside from the HOL4 embedding of the code contract semantics and not requiring any HOL4 working knowledge, the work in this paper differs in that it is targeting a fully verified path from the code contract all the way to the binaries leveraging the \ckml\ compiler specifically to provide stronger guarantees on the high assurance components.
+CoPilot is a domain specific language for writing runtime monitors for
+hard real-time distributed systems embedded in Haskell and requires
+working Haskell knowledge to write \cite{10.1007/s11334-013-0223-x}.
+The language semantics are defined over streams, there is an
+interpreter for testing the behavior of the runtime monitors, and
+there are two backend compilers to generate C code.  The generated C
+code is validated by generating random CoPilot programs, generating
+random input for each program, and checking consensus on output
+between the interpreter and C programs.  Further assurance is
+accomplished with bounded model checking by showing equivalence
+between the code from the two compiler backends over a user defined
+number of steps.  Aside from the HOL4 embedding of the code contract
+semantics and not requiring any HOL4 working knowledge, the work in
+this paper differs in that it is targeting a fully verified path from
+the code contract all the way to the binaries leveraging the \ckml\
+compiler specifically to provide stronger guarantees on the high
+assurance components.
 
-As seen in this paper, contracts can be stateful and even higher-order \cite{10.1145/583852.581484}. 
-Verification aware languages compile contracts to runtime monitors \cite{10.1007/978-3-642-28869-2_11}, or omit them when they can statically prove that the code preserves the contract under all possible inputs and executions \cite{10.1145/3158139}. Dafny is a notable verification aware language that provides a contract language, an implementation language, a proof engine to show if an implementation adheres to the contract, and backend compilers for several different target platforms \cite{dafny}.
-The Dafny contracts provide the verification conditions to prove out the implementation code and are not compiled.
-Compared to the work discussed in this paper, the test contracts are more similar to the Dafny contracts as they are also not compiled and only serve to prove properties of the code contracts.
-In that regard, the code contracts are the implementation, but unlike Dafny, \ckml\ provide a verified compilation path to binaries.
+As seen in this paper, contracts can be stateful and even
+higher-order \cite{10.1145/583852.581484}.  Verification aware
+languages compile contracts to runtime
+monitors \cite{10.1007/978-3-642-28869-2_11}, or omit them when they
+can statically prove that the code preserves the contract under all
+possible inputs and executions \cite{10.1145/3158139}. Dafny is a
+notable verification aware language that provides a contract language,
+an implementation language, a proof engine to show if an
+implementation adheres to the contract, and backend compilers for
+several different target platforms \cite{dafny}.  Dafny contracts
+provide the verification conditions to prove out the implementation
+code and are not compiled.  Compared to the work discussed in this
+paper, our test contracts are more similar to the Dafny contracts as
+they are also not compiled and only serve to prove properties of the
+code contracts.  In that regard, the code contracts are the
+implementation, but unlike Dafny, \ckml\ provide a verified
+compilation path to binaries.
