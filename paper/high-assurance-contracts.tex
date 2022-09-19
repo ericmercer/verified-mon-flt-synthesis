@@ -10,13 +10,15 @@
 
 
 Generally, AGREE contracts do not describe the computation that a
-component performs. This is entirely by design: AGREE is intended to be declarative and
-reason about component behavior solely at the specification
-level. It defines what a component computes and not how it computes it. However, the syntax of AGREE provides enough expressiveness to
-support the notion of a \emph{code contract}: a contract from which an
-implementation can be extracted. First we must discuss a class of
-guarantees---\emph{output guarantees}---which determine the values on
-all output ports of a component.
+component performs. This is entirely by design: AGREE is intended to
+be declarative and reasoning about component behavior takes place
+solely at the specification level. It defines what a component
+computes and not how it computes it. However, the syntax of AGREE
+provides enough expressiveness to support the notion of a \emph{code
+contract}: a contract from which an implementation can be
+extracted. First we must discuss a class of guarantees---\emph{output
+guarantees}---which determine the values on all output ports of a
+component.
 
 \begin{definition}[Output guarantee]
 An \emph{output guarantee} is a stylized guarantee that fully

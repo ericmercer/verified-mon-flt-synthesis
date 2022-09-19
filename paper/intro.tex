@@ -107,25 +107,47 @@ potential full-scale industrial design.
 examples and case study we discussed in this paper \cite{repo,
 phase2, camkes, case}.
 
-\subsubsection*{Contributions}
-Our approach currently applies to common cyber-vulnerabilities, such
-as overflow, lack of input validation, and supply-chain issues;
-however, other cyber-vulnerabilities such as side-channel attacks and
-denial of service are not yet dealt with in our work.  Here, we do not
-report on the invention of a new type of high-assurance component in
-terms of capability; instead, our contribution is in the automated
-synthesis of security-improving components from formal specifications
-and a means to show that the synthesis is correct. We see the
-following as the contributions of this paper:
+\subsubsection*{Contributions and limitations}
+
+Our work is embedded in a substantial collection of tools, so it is
+important to clarify the research contribution. We see the following
+as the contributions of this paper:
 
 \begin{compactitem}
-  \item The language and semantics of code contracts to specify the behavior of high assurance components.
-  \item Test contracts as a stylized mechanism to unit test code contracts inside the \brfcs\ framework with \agr.
-  \item A synthesis path from code contracts to \ckml\ with a formal framework to argue correctness.
-  \item A formal argument that \agr\ verification of code contracts carry over to the resulting binaries from the \ckml\ compiler.
-  \item A case study that uses \brfcs\ to add cyber-resiliency to a non-trivial UAV system.
+  \item The language and semantics of \emph{code contracts} provide a means
+  to join system-level contract analysis results (arising from model
+  checking) with component implementation correctness results (arising
+  from property-preserving code generation).
+
+\item \emph{Test contracts} as a
+  stylized mechanism to unit test code contracts inside the \brfcs\
+  framework with \agr.
+
+\item A synthesis path from code contracts to \ckml, supported by a formal
+   framework to argue correctness.
+
+\item A formal argument that \agr\ verification of code contracts carry over
+  to the resulting binaries from the \ckml\ compiler.
+
+\item A case
+  study that uses \brfcs\ to add cyber-resiliency to a non-trivial UAV
+  system.
 \end{compactitem}
 
+Our approach currently applies to common cyber-vulnerabilities, such
+as buffer overflow, lack of input validation, and supply-chain issues;
+however, other cyber-vulnerabilities such as side-channel attacks and
+denial of service have not yet been addressed. Moreover, this work
+does not introduce a new type of high-assurance component in terms of
+capability; instead, our contribution is in the automated synthesis of
+security-improving components from formal cyber-resilience
+specifications and a means to show that the synthesis is correct. We
+have not yet tried to apply {\brfcs} to problems outside the realm of
+cyber-resilience; however, the notions of code and test contracts,
+along with the system analysis and verified code generation facilities
+promise to be useful in a wide variety of settings.
+
+\subsubsection*{Organization}
 The rest of the paper is organized as follows.
 \secref{sec:overview} is an overview of the {\brfcs} environment.
 Our approach is illustrated by a simple example in
