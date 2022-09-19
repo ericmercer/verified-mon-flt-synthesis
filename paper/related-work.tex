@@ -5,7 +5,8 @@ Another model based approach to secure system architectures follows a pattern si
 In that work, the data connections are annotated with security properties as are the components.
 A secondary analysis determines if the components meet the security requirements of the data connections, and if not, inserts new security enhancing components in the connection.
 The insertion algorithm considers time cost when inserting components to preserve worst-case execution times mandated by the system.
-\brfcs\ has the ability to insert pre-verified components based on cyber-requirements, but does not currently have the ability to annotate connections with security properties or automatically infer where secure components need to be inserted.
+\brfcs\ has the ability to insert pre-verified components based on cyber-requirements, but does not currently have the ability to annotate connections with security properties or automatically infer where secure components need to be inserted. 
+\TODO{not clear where our work has benefits compared to this.}
 
 Assume-guarantee reasoning for compositional verification in reactive systems is well-studied \cite{10.1007/978-3-642-28891-3_13, 10.1145/2658982.2527272, 10.1007/978-3-319-17524-9_7}.
 The first steps toward synthesis of leaf-component contracts determined if leaf-component contracts are realizable \cite{10.1007/978-3-319-17524-9_13, 10.1007/978-3-319-29613-5_7}.
@@ -14,7 +15,7 @@ The algorithms discover a transition relation that preserves the contract guaran
 Two such algorithms are implemented in the \agr\ verification engine \cite{jkind}.
 These synthesis algorithms take in a declarative specification that states \emph{what is to be computed}, and then they have to infer \emph{how to compute it} for the implementation.
 Code contracts are imperative, by design, so the designer specifies directly how the computation of the high-assurance component takes place thereby avoiding the question of realizability entirely.
-That said, the test contracts in this paper can be declarative, stating what is to be computed, if desired, and \agr\ can then prove if the code contracts accomplishe that.
+That said, the test contracts in this paper can be declarative, stating what is to be computed, if desired, and \agr\ can then prove if the code contracts accomplishes that.
 
 Data-flow semantics are well studied \cite{10.1145/41625.41641,97300,
 10.1145/1379023.1375674,10.1145/2345141.2248426,10.1007/978-3-540-45212-6_10}.
@@ -42,6 +43,7 @@ allows us to generate behaviorally equivalent code so we can show that the
 generated code meets its logical specification.  This, in turn,
 can be used as a leaf-level claim in a system-wide correctness argument
 conducted by compositional reasoning in AGREE.
+\TODO{not clear where the CompCert work falls short compared to ours.}
 
 CoPilot is a domain specific language for writing runtime monitors for
 hard real-time distributed systems embedded in Haskell and requires
