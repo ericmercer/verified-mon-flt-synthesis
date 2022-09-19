@@ -4,7 +4,7 @@
       \includegraphics[scale=0.4]{flowchart.png} \\
     \end{tabular}
   \end{center}
-\caption{Simplified \brfcs\ workflow with the contributions detailed in this manuscript shaded.}
+\caption{Simplified \brfcs\ workflow. Shaded portions are the focus of the present discussion.}
 \label{fig:flowchart}
 \end{figure*}
 
@@ -28,7 +28,7 @@
 \label{fig:example-certificate}
 \end{figure}
 
-\figref{fig:flowchart} illustrates a simplified \brfcs\ workflow with the shaded boxes representing the contributions discussed in this manuscript: test contracts, code contracts, and SPLAT synthesis.
+\figref{fig:flowchart} illustrates a simplified \brfcs\ workflow with the shaded boxes representing our focus: test contracts, code contracts, and SPLAT synthesis.
 The unshaded boxes are the existing tools that generate evidence for the assurance case.
 The rest of this section follows an illustrative example through the workflow.
 
@@ -39,7 +39,7 @@ the case study in \secref{sec:case-study}.  The source for the
 entire model is found at \cite{repo}.
 
 From time to time, SW receives a message on the \texttt{AutomationRequest} input,
-forwarding it to a route planner (AI). The function of AI is to 
+forwarding it to a route planner (AI). The function of AI is to
 compute the flight path (a list of waypoints) for the UAV, outputting
 the resulting \emph{mission command} on \texttt{AutomationResponse}.
 The waypoint manager (WM) receives the mission command from AI and
@@ -48,7 +48,7 @@ starts the UAV flying the mission by putting an \emph{event} on the
 flight controller on the \texttt{Waypoint} port as the UAV location
 updates with messages on \texttt{AirVehicleLocation}.
 %%An event is repeatedly generated on \texttt{Alert} if there is no
-%%mission command from a request. 
+%%mission command from a request.
 The AI component is third-party
 software and WM is a legacy component.
 
@@ -58,7 +58,7 @@ software and WM is a legacy component.
 
 The expected behavior of the SW system, and the components
 implementing the system, are modeled with \agr\ contract
-specifications.  
+specifications.
 These contracts assume and guarantee the absence
 of any malicious, or unspecified, component behavior.  More precisely,
 the contract for SW assumes that its inputs are \emph{well-formed} and that
@@ -93,7 +93,7 @@ The \agr\ verification conditions, syntax and semantics, and the baseline contra
 
 A cyber-vulnerability analysis identifies the potential of a
 supply chain attack through the AI route planner since its third-party.  Based on the analysis, the designer adds a requirement that the system must guard against malicious AI behavior.
-They additionally remove all output guarantees from its contract since it is untrusted.  
+They additionally remove all output guarantees from its contract since it is untrusted.
 
 The output from the \agr\ analysis is shown in \figref{fig:example-certificate}.  The red
 exclamation points designate component assumptions or system output
@@ -122,7 +122,7 @@ level outputs.
       \includegraphics[scale=0.38]{agree-test-output.png} \\
       (a) \\ \\
       \includegraphics[scale=0.4]{hardened-certificate.png} \\
-      (b)    
+      (b)
     \end{tabular}
   \end{center}
   \caption{\agr\ verification certificates. (a) Test contract verification results. (b) Cyber-hardened design verification results.}
@@ -146,12 +146,12 @@ In this example, it is the well-formed property for the automation request.
 
 A monitor captures a relation on data over time and is thus able
 to reason about the temporal, and other invariant, properties of that data.  It raises
-an alert if the specified properties are ever violated.  
-As with the filter, \brfcs\ generates an initial code contract that is completed by the designer. 
+an alert if the specified properties are ever violated.
+As with the filter, \brfcs\ generates an initial code contract that is completed by the designer.
 In this example, that contract states that an
 automation response can only be generated in conjunction with an
 automation request; and further, that response must come with the
-request or in the next step after the request.  
+request or in the next step after the request.
 Code contracts are discussed in detail in \secref{sec:code-contracts}.
 
 Code contracts for high assurance components can be arbitrarily complex since they can have persistent state that evolves over time.
@@ -170,14 +170,22 @@ synthesized.
 \subsection{Synthesizing code from code contracts}
 
 High-assurance components are automatically synthesized by \splt\ from
-the code contracts to equivalent programs in the \ckml\
-language.
-In other words, for any set of input streams that meet the
-component's contract assumptions, the output streams produced from
-the synthesized \ckml\ code exactly match those defined by the contract guarantees.
-As such, the \agr\ verification results regarding the code contract apply equally to the synthesized \ckml, and thus, the results equally apply to the resulting binaries from the \ckml\ compiler.
-Synthesis from code contracts is discussed in detail in \secref{sec:synthesis}.
+the code contracts to equivalent programs in the \ckml\ language.  In
+other words, for any set of input streams that meet the component's
+contract assumptions, the output streams produced from the synthesized
+\ckml\ code exactly match those defined by the contract guarantees.
+As such, the \agr\ verification results regarding the code contract
+apply equally to the synthesized \ckml, and thus, the results equally
+apply to the resulting binaries from the \ckml\ compiler.  Synthesis
+from code contracts is discussed in detail in \secref{sec:synthesis}.
 
-Extending the \agr\ verification results to the system composition requires additional guarantees not discussed in this manuscript.
-For example, among other things, contracts for non-synthesized components must be certified to accurately model their deployed counterparts, the HAMR generated scheduler must be certified to follow the dependent data-flow in the design, scheduling windows must be certified to cover worst-case execution times, etc.
-Such additional guarantees are discussed in other works \cite{gearcase2020, dcrypps2019, 10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17, sel4-2009, scheduled-agree, 9734792}.
+Extending the \agr\ verification results to the system composition
+requires additional guarantees not discussed here.  For
+example, among other things, contracts for non-synthesized components
+must be certified to accurately model their deployed counterparts, the
+HAMR generated scheduler must be certified to follow the dependent
+data-flow in the design, scheduling windows must be certified to cover
+worst-case execution times, \etc.  Such additional guarantees are
+discussed in other works \cite{gearcase2020, dcrypps2019,
+  10.1007/978-3-030-89159-6_18, 10.1007/978-3-030-89159-6_17,
+  sel4-2009, scheduled-agree, 9734792}.
