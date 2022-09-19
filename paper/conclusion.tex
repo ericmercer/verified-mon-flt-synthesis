@@ -1,9 +1,9 @@
-Safety critical systems, such as those found in avionics, must be cyber-resilient, i.e. tolerant to cyber-attacks, in the same way that they are fault tolerant. 
+Safety critical systems, such as those found in avionics, must be cyber-resilient, i.e. tolerant to cyber-attacks, in the same way that they are fault tolerant.
 The \brfcs\ environment integrated into OSATE provides systems designers with tools to analyze and address cyber-vulnerabilities in the architectural design of a system modelled using AADL.
 We have discussed transformations provided by \brfcs\ to insert, create, and synthesize high-assurance components such as filters and monitors to improve the cyber-resiliency of the system design.
 
 A filter enforces invariant properties on data such that data that violate the invariant are not forwarded.
-A monitor detects and alerts malicious behavior in the system. 
+A monitor detects and alerts malicious behavior in the system.
 The actual behavior of such filters, monitors, and other high-assurance components are formally specified by code contracts.
 A code contract is a subset of the \agr\ language with formal semantics embedded in HOL4 for formal reasoning.
 A component's code contract states assumptions on the component inputs and provides guarantees that define the component outputs in terms of the component's inputs and current state.
@@ -24,16 +24,20 @@ We demonstrated the viability of the approach in real-world industrial design by
 The study required a range of filters, monitors, and other mitigation components to meet cyber-requirements.
 The case study demonstrated the viability of the approach to address complex message formats and non-trivial cyber-requirements.
 
-The reported case study was carried out by those that created \brfcs\ with its several tools. 
+The reported case study was carried out by those that created \brfcs\ with its several tools.
 Future work is to conduct another case study involving system designers unfamiliar with the \brfcs\ toolchain.
 We have started such a study with the design of
 an application using the Collins Common Avionics Architecture System
 (CAAS)~\cite{caas} on the CH-47F Chinook helicopter program.
 Early results are encouraging and are revealing ways to expand the expressiveness of the code contract language to make it easier to express iterative computation with arrays.
 
-Aside from adding expressiveness to the code contract language, future work is to formally verify every transformation step from the code contract to the final \ckml\ function that is compiled to the target binary. 
-The HOL4 embedding of the code contract semantics we have discussed is the starting point.
-The key remaining steps are:
+\subsubsection{Future work}
+
+Aside from adding expressiveness to the code contract language, future
+work is to formally verify every transformation step from the code
+contract to the final \ckml\ function that is compiled to the target
+binary.  The HOL4 embedding of the code contract semantics we have
+discussed is the starting point.  The key remaining steps are:
 \begin{compactitem}
   \item Automatically add state to the code contract to remove $\konst{pre}(-)$ and prove the initial and modified contracts are equivalent for all input streams
   \item Create a step based version of the modified code contract that does not use streams and prove it equivalent to the stream version
@@ -44,5 +48,6 @@ We have additionally written proofs (manually) for every step for a set of examp
 From the manual proofs, we have started work on proofs for the first two steps.
 Since these two steps are universal to all input code contracts their proofs need to be generated just once (as opposed to generating them for every component contract).
 %are universal in that they reason over any input code contract.
-The proof for the third step must be generated for each input contract. Finally, the entire process needs to be mechanized.
-Other future work includes lifting the proof results to infinite streams.
+The proof for the third step must be generated for each input
+contract. Finally, the entire process needs to be mechanized.  Other
+future work includes lifting the proof results to infinite streams.
