@@ -1,7 +1,29 @@
-%% Cyber-physical systems, such as avionics, must be tolerant to
-%% cyber-attacks in the same way they are tolerant to random faults: they
-%% must gracefully recover, or safely shut down, as requirements dictate.
+\newjunk{%
+Avionics need to be engineered to be cyber-resilient meaning that systems are able to detect and recover from attacks or safely shutdown.
+%
+As there are few development tools for cyber-resiliency, designers rely on guidelines and checklists, sometimes missing vulnerabilities until late in the process where remediation is expensive.
+%
+Our solution is a model-based approach with cyber-resilience-improving transforms that insert high-assurance components such as filters to block malicious data or monitors to detect and alarm anomalous behavior.
+%
+Novel is our use of model checking and a verified compiler to specify, verify, and synthesize these components.
+%
+We define \emph{code contracts} as formal specifications that designers write for high-assurance components, and \emph{test contracts} as tests to validate their behavior.
+%
+A model checker proves whether or not code contracts satisfy test contracts in an iterative development cycle.
+%
+The same model checker also proves whether or not a system with the inserted components, assuming they adhere to their code contracts, provide the desired cyber-resiliency for the system.
+%
+We define an algorithm to synthesize implementations for code contracts in a semantics-preserving way that is backed by a verified compiler.
+%
+The entire workflow is implemented as part of the open source \emph{\brfcs} toolkit.
+%
+We report on our experience using \brfcs\ with a case study on a UAV system that is transformed to be cyber-resilient to communication and supply chain cyber attacks.
+%
+Our case study demonstrates that synthesizing correct implementations from code
+contracts is feasible in real-world systems engineering.
+}
 
+\oldjunk{%
 We have developed a workflow for creating and inserting high-assurance
 components that enforce cyber-resiliency requirements into a
 model-based systems engineering environment.  Example high-assurance
@@ -21,3 +43,4 @@ high assurance components to harden the open source Air Force Research
 Laboratory's OpenUxAS services for route planning.  The case study
 demonstrates that synthesizing correct implementations from code
 contracts is feasible in real-world systems engineering.
+}
