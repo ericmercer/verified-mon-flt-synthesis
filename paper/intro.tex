@@ -35,27 +35,27 @@ model.
 %% systems engineers to {\em design-in} cyber-resiliency for complex
 %% cyber-physical systems.
 
-We have been developing the {\em BriefCASE} toolsuite to address this need.
+We have been developing the {\em BriefCASE} \oldjunk{toolsuite} toolkit to address this need.
 \brfcs\ is a Model-Based Systems Engineering (MBSE) environment
 built in the Open Source AADL\footnote{AADL is the acronym for
 Architecture Analysis and Design Language~\cite{aadl}.}  Tool
 Environment (OSATE) to add new capabilities for building
-cyber-resilient systems.
-
-In this paper we describe how \brfcs\ facilitates specifying, testing,
+cyber-resilient systems. 
+%
+In this paper we describe how it facilitates specifying, testing,
 verifying, and synthesizing high assurance components inserted into a
 system to improve its cyber-resiliency.  The main organizing concept
 is that of an architecture-to-architecture \emph{security-improving
-transform}, achieved via the insertion of a new architectural
-component aimed at mitigating a cyber-vulnerability.  We describe two
+transform}, achieved via the insertion of \oldjunk{a} new architectural
+component\newjunk{s} aimed at mitigating \oldjunk{a} cyber-vulnerabilit\oldjunk{y}\newjunk{ies}.  We describe two
 such transformations in this paper: (1) the insertion of a
 filter to prevent malformed data from a malicious actor being
 propagated to downstream components, and (2) the insertion of a
 runtime monitor to detect (and alert) unexpected behaviors arising
 from untrusted components.
 
+\oldjunk{%
 {\agr}
-\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment} \cite{agree2013}.}
 provides the formal setting for our work.
 {\agr} is implemented in OSATE as an \emph{annex}; hence AGREE
 specifications inherit AADL constructs for describing system
@@ -74,11 +74,68 @@ inside the \brfcs\ environment.  Once the behavior of the code
 contract is verified, \agr\ proves that---due to the newly included
 high-assurance components---the hardened system meets its
 cyber-resiliency requirements.
+}
 
+\newjunk{%
+The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented. 
+%
+We leverage the existing {\agr}\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,cakeml}. 
+%
+Specifically, designers write \emph{contracts} to formally specify input and output properties of the system and its components, and \agr\ proves via model checking whether or not the system composition preserves contract requirements at component inputs and guarantees contract obligations at system outputs.
+%
+In this way, \agr\ provides the formal framework we use to describe the behavior of an inserted high-assurance component, such as a filter or monitor, and then prove if adding such a component to the system improves
+cyber-resiliency.
+}
+
+\newjunk{
+We then use semantics preserving transformations to rewrite contracts into \ckml\ where the \ckml\ compiler then turns such contracts into binaries for the intended target platforms.
+%
+The verified compiler, with the semantics preserving transforms, ensures that the high-assurance component adheres to its contract specification.
+%
+This assurance fulfills the underlying assumption of the \agr\ model checker's proof: a component implementation adheres to its contract.
+}
+
+\newjunk{
+As such, this paper defines a
+\emph{code contract} language that is a subset of the \agr\ language
+but with sequential evaluation semantics as opposed to \agr's existing
+parallel semantics.  The sequential semantics are requisite to
+code synthesis and are defined such that \agr\ is able to still prove the contract composition of the system works.
+This paper further defines a notion of \emph{test contract} for unit
+testing code contracts outside of the system composition to verify
+input to output behavior as well as general properties of the code
+contract.  
+%
+Intuitively, the behavior of a high assurance component is
+defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contracts input assumptions.
+%
+Once the designer is satisfied that the code
+contract is correct, the system composition, with its various contracts, is verified to conclude
+that the system meets its cyber-requirements.
+}
+
+\newjunk{%
+Showing that a component is properly implemented is accomplished
+through formal synthesis from the code contract.  This paper presents the Semantic Properties
+of Language and Automata Theory (\splt) tool that generates
+\ckml\ code to implement the code contract.  \ckml\ is a
+functional language that includes additional proofs and tools built
+around it \cite{cakeml}.  The \ckml\ compiler itself is verified to
+generate binary implementations that are equivalent in semantics to
+the original input program.  That proof ensures that the resulting
+binary exactly preserves the meaning of the original code contract and
+assures that the component is faithfully implemented over all possible finite inputs. 
+Preliminary
+work has shown how to extend our work to handle infinite input
+since most systems of interest are inherently reactive and intended to run
+forever~\cite{case-verified-filter}, \cite{cakeml-space-cost}.
+}
+
+\oldjunk{%
 A novel aspect of our work is the synthesis of {\ckml} code from the
 code contracts for high-assurance components. {\ckml} is a dialect of
 the ML programming language possessing a verified
-compiler \cite{cakeml}.  We give a detailed outline of the synthesis
+compiler.  We give a detailed outline of the synthesis
 path from code contracts to \ckml\ code, providing a formal framework
 in which to argue correctness. \ckml\ then provides a verified
 compilation path to several different target binaries (and also
@@ -87,10 +144,8 @@ preserved in the final binaries).  A key contribution here is that the
 code contract semantics are defined in such a way that the \agr\
 verification results for the code contract hold for the deployed
 component, \ie, the component will detect and prevent the indicated
-cyber-vulnerabilities over all possible finite inputs. Preliminary
-work has shown how to extend our work to handle infinite input traces
-as these systems are inherently reactive and intended to run
-forever~\cite{case-verified-filter}, \cite{cakeml-space-cost}.
+cyber-vulnerabilities over all possible finite inputs.
+}
 
 We report on a case study applying these transformations with \brfcs\
 to an Unmanned Aerial Vehicle (UAV) system that uses the Air Force
@@ -111,29 +166,29 @@ phase2, camkes, case}.
 
 As indicated in the preceding discussion, {\brfcs} is aimed at
 addressing the lack of tool support for the problem of enforcing
-and implementing the class of \emph{cyber-resilience} system
+and implementing the class of cyber-resilience system
 requirements.  Our approach to the problem is embedded in a
 substantial collection of tools to be wholistic in addressing cyber-resilience at the system level, so it is important to clarify the
 research impact. We see the following as the distinguishing
 contributions of this paper:
 
 \begin{compactitem}
-  \item The language and semantics of \emph{code contracts} provide a
+  \item The language and semantics of \emph{code contracts} \oldjunk{provide} \newjunk{as} a
   means to join system-level contract analysis results (arising from
   model checking) with component implementation correctness results
   (arising from property-preserving code generation).
 
-\item We provide a strong formal path connecting (A) top-level system cyber-resilience
+  \item \emph{Test contracts} as a
+  stylized mechanism to unit test code contracts inside the \brfcs\
+  framework with \agr.
+
+  \item A strong formal path connecting (A) top-level system cyber-resilience
   requirements, (B) specifications for high-assurance components
   inserted to mitigate against specific cyber-resilience problems, and
   (C) synthesis to a programming language with a verified compiler.
 
-\item \emph{Test contracts} as a
-  stylized mechanism to unit test code contracts inside the \brfcs\
-  framework with \agr.
-
-\item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency
- to a non-trivial UAV system.
+  \item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency
+  to a non-trivial UAV system.
 \end{compactitem}
 
 Our approach currently applies to common cyber-vulnerabilities, such
@@ -164,32 +219,3 @@ is covered in Section~\ref{sec:synthesis}.
 \secref{sec:case-study} discusses the case study.
 This is followed by related work in \secref{sec:related-work}.
 The conclusions and future work are in \secref{sec:conclusion}.
-
-\begin{comment}
-  BriefCASE incorporates model-level cyber analysis tools (presently
-  GearCASE~\cite{gearcase2020} and DCRYPPS~\cite{dcrypps2019}) which can
-  examine AADL models for potential vulnerabilities and suggest
-  cyber-security requirements to mitigate them.  A library of
-  architectural transforms guides the system engineer through automated
-  model transformations that modify the architecture to address these
-  requirements, possibly inserting new high-assurance components into
-  the system.  Implementations for the new components are synthesized
-  from formal specifications using
-  SPLAT~\cite{slind-hcss2020},~\cite{formal-filter-synth-langsec}
-  (Semantic Properties for Language and Automata Theory).
-
-
-  Formal
-  verification that the transformed system model meets its requirements
-  is accomplished via \agr~\cite{agree2013} (Assume Guarantee Reasoning
-  Environment).
-  %The AGREE analysis \emph{assumes} properties on the inputs of a given component of the system, and attempts to formally prove the conjectured \emph{guarantees} of the output.
-  \agr\ is a {\em compositional assume-guarantee} style model checker
-  for AADL models that attempts to prove properties about one layer of
-  an architecture using properties allocated to its subcomponents.
-  Cyber-resilient code implementing the verified model is then
-  automatically generated using the High Assurance Modeling and Rapid
-  Engineering for Embedded Systems (HAMR) toolkit~\cite{hamr}.  If
-  desired, this code can be targeted to the formally verified seL4
-  secure microkernel~\cite{sel4-2009}.
-\end{comment}
