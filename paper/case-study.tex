@@ -10,12 +10,12 @@ The initial software architecture model (shown in \figref{fig:sw-initial}) conta
 
 For this application, UxAS accepts three types of messages.  The \textit{Operating Region} message defines where the UAV can and cannot fly.  The \textit{Line Search Task} message contains a series of waypoints that the UAV should traverse.  The waypoints typically lie along some geographical feature of interest, such as a river or railway.  Note that the UAV may not be able to directly traverse the Line Search Task waypoints due to no-fly zone constraints specified in the Operating Region message.  Anytime after receiving the Operating Region and Line Search Task messages, a Ground Station can transmit an \textit{Automation Request} message, which instructs UxAS to generate a flight plan that satisfies these constraints.  UxAS passes the flight plan in an \textit{Automation Response} message to the Waypoint Manager.  Because the Flight Control Computer can only process a small number of waypoints at a time, the Waypoint Manager parcels a small number of waypoints corresponding to the current UAV position, and sends them to the Flight Control Computer over a serial connection via the UART Driver.
 
-\begin{figure}[h]
+\begin{figure*}[h]
 	\centering
-	\includegraphics[width=1\columnwidth]{figs/sw-initial.png}
+	\includegraphics[width=2\columnwidth]{figs/sw-initial.png}
 	\caption{Initial software architecture.}
 	\label{fig:sw-initial}
-\end{figure}
+\end{figure*}
 
 Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.  We perform a formal analysis with \agr\ to verify that the model satisfies the contracts.  For the initial version of our design, the verification passes.
 %
@@ -74,12 +74,12 @@ After unit testing the monitors, we formally verify the model with \agr\ to show
 We then run \splt\ to produce provably-correct code.
 The synthesized code is output to a directory in the build file system with the location specified for each component in the model.  The corresponding correctness proof is used in our assurance case as additional evidence that the vulnerability has been properly mitigated.
 
-\begin{figure}[h]
+\begin{figure*}[h]
 	\centering
-	\includegraphics[width=1\columnwidth]{figs/hardened-sw.png}
+	\includegraphics[width=2\columnwidth]{figs/hardened-sw.png}
 	\caption{Cyber-resilient software architecture.}
 	\label{fig:hardened-sw}
-\end{figure}
+\end{figure*}
 
 Once we have determined that the model is correct and satisfies its cyber requirements, and the software components in the model have been implemented, either by \splt\ or other means, the system can be built and deployed.  We run the HAMR tool to generate the component stubs and infrastructure code necessary to enable component communication and execution according to a specified schedule.
 % HAMR translates the AADL system model to code that implements threading infrastructure and inter-component communication consistent with the AADL computational model.
@@ -104,7 +104,20 @@ On the hardened system, messages sent to the UAV were rejected by the Attestatio
 \paragraph{UxAS trojan modifies flight plan} A trojan embedded in UxAS attempts to cause the UAV to fly into a specified keep-out zone by modifying the mission command waypoints in the Automation Response.
 On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and returned the UAV to Home Base.
 
+\subsection{Discussion}
 
+\newjunk{
+The case study demonstrated the viability of writing code contracts and synthesizing implementations from code contracts in a real-world system. It additionally provided insights for improvement.  We discovered very early that we needed a mechanism to test contracts.  We initially used the synthesis path with a custom test harness for the synthesized code, but this proved to be slow and cumbersome because we had to move back and forth between the OSATE environment and an external test platform. Test contracts are a direct result of our experience, and they obviate the back and forth by integrating test into the modeling and analysis environment.
+}
+
+\newjunk{
+Writing code contracts for the more complex monitors revealed that although the language is very effective at declarative specifications that define what is being calculated, it is non-intuitive, and sometimes cumbersome, for defining how the computation needs to take place. The primary reason for its unease in describing how computation is performed is that it lacks any type of iterative looping structure for arrays. Instead, it relies on folding and mapping to describe such computation which is non-intuitive for many types of array updates. Growing the expressiveness of the language arround arrays is something to investigate in future work.
+}
+
+
+\newjunk{
+	There are several, practical, low-level concerns that need to be addressed in the high-level model before synthesis takes place that in our process were only discovered after running the actual system on the designated hardware and software. We specifically found it difficult to know the memory bounds for heaps, stacks, and buffers and time bounds for the scheduler \emph{a priori} to code synthesis. As a result, we would have to employ a costly iterative approach to set bounds, synthesize code, and then check if anything failed. Integrating better memory and running time analysis at the modeling level is something to investigate in future work.  
+}
 % \begin{figure}[h]
 % 	\centering
 % 	\includegraphics[width=0.8\columnwidth]{figs/mitigation-output.png}
