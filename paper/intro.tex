@@ -79,7 +79,7 @@ cyber-resiliency requirements.
 \newjunk{%
 The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented. 
 %
-We leverage the existing {\agr}\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,cakeml}. 
+We leverage the existing {\agr}\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,compositional-analysis-agree,nfm:agree,cakeml}. 
 %
 Specifically, designers write \emph{contracts} to formally specify input and output properties of the system and its components, and \agr\ proves via model checking whether or not the system composition preserves contract requirements at component inputs and guarantees contract obligations at system outputs.
 %
@@ -107,7 +107,7 @@ input to output behavior as well as general properties of the code
 contract.  
 %
 Intuitively, the behavior of a high assurance component is
-defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contracts input assumptions.
+defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contract's input assumptions.
 %
 Once the designer is satisfied that the code
 contract is correct, the system composition, with its various contracts, is verified to conclude
