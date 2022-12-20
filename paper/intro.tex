@@ -52,7 +52,10 @@ such transformations in this paper: (1) the insertion of a
 filter to prevent malformed data from a malicious actor being
 propagated to downstream components, and (2) the insertion of a
 runtime monitor to detect (and alert) unexpected behaviors arising
-from untrusted components.
+from untrusted components. 
+\newjunk{
+We refer to these as \emph{high-assurance components} because they must be correct and fulfill their intended purpose for the system to be cyber-resilient.
+}
 
 \oldjunk{%
 {\agr}
@@ -77,7 +80,7 @@ cyber-resiliency requirements.
 }
 
 \newjunk{%
-The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that a high-assurance component meets its intended purpose and is properly implemented. 
+The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that such high-assurance components meet their intended purpose and are properly implemented. 
 %
 We leverage the existing {\agr}\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,compositional-analysis-agree,nfm:agree,cakeml}. 
 %
