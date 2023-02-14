@@ -1311,9 +1311,371 @@ They enable designers to iteratively develop code contracts inside OSATE with \a
 %
 These same tests can be synthesized to the backend implementation for traditional testing, if for example, the code contract is a model of an existing legacy binary.
 
+%%
+% SYNTHESIS TO CAKEML
+%%
+
 \section{Synthesis to CakeML}
 \label{sec:synthesis}
-\input{synthesis}
+
+Synthesis maps from model and specifications to code.
+%
+The \splt\ tool traverses the system architecture looking for occurrences of high assurance components specified by code contracts;
+%
+for each such occurrence it generates a CakeML program.
+%
+\splt\ supports three kinds of behavioral specification from which to generate code.
+%
+In increasing order of expressiveness, these are: regular expressions, contiguity types, and code contracts.
+%
+In earlier work we have described how regular expressions and contiguity types are used as specification languages for verified filter implementations.
+%
+In this paper, we extend this \emph{specification oriented} approach to the Turing-complete specifications of code contracts in \agr.
+%
+We give a short review of that previous work before going into detail on the synthesis.
+
+\paragraph{Regular expressions:\/} often the well-formedness of data on connections can be enforced by matching against a regular expression.
+%
+In other words, the data can be characterized by a \emph{regular language}.
+%
+As is well known, regular expressions can be translated to efficient deterministic finite state machine (DFA) implementations.
+%
+In \cite{formal-filter-synth-langsec,case-verified-filter} we report on the creation and application of table-based DFA filters from a verified regular expression-to-DFA compiler.
+%
+The latter paper offers a fully-worked out example synthesizing a regular expression filter and formally proving that it meets an non-terminating behavioral specification.
+
+\paragraph{Contiguity types\cite{contiguity-types}:\/} contiguity types, similar to regular expressions, are effective at describing data at the network message level, \eg, as flat strings.
+%
+The notation is however much more expressive, being able to declare many kinds of so-called \emph{self-describing} messages, \ie, those where message structure is dependent on data held elsewhere in the message.
+%
+\figref{fig:filter-spec} gives a contiguity type specification for the well-formed waypoints of our example system.
+%
+We have formalized and verified a contiguity type matcher, which has been extensively applied throughout our case studies.
+
+%%
+% COMPILING FROM CODE CONTRACTS
+%%
+
+\subsection{Compiling from code contracts}
+
+When full computational power is needed, we can use the expressive power of AGREE code contracts to write arbitrarily complex filter or monitor operations, as we have already seen.
+%
+Our formal model of AGREE syntax and semantics is applied to extract code contracts and map them to equivalent logic functions.
+%
+In particular, given a code contract with functionality ${\Eqs}\cdot G$, input ports $\mathbb{I}$, state variables $\mathbb{S}$, and output ports $\mathbb{O}$, the semantics given in \secref{sec:code-contracts} can be applied to define a stream-oriented \emph{step} function $\konst{strmStep} : \mathbb{N}_0 \to \mathit{Env} \to \mathit{Env}$ defined as
+%
+\[
+ \konst{strmStep}\;t \; E = \sem{\mathit{Eqs} \cdot G}^E_t
+\]
+%
+Now suppose ${\Eqs}\cdot G$ is \emph{Pascalish}, \ie, sequentially imperative.
+%
+Then we can direcctly create a logic function
+%
+\[
+\konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}
+\]
+%
+corresponding to \konst{strmStep} that takes input and state as parameters and returns an updated state and output.
+%
+Thus the environment $\mathit{Env}$ holding all previous values of each variable can be replaced by \emph{parameters}, each of which is able to hold only one data element.
+%
+Assuming $\mathit{E}' = \konst{strmStep}\;t\; \mathit{E}$, we can formally prove that
+%
+\[
+\vdash (\mathit{E}' \vert_{\mathbb{S}},
+ \mathit{E}' \vert_{\mathbb{O}}) =
+\konst{stateStep} (\mathit{E}\vert_{\mathbb{I}(t)},
+                   \mathit{E}\vert_{\mathbb{S}(t)})
+\]
+%
+In other words, projecting out the state and output components from the result of $\konst{strmStep}\;t\; \mathit{E}$ equals the result of applying \konst{stateStep} on the input and state components of $\mathit{E}$ at time $t$.
+%
+This theorem connects the stream semantics of the code contract to a pure logic function over the values appearing in the stream.
+%
+From this point we can use tools in the \ckml\ eco-system to jump from the setting of higher order logic to \ckml\ abstract syntax \cite{cakeml-translator}.
+%
+In this way we have moved from stream semantics to logic function to CakeML evaluation semantics in a property-preserving way.
+%
+Once in \ckml, further necessary features can be added, namely imperative variables for storing state between component invocations, also invocations of the (verified) foreign function interface of \ckml\ \cite{cakeml-monadic}.
+%
+Finally, the CakeML compiler can be applied to the program.
+%
+It delivers an executable which can be shown to preserve the original contract.
+
+%%
+% GENERATING CAKEML
+%%
+
+\subsection{Generating \ckml}
+For any of the three specification languages, we take the following general steps to arrive at an executable.
+%
+\begin{compactenum}
+\item Map from specification to computable function in logic, producing a proof of equivalence.
+\item Add parsers and printers (specified by contiguity types) for input and output.
+\item Map to CakeML and add calls to input/output library routines via the CakeML foreign function interface.
+\item Invoke the CakeML compiler.
+\end{compactenum}
+%
+In the following, we examine further details in both filter and monitor synthesis.
+
+%%
+% FILTER GENERATION
+%%
+
+\subsection{Filter Generation}
+
+A filter is intended to be simple, although it may make deep semantic checks.
+%
+A filter has one input port and one output; messages on the input that the filter policy admits pass unchanged to the output port;
+%
+all others are dropped (not passed on).
+%
+We have investigated two kinds of filter.
+%
+In the first, a relatively shallow scan of the input suffices to enforce the policy.
+%
+For example, we have used the expressive power of regular expressions and Contiguity Types \cite{contiguity-types} to enforce \emph{lightweight} bounds constraints on GPS coordinates in UxAS messages.
+%
+On the other hand, a filter may need to parse the input buffer into a data structure specified in AGREE and apply a user-defined \emph{wellformedness} property, also specified in AGREE, to the data.
+%
+Arbitrarily complex wellformedness checks can be made in this way.
+%
+\figref{fig:filter-spec} shows a combination where the checking specified by {\small\verb+WELL_FORMED_AUTOMATION_RESPONSE+} depends on an underlying check specified by the contiguity type checking bounds on waypoints.
+
+The verdict of a filter is made and performed within one thread invocation.
+%
+Thus, in its given time slice, the following steps must be completed:
+\begin{compactenum}
+\item
+The filter checks to see if there is any input available.
+%
+If there is none then it yields control; otherwise:
+
+\item The input is read (and parsed if need be);
+
+\item The wellformedness predicate is evaluated on the input;
+
+\item If the predicate returns \konst{true} then the input buffer
+ is copied to the output, otherwise no action is taken; and
+
+\item The filter yields control.
+\end{compactenum}
+
+\newsavebox{\contig}
+\begin{lrbox}{\contig}
+\begin{lstlisting}[style=myML]
+  Waypoint =
+    {Latitude  : f64
+     Longitude : f64
+     Altitude  : f32
+     Check     : Assert
+      (~90.0 <= Latitude and Latitude <= 90.0 and
+       ~180.0 <= Longitude and Longitude <= 180.0 and
+       1000.0 <= Altitude and Altitude <= 15000.0)}
+
+  AutomationResponse =
+    {TaskID : i64
+     Length : u8
+     Waypoints : Waypoint [3]}
+
+ fun WELL_FORMED_AUTOMATION_RESPONSE(aresp) =
+   (forall wpt in aresp.Waypoints, WELL_FORMED_WAYPOINT(wpt))
+   and ... ;
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \scalebox{0.60}{\usebox{\contig}}
+    \end{tabular}
+  \end{center}
+  \caption{Filter specification.}
+  \label{fig:filter-spec}
+\end{figure}
+
+
+\newsavebox{\cml}
+\begin{lrbox}{\cml}
+\begin{lstlisting}[style=myML]
+fun filter_step () =
+ let val () = Utils.clear_buf buffer
+     val () = API.callFFI "get_input" "" buffer
+ in
+    if WELL_FORMED_AUTOMATION_RESPONSE buffer
+    then
+      API.callFFI "put_output" buffer Utils.emptybuf
+    else print"Filter rejects message.\n"
+end
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \scalebox{0.60}{\usebox{\cml}}
+    \end{tabular}
+  \end{center}
+  \caption{Synthesized CakeML for the filter.}
+  \label{fig:filter-cakeml}
+\end{figure}
+
+The contiguity type specification and wellformedness predicate for the filter are shown in \figref{fig:filter-spec} and the synthesized \ckml\ code is in \figref{fig:filter-cakeml}.
+%
+The code is called at dispatch by the scheduler.
+%
+The \texttt{API.callFFI} is the link to the communication fabric to capture input and provide output.
+%
+The body of the function restates the filter contract to make the appropriate assignments in a way that matches the truth value of the predicate in the filter guarantee.
+
+%%
+% MONITOR GENERATION
+%%
+
+\subsection{Monitor Generation}
+
+As discussed above, a monitor specification is mapped to a state transformation function
+%
+\[
+\konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}.
+\]
+%
+which computes as follows:
+%
+\begin{compactenum}
+
+\item Each input buffer is parsed into data of the type specified by the port type;
+
+\item
+New values for the state variables are computed, in dependency order.
+%
+At this point variables defined by \emph{followed-by} are dealt with.
+%
+Suppose the variable definitions have the following form:
+%
+\[
+\begin{array}{l}
+  v_1 = i_1 \longrightarrow e_1 \\
+  \cdots \\
+  v_n = i_n \longrightarrow e_n \\
+\end{array}
+\]
+%
+In the generated function, for the first invocation of \konst{stateStep} only, the initializations are executed in order:
+%
+\[
+  v_1 = i_1; \cdots ;  v_n = i_n;
+\]
+%
+In all later invocations, the \emph{non-initialization} assignments are performed, also in order:
+%
+\[
+  v_1 = e_1; \cdots ; v_n = e_n; \\
+\]
+
+\item Values of the outputs are computed;
+
+\item Outputs are written and the new state is written;
+
+\item The monitor yields control.
+\end{compactenum}
+
+The \konst{stepFn} for the monitor of the example described in \secref{sec:example} is displayed in \figref{fig:monitor-cakeml}.
+
+\newsavebox{\monFn}
+\begin{lrbox}{\monFn}
+\begin{lstlisting}[style=myML]
+fun stateStep (response,request)
+    (rsp,req,preIsPending,isPending,latency,policy,alert)
+let val stateVars' =
+      if !initStep then
+      let val rsp = Option.isSome response
+          val req = Option.isSome request
+          val preIsPending = False
+          val isPending = req andalso not rsp
+          val latency = 0
+          val policy = (if rsp then req else True)
+          val alert = not(policy)
+          val () = (initStep := False)
+      in
+        (rsp,req,preIsPending,isPending,latency,policy,alert)
+      end
+      else
+      let ...
+          val rsp = Option.isSome response
+          val req = Option.isSome request
+          val preIsPending = pre isPending
+          val isPending = (req andalso not rsp) orelse
+                          ((not rsp) andalso pre isPending)
+          val latency = (if req then 0 else (pre latency + 1)
+          val policy =
+            ((if isPending then
+                (latency < Defs.max_latency) else True)
+              andalso
+              (if rsp then
+                 (req orelse preIsPending) else True))
+          val alert = (Defs.is_latched andalso (pre alert))
+                      orelse not(policy)
+      in
+        (rsp,req,preIsPending,isPending,latency,policy,alert)
+      end
+   val (rsp',_,_,_,_,_,alert') = stateVars'
+   val alertPort = if alert' then Some () else None
+   val outputPort =
+     if alert' then None else
+     if rsp' then Some response
+     else None
+in
+   (stateVars', (alertPort,outputPort))
+end
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{c}
+      \scalebox{0.60}{\usebox{\monFn}}
+    \end{tabular}
+  \end{center}
+  \caption{Synthesized CakeML for the monitor.}
+  \label{fig:monitor-cakeml}
+\end{figure}
+
+\subsection{Incorporation into system execution}
+
+The system scheduler \emph{activates} components in some order.
+%
+It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+%
+Activating a monitor component takes the form of the following pseudo-code, in which the monitor evaluates the \konst{stateStep} on its current inputs and the current values of the state variables, returning the new state and the output values.
+%
+\[
+\begin{array}{ll}
+ \mathit{(i_1,\ldots)} & = \konst{readInputs}(); \\
+ (v_1,\ldots) & = \konst{readState}() ; \\
+ ({v_1}',\ldots), ({o_1}',\ldots) & = \konst{stateStep} ((i_1,\ldots),(v_1,\ldots)) ; \\
+ \multicolumn{2}{l}{\konst{writeState}({v_1}',\ldots);} \\
+ \multicolumn{2}{l}{\konst{writeOutputs}({o_1}'\ldots);} \\
+\end{array}
+\]
+
+
+\paragraph{Partiality:\/} partiality is an important consideration for both filters and monitors: the input data might not parse or the computation of a filter could be badly written and fail at runtime.
+%
+In such cases, the filter should recover and yield control without passing the input onwards.
+%
+For these failure cases, the filter is behaving as it should, but we must also guard against situations in which a \emph{correctly specified} filter or monitor fails in the runtime.
+%
+This kind of defect arises when a filter, for example, \emph{ought} to accept a message, but lack of resources results in the filter failing to do so.
+%
+For example, the parse of a message might need more space than has been allocated;
+%
+another example could be if the time slice provided by the scheduler is too short for the computation to finish.
+%
+Thus resource bounds need to be included in the correctness argument.
+%
+Some preliminary work that could support formal proofs of such bounds has been done for \ckml\ \cite{cakeml-space-cost}.
 
 \section{Case study}
 \label{sec:case-study}
