@@ -1899,7 +1899,84 @@ Integrating better memory and running time analysis at the modeling level is som
 
 \section{Related work}
 \label{sec:related-work}
-\input{related-work}
+
+Another model based approach to secure system architectures follows a pattern similar to \brfcs\ with attestation by inserting pre-verified components into the architecture to give certain guarantees \cite{6209212}.
+%
+In that work, the data connections are annotated with security properties as are the components.
+%
+A secondary analysis determines if the components meet the security requirements of the data connections, and if not, inserts new security enhancing components in the connection.
+%
+The insertion algorithm considers time cost when inserting components to preserve worst-case execution times mandated by the system.
+%
+In the \brfcs\ tool chain there are tools that can analyze the model annotated with security properties and identify where security vulnerabilities may be located, and there are other tools to transform the model to address those vulnerabilities such as those discussed in this paper.
+
+Assume-guarantee reasoning for compositional verification in reactive systems is well-studied \cite{10.1007/978-3-642-28891-3_13, 10.1145/2658982.2527272, 10.1007/978-3-319-17524-9_7}.
+%
+The first steps toward synthesis of leaf-component contracts determined if leaf-component contracts are realizable \cite{10.1007/978-3-319-17524-9_13, 10.1007/978-3-319-29613-5_7}.
+%
+These led to algorithms for component synthesis from Lustre models based on realizability \cite{katis2017synthesis, 10.1007/978-3-319-89963-3_10}.
+%
+The algorithms discover a transition relation that preserves the contract guarantees under all allowed inputs and can be directly transformed into the language intended for the system's implementation.
+%
+Two such algorithms are implemented in the \agr\ verification engine \cite{jkind}.
+%
+These synthesis algorithms take in a declarative specification that states \emph{what is to be computed}, and then they have to infer \emph{how to compute it} for the implementation.
+%
+Code contracts are imperative, by design, so the designer specifies directly how the computation of the high-assurance component takes place thereby avoiding the question of realizability entirely.
+%
+That said, the test contracts in this paper can be declarative, stating what is to be computed, if desired, and \agr\ can then prove if the code contracts accomplishes that.
+
+Data-flow semantics are well studied \cite{10.1145/41625.41641,97300, 10.1145/1379023.1375674,10.1145/2345141.2248426,10.1007/978-3-540-45212-6_10}.
+%
+State machine semantics can be added to synchronous data-flow \cite{10.1145/1086228.1086261}.
+%
+The idea is to translate imperative constructs into equivalent synchronous data flow constructs.
+%
+The resulting Lustre can then be compiled. The goal is to provide a seamless connection between pure data-flow and pure control design.
+%
+These approaches are similar to the code contracts in this paper in that they embed imperative computation into the synchronous data-flow semantics of Lustre which are then passed to compilers to render the final target binaries.
+%
+These compilers however are not verified as is the \ckml\ compiler targeted in this work.
+
+A fully verified compiler has been developed that takes Lustre and compiles it into assembly code, specified and verified in Coq \cite{10.1145/3140587.3062358}.
+%
+The key is in combining infinite sequences of data-flow models with incremental manipulation of memories akin to an imperative model.
+%
+CompCert is used on the backend to create the final rendered executable \cite{compcert}.
+%
+This work is quite similar to ours in providing a verified compilation chain from Lustre.
+%
+However, there are significant differences: notably, they tackle a more comprehensive subset of Lustre than our work.
+%
+We have been able to work effectively with a relatively simple core language, \eg, without \emph{clocking} features.
+%
+This subset aligns with our contract language, and allows us to generate behaviorally equivalent code so we can show that the generated code meets its logical specification.
+%
+This, in turn, can be used as a leaf-level claim in a system-wide correctness argument conducted by compositional reasoning in \agr.
+%
+It is important to note that we target a wholistic systems approach to cyber-security that is integrated into the \agr\ reasoning environment whereas the other work targets more specifically a compiler for Lustre.
+
+CoPilot is a domain specific language for writing runtime monitors for hard real-time distributed systems embedded in Haskell and requires working Haskell knowledge to write \cite{10.1007/s11334-013-0223-x}.
+%
+The language semantics are defined over streams, there is an interpreter for testing the behavior of the runtime monitors, and there are two backend compilers to generate C code.
+%
+The generated C code is validated by generating random CoPilot programs, generating random input for each program, and checking consensus on output between the interpreter and C programs.
+%
+Further assurance is accomplished with bounded model checking by showing equivalence between the code from the two compiler backends over a user defined number of steps.
+%
+Aside from the HOL4 embedding of the code contract semantics and not requiring any HOL4 working knowledge, the work in this paper differs in that it is targeting a fully verified path from the code contract all the way to the binaries leveraging the \ckml\ compiler specifically to provide stronger guarantees on the high assurance components.
+
+As seen in this paper, contracts can be stateful and even higher-order \cite{10.1145/583852.581484}.
+%
+Verification aware languages compile contracts to runtime monitors \cite{10.1007/978-3-642-28869-2_11}, or omit them when they can statically prove that the code preserves the contract under all possible inputs and executions \cite{10.1145/3158139}.
+%
+Dafny is a notable verification aware language that provides a contract language, an implementation language, a proof engine to show if an implementation adheres to the contract, and backend compilers for several different target platforms \cite{dafny}.
+%
+Dafny contracts provide the verification conditions to prove out the implementation code and are not compiled.
+%
+Compared to the work discussed in this paper, our test contracts are more similar to the Dafny contracts as they are also not compiled and only serve to prove properties of the code contracts.
+%
+In that regard, the code contracts are the implementation, but unlike Dafny, \ckml\ provide a verified compilation path to binaries.
 
 \section{Conclusion}
 \label{sec:conclusion}
