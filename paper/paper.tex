@@ -278,7 +278,7 @@ Essential background on {\agr} verification and specification are presented in \
 %
 The language and semantics of code contracts are defined in \secref{sec:code-contracts}, and test contracts are described in \secref{sec:testing}.
 %
-The synthesis pathway is covered in Section~\ref{sec:synthesis}.
+The synthesis pathway is covered in \secref{sec:synthesis}.
 %
 \secref{sec:case-study} discusses the case study.
 %
@@ -704,11 +704,209 @@ A contract is self-consistent if it does not guarantee two different values in t
 
 \subsection{Syntax}
 \label{sec:agree-semantics}
-\input{agree-semantics}
+
+The syntax of \agr\ is essentially that of quantifier-free first order predicate logic supplemented with a few temporal operators.
+%
+The terms (\emph{e}) are arithmetic expressions built from variables ($v$) and numeric and boolean literals ($c$), while formulas (\emph{b}) are built using logical connectives from atomic formulas (\emph{a}) based on the familiar comparison operators.
+%
+\[
+\begin{array}{rcl}
+e & ::= & v \mid c \mid e \;\set{+,*,/}\; e \\
+a & ::= & e\; \set{=,<}\; e \\
+b & ::= & v \mid c \mid a \mid \neg b
+            \mid b \; \set{\land,\lor,\imp,\iff}\; b
+\end{array}
+\]
+%
+\agr\ includes a conditional, $\itelse{b}{(-)}{(-)}$, for both terms and formulas. To support port handling, \agr\ defines a predicate $\konst{event}(p)$, which tests if an event (or event-data) port $p$ is signaled.
+%
+Lastly, \agr\ supports temporal operators \emph{previously} $\konst{pre}(-)$, \emph{followed-by} $(-) \to (-)$, and historically $\konst{Hist}(-)$.
+
+%%
+% SEMANTICS
+%%
+
+\subsection{Semantics}
+
+The semantics of terms and formulas is defined over \emph{streams of values}.
+%
+Values encompass at least booleans and numbers but can be readily extended to include records and arrays.
+%
+A value stream is a total function from time (natural numbers including 0) to values:
+%
+\[
+ \konst{stream} = \mathbb{N}_0 \to \konst{value}
+\]
+%
+Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$ binding variable names to value streams, the semantics $\sem{-}^E_t$ of terms and formulas defines the meaning of compound syntax in terms of the meaning of subexpressions.
+%
+The value of a variable $v$ at time $t$ is found by looking up the stream bound to $v$ in $E$ (call it $s$) and returning $s_t$. Some clauses of the semantics follow, omitting the temporal operators:
+%
+\[
+\begin{array}{rcl}
+\sem{v}^E_t & = & E(v)(t) \\
+\sem{c}^E_t & = & c \\
+\sem{e_1 + e_2}^E_t & = & \sem{e_1}^E_t + \sem{e_2}^E_t \\
+   & \cdots & \\
+\sem{b_1 \land b_2}^E_t & = & \sem{b_1}^E_t \land \sem{b_2}^E_t \\
+   & \cdots & \\
+\end{array}
+\]
+
+The temporal operators deal with time in more significant ways.
+%
+The value of $\konst{pre}(e)$ at time $t$ is the value of $e$ at time $t-1$ (at time zero, \konst{pre} is undefined).
+%
+A followed-by, $e_1 \to e_2$, evaluates to $e_1$ at time zero; otherwise it is $e_2$.
+%
+Followed-by is typically used to give a value to a stream in the first step so that subsequent steps are able to use $\konst{pre}(e)$.
+%
+\[
+\begin{array}{rcl}
+\sem{\konst{pre}(e)}^E_t & = & \sem{e}^E_{t-1}, \mathrm{when}\ t > 0 \\
+\sem{e_1 \to e_2}^E_t & = & \itelse{t=0}{\sem{e_1}^E_0}{\sem{e_2}^E_t} \\
+\sem{\konst{Hist}(b)}^E_t & = & \forall n \leq t.\; \sem{b}^E_n
+\end{array}
+\]
+
+Although basic, these definitions can be used to define higher-level past-time operators from PLTL such as \konst{Once} and \konst{Since}.
+%
+These can be expressed in a recursive style as follows:
+%
+\[
+\begin{array}{rcl}
+\konst{Once}(b) & = & b \to b \vee \konst{pre}(\konst{Once}(b)) \\
+\konst{Since}(a, b) & = & b \to b \lor (a \land \konst{pre}(\konst{Since}(a, b))
+\end{array}
+\]
+%
+\noindent $\konst{Once}(b)$ is true if $b$ has ever been true before, or in, the current moment.
+%
+$\konst{Since}(a, b)$ is true if $a$ has been true in all moments up to the present one since $b$ most recently became true.
+%
+All other past-time operators of PLTL can be defined similarly \cite{monitor}.
+
+\agr\ uses ASCII notation for the mathematical syntax we have defined.
+%
+The following table spells out the mapping.
+%
+\[
+\begin{tabular}{l|l|l}
+ Operation & Math. notation & \agr \\ \hline
+ followed-by &  $e \to e$          & \verb+e -> e+  \\
+ logical implication &  $e \imp e$ & \verb+e => e+ \\
+ if-and-only-if &  $e \iff e$      & \verb+e <=> e+ \\
+ logical and &  $e \land e$      & \verb+e and e+ \\
+ logical or &  $e \lor e$      & \verb+e or e+ \\
+ logical not & $\neg b$      & \verb+not b+ \\
+ variable definition & $v = e$     & \verb+eq v e+ \\
+ Previously  & $\konst{pre}(b)$ & \verb+pre(b)+ \\
+ Historically  & $\konst{Hist}(b)$ & \verb+Historically(b)+ \\
+\end{tabular}
+\]
+
+%%
+% FORMAL CONTRACT FOR THE EXAMPLE SYSTEM
+%%
 
 \subsection{Formal contract for the example system}
 \label{sec:sw-contract}
-\input{sw-contract}
+
+\newsavebox{\sw}
+\begin{lrbox}{\sw}
+\begin{lstlisting}[style=agree,numbers=left]
+eq req : bool = event(AutomationRequest);*\label{line:sw-event-def-start}*
+eq avl : bool = event(AirVehicleLocation);
+eq wp  : bool = event(Waypoint);
+eq strt: bool = event(Start);
+eq alrt: bool = event(Alert);*\label{line:sw-event-def-end}*
+
+assume "Automation requests are well-formed" : *\label{line:sw-assume-1}*
+  req => WELL_FORMED_AUTOMATION_REQUEST(AutomationRequest);
+assume "Air vehicle locations are well-formed" : *\label{line:sw-assume-2}*
+  avl => WELL_FORMED_WAYPOINT(AirVehicleLocation);
+assume "One automation request in flight at a time" : *\label{line:sw-assume-3}*
+  true ->
+  (req => pre(Historically(not req) or Since(not req, strt)));
+
+guarantee "Waypoints coincide with air vehicle locations": *\label{line:sw-guarantee-1}*
+  wp => avl;
+guarantee "Starts include a new waypoint" : *\label{line:sw-guarantee-2}*
+  strt => wp;
+guarantee "Waypoints are well-formed" :  *\label{line:sw-guarantee-3}*
+  wp => WELL_FORMED_WAYPOINT(Waypoint);
+guarantee "Starts within one cycle of requests if not alerting" : *\label{line:sw-guarantee-4}*
+  (strt => ((not alrt) and req)) ->
+  (strt => ((not alrt) and (req or pre(req))));
+guarantee "Alert if not started within one cycle of requests" : *\label{line:sw-guarantee-5}*
+  true -> ((pre(req and not strt) and not strt) => alrt);
+guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
+  Once(alrt) => alrt;
+\end{lstlisting}
+\end{lrbox}
+
+\begin{figure}
+  \begin{center}
+    \scalebox{0.62}{\usebox{\sw}}
+  \end{center}
+  \caption{The SW component contract.}
+  \label{fig:sw}
+\end{figure}
+
+The AGREE specification for the SW component in \secref{sec:example} is given in \figref{fig:sw}.
+%
+\linesref{line:sw-event-def-start}{line:sw-event-def-end} define local variables that are true when data is present on the corresponding event ports for the component.  These variables are
+purely for notational convenience.
+%
+The contract has three assumptions:
+%
+\begin{itemize}
+\item \lineref{line:sw-assume-1} and \lineref{line:sw-assume-2}.
+When input is present it is well-formed. The well-formed predicates
+are defined elsewhere using AGREE functions.
+\item \lineref{line:sw-assume-3}. If there is an incoming request,
+it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)},
+or it arrives after the component has output a start event in response to a previous
+request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---to be read as \emph{not
+request since start}.
+\end{itemize}
+
+\noindent The contract has six guarantees:
+%
+\begin{itemize}
+\item
+\lineref{line:sw-guarantee-1}, \lineref{line:sw-guarantee-2}, and \lineref{line:sw-guarantee-3}.
+%
+A waypoint coincides with a update on the UAV location, a start coincides with a new waypoint, and waypoints are well-formed.
+
+\item
+\lineref{line:sw-guarantee-4}.
+%
+A start happens with a request or one step after a request.
+%
+At time zero the start must coincide with the request;
+%
+after that, the start must coincide with the request or else is a response to a request one step earlier.
+%
+The guarantee works with the assumption on \lineref{line:sw-assume-3} and thus does not have to check for two requests in a row without a start, since the assumption precludes that input behavior.
+%
+The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
+
+\item
+\lineref{line:sw-guarantee-5}.
+%
+The alert is signaled if the start does not arrive within the one-step bound.
+%
+Together with \lineref{line:sw-guarantee-4} this allows for non-alerting and alerting behavior.
+
+\item
+%
+\lineref{line:sw-guarantee-6}.
+%
+If an alert has ever happened, it continues to happen.
+\end{itemize}
+%
+These six guarantees define the behavior of the SW component under the three assumptions and correspond to the informal descriptions given in \secref{sec:example}.
 
 \section{Code contracts for high assurance components}
 \label{sec:code-contracts}
