@@ -1,9 +1,6 @@
-% TODO: add in the referee tag for the submission
-%\documentclass[global,twocolumn,referee]{svjour}
-\documentclass[global,twocolumn,keeplastbox]{svjour}
+\documentclass[global,twocolumn]{svjour}
 \usepackage{cite}
 \usepackage{amsmath}
-% \usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{url}
 \usepackage{comment}
@@ -87,38 +84,13 @@
 \newcommand{\splt}{SPLAT}
 \newcommand{\ckml}{CakeML}
 
-% \newcommand{\eqref}[1]{Eq.~\ref{#1}}
-
-% Latex trickery for infix div operator, from stackexchange
-
-%% \makeatletter
-%% \newcommand*{\bdiv}{%
-%%   \nonscript\mskip-\medmuskip\mkern5mu%
-%%   \mathbin{\operator@font div}\penalty900\mkern5mu%
-%%   \nonscript\mskip-\medmuskip
-%% }
-%% \makeatother
-
 \newcommand{\ie}{\textit{i.e.}}
 \newcommand{\eg}{\textit{e.g.}}
 \newcommand{\etal}{\textit{et al.}}
 \newcommand{\etc}{\textit{etc.}}
 \newcommand{\adhoc}{\textit{ad hoc}}
 
-% \theoremstyle{plain}
-% \newtheorem{theorem}{Theorem}
-% \newtheorem{lemma}{Lemma}
-
-% \theoremstyle{definition}
-% \newtheorem{definition}{Definition}
-
-% \theoremstyle{remark}
-% \newtheorem{remark}{Remark}
-
 \journalname{Software and Systems Modeling}
-
-\newif\ifREVISIONS
-\REVISIONSfalse
 
 \begin{document}
 \title{
@@ -151,15 +123,156 @@
 \maketitle
 
 \begin{abstract}
-\input{abstract}
+Avionics need to be engineered to be cyber-resilient meaning that systems are able to detect and recover from attacks or safely shutdown.
+%
+As there are few development tools for cyber-resiliency, designers rely on guidelines and checklists, sometimes missing vulnerabilities until late in the process where remediation is expensive.
+%
+Our solution is a model-based approach with cyber-resilience-improving transforms that insert high-assurance components such as filters to block malicious data or monitors to detect and alarm anomalous behavior.
+%
+Novel is our use of model checking and a verified compiler to specify, verify, and synthesize these components.
+%
+We define \emph{code contracts} as formal specifications that designers write for high-assurance components, and \emph{test contracts} as tests to validate their behavior.
+%
+A model checker proves whether or not code contracts satisfy test contracts in an iterative development cycle.
+%
+The same model checker also proves whether or not a system with the inserted components, assuming they adhere to their code contracts, provide the desired cyber-resiliency for the system.
+%
+We define an algorithm to synthesize implementations for code contracts in a semantics-preserving way that is backed by a verified compiler.
+%
+The entire workflow is implemented as part of the open source \emph{\brfcs} toolkit.
+%
+We report on our experience using \brfcs\ with a case study on a UAV system that is transformed to be cyber-resilient to communication and supply chain cyber attacks.
+%
+Our case study demonstrates that writing code contracts and then synthesizing correct implementations from them is feasible in real-world systems engineering for cyber-resilience.
 \end{abstract}
 
 \section{Introduction} \label{sec:intro}
-\input{intro}
+In recent years, aerospace stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.
+%
+\footnote{This work was funded in part by the
+Defense Advanced Research Projects Agency (DARPA) CASE program.
+%
+The views expressed are those of the authors and do not reflect the official
+policy or position of DARPA or the U.S. Government.}
+%
+Thus, in addition to being fault-tolerant, safety-critical avionics systems must also be {\em cyber-resilient}.
+%
+Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-criticalsystems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
 
-% \section{Overview of \brfcs}
-% \label{sec:overview}
-% \input{overview}
+Unfortunately, systems engineers are currently given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.  They instead rely on process-oriented checklists and guidelines.
+%
+Cyber vulnerabilities are often discovered during penetration testing late in the development process;
+%
+or worse yet, they may be discovered only after the product has been fielded, necessitating extremely expensive and time-consuming remediation. This is not a sustainable development model.
+
+We have been developing the {\em BriefCASE} \oldjunk{toolsuite} toolkit to address this need.
+%
+\brfcs\ is a Model-Based Systems Engineering (MBSE) environment built in the Open Source AADL Tool Environment (OSATE) to add new capabilities for building cyber-resilient systems.
+%
+\footnote{AADL is the acronym for Architecture Analysis and Design Language~\cite{aadl}.}
+%
+In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high assurance components inserted into a system to improve its cyber-resiliency.
+%
+The main organizing concept is that of an architecture-to-architecture \emph{security-improving transform}, achieved via the insertion of new architectural components aimed at mitigating cyber-vulnerabilities.
+%
+We describe two such transformations in this paper: (1) the insertion of a filter to prevent malformed data from a malicious actor being propagated to downstream components, and (2) the insertion of a runtime monitor to detect (and alert) unexpected behaviors arising from untrusted components.
+%
+We refer to these as \emph{high-assurance components} because they must be correct and fulfill their intended purpose for the system to be cyber-resilient.
+
+The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that such high-assurance components meet their intended purpose and are properly implemented.
+%
+We leverage the existing {\agr} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,compositional-analysis-agree,nfm:agree,cakeml}.
+%
+\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.}
+%
+Specifically, designers write \emph{contracts} to formally specify input and output properties of the system and its components, and \agr\ proves via model checking whether or not the system composition preserves contract requirements at component inputs and guarantees contract obligations at system outputs.
+%
+In this way, \agr\ provides the formal framework we use to describe the behavior of an inserted high-assurance component, such as a filter or monitor, and then prove if adding such a component to the system improves cyber-resiliency.
+
+We then use semantics preserving transformations to rewrite contracts into \ckml\ where the \ckml\ compiler then turns such contracts into binaries for the intended target platforms.
+%
+The verified compiler, with the semantics preserving transforms, ensures that the high-assurance component adheres to its contract specification.
+%
+This assurance fulfills the underlying assumption of the \agr\ model checker's proof: a component implementation adheres to its contract.
+
+As such, this paper defines a \emph{code contract} language that is a subset of the \agr\ language but with sequential evaluation semantics as opposed to \agr's existing parallel semantics.
+%
+The sequential semantics are requisite to code synthesis and are defined such that \agr\ is able to still prove the contract composition of the system works.
+%
+This paper further defines a notion of \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
+%
+Intuitively, the behavior of a high assurance component is defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contract's input assumptions.
+%
+Once the designer is satisfied that the code contract is correct, the system composition, with its various contracts, is verified to conclude that the system meets its cyber-requirements.
+
+Showing that a component is properly implemented is accomplished through formal synthesis from the code contract.  This paper presents the Semantic Properties of Language and Automata Theory (\splt) tool that generates \ckml\ code to implement the code contract.
+%
+\ckml\ is a functional language that includes additional proofs and tools built around it \cite{cakeml}.
+%
+The \ckml\ compiler itself is verified to generate binary implementations that are equivalent in semantics to the original input program.
+%
+That proof ensures that the resulting binary exactly preserves the meaning of the original code contract and assures that the component is faithfully implemented over all possible finite inputs.
+%
+Preliminary work has shown how to extend our work to handle infinite input since most systems of interest are inherently reactive and intended to run forever~\cite{case-verified-filter,cakeml-space-cost}.
+
+We report on a case study applying these transformations with \brfcs\ to an Unmanned Aerial Vehicle (UAV) system that uses the Air Force Research Laboratory's OpenUxAS services for route planning.
+%
+OpenUxAS, as an open source product, is considered \emph{untrusted}.
+%
+The UAV system is thus transformed to be resilient to malicious behavior that may arise in the untrusted component.
+%
+In particular, filters are added to guard against malformed input and a monitor is created to guard against malicious flight plans generated from OpenUxAS.
+%
+The case study system is complex and shows the viability of the approach in potential full-scale industrial design.
+
+{\brfcs} is open source and publicly available \cite{fmide}, as are the examples and case study we discuss in this paper \cite{repo,
+phase2, camkes, case}.
+
+\subsubsection*{Contributions and limitations}
+
+As indicated in the preceding discussion, {\brfcs} is aimed at addressing the lack of tool support for the problem of enforcing and implementing the class of cyber-resilience system requirements.
+%
+Our approach to the problem is embedded in a substantial collection of tools to be wholistic in addressing cyber-resilience at the system level, so it is important to clarify the
+research impact.
+%
+We see the following as the distinguishing contributions of this paper:
+\begin{compactitem}
+  \item The language and semantics of \emph{code contracts} as a means to join system-level contract analysis results (arising from model checking) with component implementation correctness results (arising from property-preserving code generation).
+  \item \emph{Test contracts} as a stylized mechanism to unit test code contracts inside the \brfcs\ framework with \agr.
+  \item A strong formal path connecting (A) top-level system cyber-resilience requirements, (B) specifications for high-assurance components inserted to mitigate against specific cyber-resilience problems, and (C) synthesis to a programming language with a verified compiler.
+  \item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency to a non-trivial UAV system.
+\end{compactitem}
+
+Our approach currently applies to common cyber-vulnerabilities, such as buffer overflow, lack of input validation, and supply-chain issues;
+%
+however, other cyber-vulnerabilities such as side-channel attacks and denial of service have not yet been addressed. Moreover, this work does not introduce a new type of high-assurance component in terms of capability.
+%
+Instead, our contribution is in the automated synthesis of security-improving components from formal cyber-resilience specifications, paired with a verification showing that the synthesized implementation is correct in the context of the whole system all the way down to the binary implementation.
+
+We have not yet tried to apply {\brfcs} to problems outside the realm of cyber-resilience;
+%
+however, the notions of code and test contracts, along with the system analysis and verified code generation facilities promise to be useful in a wide variety of settings.
+%
+Writing code and test contracts does require a working knowledge of propositional logic but not to a degree that would exceed what would be expected in a designer.
+%
+The general synthesis approach in this paper could be used outside of the \brfcs\ environment, but it would only then provide guarantees relative to the complied artifacts and not say anything about the correctness of the system composition.
+
+\subsubsection*{Organization}
+The rest of the paper is organized as follows.
+%
+Our approach is illustrated by a simple example in \secref{sec:example}.
+%
+Essential background on {\agr} verification and specification are presented in \secref{sec:agree}.
+%
+The language and semantics of code contracts are defined in \secref{sec:code-contracts}, and test contracts are described in \secref{sec:testing}.
+%
+The synthesis pathway is covered in Section~\ref{sec:synthesis}.
+%
+\secref{sec:case-study} discusses the case study.
+%
+This is followed by related work in \secref{sec:related-work}.
+%
+The conclusions and future work are in \secref{sec:conclusion}.
 
 \section{Illustrative example}
 \label{sec:example}
@@ -197,13 +310,6 @@
 \label{sec:related-work}
 \input{related-work}
 
-\ifREVISIONS
-\subsection{Revisions}
-\begin{compactitem}
-  \item Add recent work published after 2018
-\end{compactitem}
-\fi
-
 \section{Conclusion}
 \label{sec:conclusion}
 \input{conclusion}
@@ -211,12 +317,5 @@
 \clearpage
 \bibliographystyle{plain}
 \bibliography{paper}
-
-% \appendix
-% \section{Contiguity Types}
-% \input{contig}
-
-% \section{System Model and Semantics}
-% \input{system}
 
 \end{document}
