@@ -1,0 +1,1 @@
+Darren Cofer (PhD, University of Texas at Austin) is a Fellow at Collins Aerospace. His research interests include formal methods and tools for verification and certification of high-integrity systems. He is a senior member of the IEEE. Contact him at cofer@ieee.org.

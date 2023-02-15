@@ -1,0 +1,1 @@
+Isaac Amundson (PhD, Vanderbilt University) is a Senior Principal Research Engineer at Collins Aerospace.  His research focuses on modeling, formal verification and assurance, and he has led the design and implementation of multiple MBSE toolchains for providing inherent dependability in high-assurance systems.

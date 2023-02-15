@@ -1,0 +1,1 @@
+David Hardin (PhD, Kansas State University) is a research engineer at Collins Aerospace, and has made contributions in formal methods, high-assurance computer architecture, and real-time embedded Java.  He is editor of the book "Design and Verification of Microprocessor Systems for High-Assurance Applications."

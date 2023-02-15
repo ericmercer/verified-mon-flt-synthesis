@@ -1,0 +1,1 @@
+Konrad Slind (PhD, TU Munich) is an Applied Scientist at Amazon is is formally an industrial logician with Collins Aerospace. His research interests include design and implementation of higher order logic theorem provers, verified compilation, and self-describing data formats.

@@ -1,0 +1,2 @@
+Junaid Babar (PhD, Iowa State University) is a research engineer at Collins Aerospace.
+His research interests include formal verification via model checking, temporal logics and decision diagrams.

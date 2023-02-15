@@ -1,0 +1,1 @@
+Eric Mercer (PhD, University of Utah) is an Associate Professor at Brigham Young University and an Amazon Scholar. His research interests include software verification, model checking, static analysis, and programming languages.
