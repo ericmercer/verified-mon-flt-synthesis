@@ -161,22 +161,26 @@ policy or position of DARPA or the U.S. Government.}
 %
 Thus, in addition to being fault-tolerant, safety-critical avionics systems must also be {\em cyber-resilient}.
 %
-Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-criticalsystems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
+Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-critical systems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
 
-Unfortunately, systems engineers are currently given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.  They instead rely on process-oriented checklists and guidelines.
+Unfortunately, systems designers are currently given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.
+%
+They instead rely on process-oriented checklists and guidelines.
 %
 Cyber vulnerabilities are often discovered during penetration testing late in the development process;
 %
 or worse yet, they may be discovered only after the product has been fielded, necessitating extremely expensive and time-consuming remediation. This is not a sustainable development model.
 
-We have been developing the {\em BriefCASE} \oldjunk{toolsuite} toolkit to address this need.
+We have been developing the {\em BriefCASE} toolkit to address this need.
 %
-\brfcs\ is a Model-Based Systems Engineering (MBSE) environment built in the Open Source AADL Tool Environment (OSATE) to add new capabilities for building cyber-resilient systems.
+\brfcs\ is a Model-Based Systems Engineering (MBSE) environment that is integrated into the Open Source AADL Tool Environment (OSATE).
 %
 \footnote{AADL is the acronym for Architecture Analysis and Design Language~\cite{aadl}.}
 %
-In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high assurance components inserted into a system to improve its cyber-resiliency.
+It adds new capabilities for building cyber-resilient systems.
 %
+In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high assurance components inserted into a system to improve its cyber-resiliency.
+
 The main organizing concept is that of an architecture-to-architecture \emph{security-improving transform}, achieved via the insertion of new architectural components aimed at mitigating cyber-vulnerabilities.
 %
 We describe two such transformations in this paper: (1) the insertion of a filter to prevent malformed data from a malicious actor being propagated to downstream components, and (2) the insertion of a runtime monitor to detect (and alert) unexpected behaviors arising from untrusted components.
@@ -238,9 +242,9 @@ phase2, camkes, case}.
 
 \subsubsection*{Contributions and limitations}
 
-As indicated in the preceding discussion, {\brfcs} is aimed at addressing the lack of tool support for the problem of enforcing and implementing the class of cyber-resilience system requirements.
+As indicated in the preceding discussion, {\brfcs} is aimed at addressing the lack of tool support for the problem of enforcing and implementing cyber-resilience system requirements.
 %
-Our approach to the problem is embedded in a substantial collection of tools to be wholistic in addressing cyber-resilience at the system level, so it is important to clarify the
+Our approach to the problem is embedded in a collection of tools that together are intended to be wholistic in addressing cyber-resilience at the system level, so it is important to clarify the
 research impact.
 %
 We see the following as the distinguishing contributions of this paper:
@@ -251,15 +255,15 @@ We see the following as the distinguishing contributions of this paper:
   \item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency to a non-trivial UAV system.
 \end{compactitem}
 
-Our approach currently applies to common cyber-vulnerabilities, such as buffer overflow, lack of input validation, and supply-chain issues;
+Our approach currently applies to common cyber-vulnerabilities, such as buffer overflow, lack of input validation, and supply-chain issues.
 %
-however, other cyber-vulnerabilities such as side-channel attacks and denial of service have not yet been addressed. Moreover, this work does not introduce a new type of high-assurance component in terms of capability.
+Other cyber-vulnerabilities such as side-channel attacks and denial of service have not yet been addressed. Moreover, this work does not introduce a new type of high-assurance component in terms of capability.
 %
 Instead, our contribution is in the automated synthesis of security-improving components from formal cyber-resilience specifications, paired with a verification showing that the synthesized implementation is correct in the context of the whole system all the way down to the binary implementation.
 
 We have not yet tried to apply {\brfcs} to problems outside the realm of cyber-resilience;
 %
-however, the notions of code and test contracts, along with the system analysis and verified code generation facilities promise to be useful in a wide variety of settings.
+however, the notions of code and test contracts, along with the system analysis and verified code generation facilities should be useful in a wide variety of settings.
 %
 Writing code and test contracts does require a working knowledge of propositional logic but not to a degree that would exceed what would be expected in a designer.
 %
