@@ -321,7 +321,7 @@ inherent cyber-resiliency.
 \figref{fig:flowchart} is a simplified illustration of the toolkit that omits tooling outside of our contributions discussed here (see \cite{dcrypps2019,gearcase2020,resolute-destion,attestation-copland,awas,hamr,sel4-sosp09, sel4-tocs14, sel4-cacm18} for other aspects of \brfcs).
 %
 The shaded boxes represent our contribution: test contracts, code contracts, and SPLAT synthesis.
-The unshaded boxes are the existing tools that provide the foundation for our contributions.
+The unshaded boxes are the existing elements that provide the foundation for our contributions.
 
 The intended \brfcs\ workflow is in \figref{fig:workflow}.
 %
@@ -418,7 +418,7 @@ The legacy WM contract guarantees that
   \item any further waypoints coincide with location updates.
 \end{compactitem}
 
-\figref{fig:workflow} shows the intent of this behavioral contract definition of the UAV software system on the left-side of the figure at the arrow marked start.
+This behavioral contract definition of the UAV software system is the starting point on the left-side of \figref{fig:workflow}.
 %
 The \agr\ verification engine tries to prove if the component composition of the software system is correct.
 %
@@ -434,15 +434,13 @@ The \agr\ verification conditions, syntax and semantics, and the baseline contra
 % ADDING CYBER REQUIREMENTS
 %%
 
-\subsection{Adding cyber requirements}
+\subsection{Adding Cyber Requirements}
 
-Having passed \agr\ verification, the workflow in \figref{fig:workflow} proceeds to the threat analysis stage.
+Having passed \agr\ verification, the workflow in \figref{fig:workflow} proceeds to the thread analysis as the UAV must actively protect itself from malicious actors.
 %
-The UAV must actively protect itself from malicious actors, but to this point, the designers have only been focusing on its core functional behavior with little consideration for cyber-resilience.
+Threat analysis identifies the potential of a supply chain attack through the AI route planner since its third-party.
 %
-A cyber-vulnerability analysis identifies the potential of a supply chain attack through the AI route planner since its third-party.
-%
-Based on the analysis, the designer adds a requirement that the system must guard against malicious AI behavior.
+To mitigate the identified supply chain attack, the designer adds a requirement that the system must guard against malicious AI behavior.
 %
 This requirement is reflected in the component contracts by removing all output guarantees from the AI contract since that component is considered untrusted.
 %
@@ -458,7 +456,7 @@ The consequence of that failing input assumption is that the WM outputs are no l
 %
 For a contract, when an input assumption does not hold, then the output may be arbitrary.
 %
-The now arbitrary output from the WM due to input assumption violations lead to the rest of the failures in \figref{fig:example-certificate} as the WM provides the system level outputs.
+The rest of the failures in \figref{fig:example-certificate} are the result of the WM outputs now being arbitrary.
 
 \begin{figure*}
   \begin{center}
@@ -487,7 +485,7 @@ The now arbitrary output from the WM due to input assumption violations lead to 
 % ADDING HIGH ASSURANCE COMPONENTS
 %%
 
-\subsection{Adding high assurance components}
+\subsection{Adding High-assurance Components}
 
 As \agr\ proves the system does not meet its cyber-requirements, the workflow moves to the right in \figref{fig:workflow} to the transforms box.
 %
@@ -526,25 +524,22 @@ For example, one of the test contracts for the monitor is that when it sees an a
 %
 Test contracts are discussed in detail in \secref{sec:testing}.
 %
-An example test from that section the the monitor in our example here is shown in \figref{fig:test}.
-
+\figref{fig:test} in that section is an example test contract for the added monitor in our example.
 
 As shown in \figref{fig:workflow}, making the system cyber-resilient is an iterative process of adding high-assurance components, writing their code contracts, testing those contracts with test contracts, and then seeing if they are sufficient to prove out the system.
 %
-Having completed such an iterative for our example system, the \agr\ analysis of the cyber-hardened implementation is shown in \figref{fig:hardened-certificate}.
+The \agr\ analysis of the cyber-hardened implementation at the end of that iterative process is shown in \figref{fig:hardened-certificate}.
 %
 \figref{fig:hardened-certificate}(a) is the test contract results and \figref{fig:hardened-certificate}(b) is the hardened system composition.
 %
 Here \agr\ has generated high-level evidence justifying the claim that the high-assurance components meet their intended purposes.
-%
-Having passed \agr\ verification, the high-assurance components are ready to be synthesized.
 
 %%
 % SYNTHESIZING CODE FROM CODE CONTRACTS
 %
 \subsection{Synthesizing code from code contracts}
 
-As \agr\ now proves the system now meets its cyber-requirements, the workflow moves to the right in \figref{fig:workflow} to the code generation box.
+As \agr\ proves the system now meets its cyber-requirements, the workflow moves to the right in \figref{fig:workflow} to the code generation box.
 %
 High-assurance components are automatically synthesized by \splt\ from the code contracts to equivalent programs in the \ckml\ language.
 %
