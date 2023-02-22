@@ -179,7 +179,7 @@ We have been developing the {\em BriefCASE} toolkit to address this need.
 %
 It adds new capabilities for building cyber-resilient systems.
 %
-In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high assurance components inserted into a system to improve its cyber-resiliency.
+In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high-assurance components inserted into a system to improve its cyber-resiliency.
 
 The main organizing concept is that of an architecture-to-architecture \emph{security-improving transform}, achieved via the insertion of new architectural components aimed at mitigating cyber-vulnerabilities.
 %
@@ -209,7 +209,7 @@ The sequential semantics are requisite to code synthesis and are defined such th
 %
 This paper further defines a notion of \emph{test contract} for unit testing code contracts outside of the system composition to verify input to output behavior as well as general properties of the code contract.
 %
-Intuitively, the behavior of a high assurance component is defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contract's input assumptions.
+Intuitively, the behavior of a high-assurance component is defined by the designer in a code contract, the designer then writes test contracts to validate that behavior by asking \agr\ to prove if the code contract ensures the output obligations in the test contract under the test contract's input assumptions.
 %
 Once the designer is satisfied that the code contract is correct, the system composition, with its various contracts, is verified to conclude that the system meets its cyber-requirements.
 
@@ -517,7 +517,7 @@ Code contracts are discussed in detail in \secref{sec:code-contracts}.
 %
 \figref{fig:filter} and \figref{fig:monitor} are the code contracts from that section for the high-assurance filter and monitor inserted into the original system as shown in \figref{fig:hardened}.
 
-Code contracts for high assurance components can be arbitrarily complex since they can have persistent state that evolves over time.
+Code contracts for high-assurance components can be arbitrarily complex since they can have persistent state that evolves over time.
 %
 Test contracts allow the designer to validate code contract behavior with unit testing.
 For example, one of the test contracts for the monitor is that when it sees an automation response one step after a request, then it should not alert, and it should pass the response downstream.
@@ -610,7 +610,7 @@ A data port is a sampled port: the data can be read at anytime.
 %
 An event data port indicates when data is present with an event.
 
-Data flows through the subcomponents of a system in dependency order, with inputs being propagated to outputs through all contracts until they stabilize \ie, cannot propagate further.
+Data flows through the subcomponents of a system in dependency order, with inputs being propagated to outputs through all contracts until they stabilize (\ie, they cannot propagate further).
 %
 Therefore, subcomponent contracts, and thus the top-level model, must be acyclic.
 %
@@ -624,7 +624,7 @@ It is worth noting that the semantics do not model computation or communication 
 % CONTRACTS AND VERIFICATION CONDITIONS
 %%
 
-\subsection{Contracts and verification conditions}
+\subsection{Contracts and Verification Conditions}
 
 From the system and component contracts, \agr\ generates a set of verification conditions to show that a system's component implementation is correct~\cite{agree2013}.
 %
@@ -785,13 +785,11 @@ $\konst{Since}(a, b)$ is true if $a$ has been true in all moments up to the pres
 %
 All other past-time operators of PLTL can be defined similarly \cite{monitor}.
 
-\agr\ uses ASCII notation for the mathematical syntax we have defined.
-%
-The following table spells out the mapping.
+\agr\ uses ASCII notation for the mathematical syntax we have defined as shown in the following table.
 %
 \[
 \begin{tabular}{l|l|l}
- Operation & Math. notation & \agr \\ \hline
+ Operation & Math & \agr \\ \hline
  followed-by &  $e \to e$          & \verb+e -> e+  \\
  logical implication &  $e \imp e$ & \verb+e => e+ \\
  if-and-only-if &  $e \iff e$      & \verb+e <=> e+ \\
@@ -799,8 +797,8 @@ The following table spells out the mapping.
  logical or &  $e \lor e$      & \verb+e or e+ \\
  logical not & $\neg b$      & \verb+not b+ \\
  variable definition & $v = e$     & \verb+eq v e+ \\
- Previously  & $\konst{pre}(b)$ & \verb+pre(b)+ \\
- Historically  & $\konst{Hist}(b)$ & \verb+Historically(b)+ \\
+ previously  & $\konst{pre}(b)$ & \verb+pre(b)+ \\
+ historically  & $\konst{Hist}(b)$ & \verb+Historically(b)+ \\
 \end{tabular}
 \]
 
@@ -808,7 +806,7 @@ The following table spells out the mapping.
 % FORMAL CONTRACT FOR THE EXAMPLE SYSTEM
 %%
 
-\subsection{Formal contract for the example system}
+\subsection{Formal Contract for the Example System}
 \label{sec:sw-contract}
 
 \newsavebox{\sw}
@@ -846,7 +844,7 @@ guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
 
 \begin{figure}
   \begin{center}
-    \scalebox{0.62}{\usebox{\sw}}
+    \resizebox{\columnwidth}{!}{\usebox{\sw}}
   \end{center}
   \caption{The SW component contract.}
   \label{fig:sw}
@@ -859,33 +857,33 @@ purely for notational convenience.
 %
 The contract has three assumptions:
 %
-\begin{itemize}
+\begin{compactitem}
 \item
-\lineref{line:sw-assume-1} and \lineref{line:sw-assume-2}.
+\lineref{line:sw-assume-1} and \lineref{line:sw-assume-2}:
 %
-When input is present it is well-formed.
+when input is present it is well-formed.
 %
 The well-formed predicates are defined elsewhere using AGREE functions.
 
 \item
-\lineref{line:sw-assume-3}.
+\lineref{line:sw-assume-3}:
 %
-If there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it arrives after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---to be read as \emph{not
+if there is an incoming request, it is either the very first one, \texttt{\textbf{Historically}(\textbf{not} req)}, or it arrives after the component has output a start event in response to a previous request, \texttt{\textbf{Since}(\textbf{not} req, strt)}---to be read as \emph{not
 request since start}.
-\end{itemize}
+\end{compactitem}
 
 \noindent The contract has six guarantees:
 %
-\begin{itemize}
+\begin{compactitem}
 \item
-\lineref{line:sw-guarantee-1}, \lineref{line:sw-guarantee-2}, and \lineref{line:sw-guarantee-3}.
+\lineref{line:sw-guarantee-1}, \lineref{line:sw-guarantee-2}, and \lineref{line:sw-guarantee-3}:
 %
-A waypoint coincides with a update on the UAV location, a start coincides with a new waypoint, and waypoints are well-formed.
+a waypoint coincides with a update on the UAV location, a start coincides with a new waypoint, and waypoints are well-formed.
 
 \item
-\lineref{line:sw-guarantee-4}.
+\lineref{line:sw-guarantee-4}:
 %
-A start happens with a request or one step after a request.
+a start happens with a request or one step after a request.
 %
 At time zero the start must coincide with the request;
 %
@@ -896,22 +894,22 @@ The guarantee works with the assumption on \lineref{line:sw-assume-3} and thus d
 The guarantee also does not force the start to always happen, it only says that if it does happen, it is under the defined conditions.
 
 \item
-\lineref{line:sw-guarantee-5}.
+\lineref{line:sw-guarantee-5}:
 %
-The alert is signaled if the start does not arrive within the one-step bound.
+the alert is signaled if the start does not arrive within the one-step bound.
 %
 Together with \lineref{line:sw-guarantee-4} this allows for non-alerting and alerting behavior.
 
 \item
 %
-\lineref{line:sw-guarantee-6}.
+\lineref{line:sw-guarantee-6}:
 %
-If an alert has ever happened, it continues to happen.
-\end{itemize}
+if an alert has ever happened, it continues to happen.
+\end{compactitem}
 %
 These six guarantees define the behavior of the SW component under the three assumptions and correspond to the informal descriptions given in \secref{sec:example}.
 
-\section{Code contracts for high assurance components}
+\section{Code Contracts for High-assurance Components}
 \label{sec:code-contracts}
 
 Generally, AGREE contracts do not describe the computation that a component performs.
@@ -1031,11 +1029,11 @@ also, accesses to a past value of a variable are only possible until the variabl
 %
 In informal terms, this means that ${\Eqs}\cdot G$ in a code contract has the following properties:
 %
-\begin{itemize}
+\begin{compactitem}
 \item Followed-by only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
 \item $\konst{pre}(e)$ is allowed only when $e$ is a variable; and
 \item $\konst{pre}(v)$ is allowed only before the defining equation $v = e$ (and may occur in $e$).
-\end{itemize}
+\end{compactitem}
 %
 For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be defined, albeit in a manner that is not Pascal-like, by
 %
@@ -1127,7 +1125,7 @@ A Pascal-like ${\Eqs} \cdot G$ is straightforward to implement in conventional p
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-      \scalebox{0.62}{\usebox{\flt}} \\
+      \resizebox{\columnwidth}{!}{\usebox{\flt}} \\
     \end{tabular}
   \end{center}
   \caption{Code contract for high-assurance filter.}
@@ -1137,7 +1135,7 @@ A Pascal-like ${\Eqs} \cdot G$ is straightforward to implement in conventional p
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-    \scalebox{0.62}{\usebox{\mntr}} \\
+      \resizebox{\columnwidth}{!}{\usebox{\mntr}} \\
     \end{tabular}
   \end{center}
   \caption{Code contract for high-assurance monitor.}
@@ -1219,11 +1217,11 @@ It is an especially difficult challenge here because there is no direct way to e
 
 A tempting approach to exercising code contracts directly is to use \splt\ to create the target binary and then use that runtime with traditional testing.
 %
-Such an approach adds extra steps, including test harneses, that are not needed, as it is possible to bridge the formal model in \agr, with its proof system, to traditional validation using tests.
+Such an approach adds extra steps, including test harnesses, that are not needed, as it is possible to bridge the formal model in \agr, with its proof system, to traditional validation using tests.
 %
 The intuition for that bridge comes from the compositional reasoning in AADL and \agr.
 %
-Effectively, a code contract for a high assurance component should be a valid implementation of a test scenario.
+Effectively, a code contract for a high-assurance component should be a valid implementation of a test scenario.
 %
 In other words, the test scenario, as expressed in a test contract, is the desired behavior of the system, and the code contract implements that behavior.
 
@@ -1281,7 +1279,7 @@ In other words, according to Liskov substitution, \agr\ proves if the code contr
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-    \scalebox{0.60}{\usebox{\tst}} \\
+      \resizebox{\columnwidth}{!}{\usebox{\tst}} \\
     \end{tabular}
   \end{center}
   \caption{A unit test for the monitor with its test contract.}
@@ -1319,7 +1317,7 @@ These same tests can be synthesized to the backend implementation for traditiona
 
 Synthesis maps from model and specifications to code.
 %
-The \splt\ tool traverses the system architecture looking for occurrences of high assurance components specified by code contracts;
+The \splt\ tool traverses the system architecture looking for occurrences of high-assurance components specified by code contracts;
 %
 for each such occurrence it generates a CakeML program.
 %
@@ -1487,7 +1485,7 @@ If there is none then it yields control; otherwise:
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-      \scalebox{0.60}{\usebox{\contig}}
+      \resizebox{\columnwidth}{!}{\usebox{\contig}}
     \end{tabular}
   \end{center}
   \caption{Filter specification.}
@@ -1513,7 +1511,7 @@ end
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-      \scalebox{0.60}{\usebox{\cml}}
+      \resizebox{\columnwidth}{!}{\usebox{\cml}}
     \end{tabular}
   \end{center}
   \caption{Synthesized CakeML for the filter.}
@@ -1634,7 +1632,7 @@ end
 \begin{figure}
   \begin{center}
     \begin{tabular}{c}
-      \scalebox{0.60}{\usebox{\monFn}}
+      \resizebox{\columnwidth}{!}{\usebox{\monFn}}
     \end{tabular}
   \end{center}
   \caption{Synthesized CakeML for the monitor.}
@@ -1963,7 +1961,7 @@ The generated C code is validated by generating random CoPilot programs, generat
 %
 Further assurance is accomplished with bounded model checking by showing equivalence between the code from the two compiler backends over a user defined number of steps.
 %
-Aside from the HOL4 embedding of the code contract semantics and not requiring any HOL4 working knowledge, the work in this paper differs in that it is targeting a fully verified path from the code contract all the way to the binaries leveraging the \ckml\ compiler specifically to provide stronger guarantees on the high assurance components.
+Aside from the HOL4 embedding of the code contract semantics and not requiring any HOL4 working knowledge, the work in this paper differs in that it is targeting a fully verified path from the code contract all the way to the binaries leveraging the \ckml\ compiler specifically to provide stronger guarantees on the high-assurance components.
 
 As seen in this paper, contracts can be stateful and even higher-order \cite{10.1145/583852.581484}.
 %
