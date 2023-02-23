@@ -1777,9 +1777,9 @@ In addition to monitoring the UxAS output for malformed messages, we must also m
 %
 This requires adding components for detecting that UxAS has crashed, as well as monitoring the correctness of the flight plans it produces.
 %
-We therefore add a response monitor (Resp\_Monitor) to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.
+We therefore add a response monitor (Resp Monitor) to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.
 %
-And we add a geo-fence monitor (Geofence\_Monitor) to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.
+And we add a geo-fence monitor (Geofence Monitor) to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.
 %
 The Geofence\_Monitor is a gated monitor in that it prevents the observed automation response from reaching the Waypoint Manager if the zones are violated.
 %
@@ -1877,7 +1877,7 @@ The primary reason for its unease in describing how computation is performed is 
 %
 Instead, it relies on folding and mapping to describe iterative computation which is non-intuitive for many types of array updates.
 %
-Growing the expressiveness of the language arround arrays is something to investigate in future work.
+Growing the expressiveness of the language around arrays is something to investigate in future work.
 
 There are several, practical, low-level concerns that need to be addressed in the high-level model before synthesis takes place that in our process were only discovered after running the actual system on the designated hardware and software.
 %
@@ -1938,7 +1938,7 @@ This work is quite similar to ours in providing a verified compilation chain fro
 %
 However, there are significant differences: notably, they tackle a more comprehensive subset of Lustre than our work.
 %
-We have been able to work effectively with a relatively simple core language, \eg, without \emph{clocking} features.
+We have been able to work effectively with a relatively simple core language, \eg, without clocking features.
 %
 This subset aligns with our contract language, and allows us to generate behaviorally equivalent code so we can show that the generated code meets its logical specification.
 %
@@ -1966,7 +1966,7 @@ Dafny contracts provide the verification conditions to prove out the implementat
 %
 Compared to the work discussed in this paper, our test contracts are more similar to the Dafny contracts as they are also not compiled and only serve to prove properties of the code contracts.
 %
-In that regard, the code contracts are the implementation, but unlike Dafny, \ckml\ provide a verified compilation path to binaries.
+In that regard, the code contracts are the implementation, but unlike Dafny, \ckml\ provides a verified compilation path to binaries.
 
 %%
 % CONCLUSION
