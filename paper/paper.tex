@@ -76,6 +76,7 @@
 \newcommand{\figref}[1]{Fig.~\ref{#1}}
 \newcommand{\secref}[1]{Sec.~\ref{#1}}
 \newcommand{\lineref}[1]{Line~\ref{#1}}
+\newcommand{\defref}[1]{Def.~\ref{#1}}
 \newcommand{\linesref}[2]{Lines~\ref{#1}--\ref{#2}}
 
 % Acronym macros
@@ -191,7 +192,7 @@ The contributions of this paper relate to the aspects of \brfcs\ concerning evid
 %
 We leverage the existing {\agr} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,compositional-analysis-agree,nfm:agree,cakeml}.
 %
-\footnote{AGREE is the acronym for \emph{Assume Guarantee Reasoning Environment}.}
+\footnote{\agr\ is the acronym for \emph{Assume Guarantee Reasoning Environment}.}
 %
 Specifically, designers write \emph{contracts} to formally specify input and output properties of the system and its components, and \agr\ proves via model checking whether or not the system composition preserves contract requirements at component inputs and guarantees contract obligations at system outputs.
 %
@@ -850,7 +851,7 @@ guarantee "Once alerted always alerted" : *\label{line:sw-guarantee-6}*
   \label{fig:sw}
 \end{figure}
 
-The AGREE specification for the SW component in \secref{sec:example} is given in \figref{fig:sw}.
+The \agr\ specification for the SW component in \secref{sec:example} is given in \figref{fig:sw}.
 %
 \linesref{line:sw-event-def-start}{line:sw-event-def-end} define local variables that are true when data is present on the corresponding event ports for the component.  These variables are
 purely for notational convenience.
@@ -863,7 +864,7 @@ The contract has three assumptions:
 %
 when input is present it is well-formed.
 %
-The well-formed predicates are defined elsewhere using AGREE functions.
+The well-formed predicates are defined elsewhere using \agr\ functions.
 
 \item
 \lineref{line:sw-assume-3}:
@@ -909,16 +910,20 @@ if an alert has ever happened, it continues to happen.
 %
 These six guarantees define the behavior of the SW component under the three assumptions and correspond to the informal descriptions given in \secref{sec:example}.
 
+%%
+% Code contracts for High-assurance Components
+%%
+
 \section{Code Contracts for High-assurance Components}
 \label{sec:code-contracts}
 
-Generally, AGREE contracts do not describe the computation that a component performs.
+\agr\ contracts do not describe the computation that a component performs by design:
 %
-This is entirely by design: AGREE is intended to be declarative and reasoning about component behavior takes place solely at the specification level.
+it is intended to be declarative so it reasons about component behavior at the specification level.
 %
 It defines what a component computes and not how it computes it.
 %
-However, the syntax of AGREE provides enough expressiveness to support the notion of a \emph{code contract}: a contract from which an implementation can be extracted.
+However, the syntax of \agr\ provides enough expressiveness to support the notion of a \emph{code contract}: a contract from which an implementation can be extracted.
 %
 First we must discuss a class of guarantees, \emph{output guarantees}, which determine the values on all output ports of a component.
 
@@ -940,16 +945,14 @@ There are three possibilities according to whether the output port $p$ is a \kon
 Informally, a code contract treats its \konst{eq} ``statements'' as defining a list of assignments to state variables, and its output guarantees as directives for producing output.
 
 \begin{definition}[Code contract]
-A leaf component of the form $(I,O,A,P,\emptyset)$ is a \emph{code contract} if $\mathit{Eqs} \cup G \subseteq P$, where \[\mathit{Eqs} = \set{v_1 = e_1, \cdots , v_n = e_n} \] is a non-empty set of \konst{eq} statements and $G$ is the set of output guarantees, one for each element of $O$.
+A leaf component of the form $(I,O,A,P,\emptyset)$ is a \emph{code contract} if $(\mathit{Eqs} \cup G) \subseteq P$, where \[\mathit{Eqs} = [v_1 = e_1, \cdots , v_n = e_n] \] is a non-empty list of \konst{eq} statements and $G$ is the set of output guarantees, one for each element of $O$.
 %
-In the interpretation as code, the order of elements of $\mathit{Eqs}$ is important, and is simply taken to be the occurrence order of the \konst{eq} statements in the syntax.
-%
-Thus we will work with the \emph{list} of equations $\mathit{Eqs} = [v_1 = e_1; \cdots ; v_n = e_n]$.
+In the interpretation as code, the order of elements of $\mathit{Eqs}$ is important and is simply taken to be the occurrence order of the \konst{eq} statements in the syntax.
 \end{definition}
 
-The semantics of \secref{sec:agree-semantics} supports a formal connection between the original contract, and verification results of the AGREE model checker being run on it, and code generated from specifications of leaf level cyber-components.
+The semantics of \secref{sec:agree-semantics} give a formal connection between the system contract, the verification results of the \agr\ model checker, and the code synthesized for leaf level components.
 %
-It also provides the root meaning at the base of a chain of translation steps moving from an AGREE contract to a CakeML executable.
+It thus provides the root meaning at the base of a chain of translation steps moving from a code contract to a \ckml\ executable.
 
 The first step in the chain maps the contract to a code-focused representation.
 Assume given a code contract $(I,O,A,\mathit{Eqs} \cup G \cup P,\emptyset)$, environment $E$, and time $t$.
@@ -982,60 +985,51 @@ Assume code contract $(I,O,A,\mathit{Eqs} \cup G \cup P,\emptyset)$.
 The contract is \emph{correct}, if for all $E$ and $t$, whenever the assumptions (historically) hold in $E$ and evaluation steps from $E$ to $E'$, then the guarantees hold in $E'$:
 %
 \[
-\sem{\konst{Hist}(A)}^E_t \land E' = \sem{\mathit{Eqs} \cdot G}^E_t \imp \sem{P}^{E'}_t
+(\sem{\konst{Hist}(A)}^E_t \land E' = \sem{\mathit{Eqs} \cdot G}^E_t) \imp \sem{P}^{E'}_t
 \]
 %
-\end{definition}
+\end{definition}\label{def:correct}
 
-How does this notion of correctness integrate with the verification conditions generated by AGREE?
+How does this notion of correctness integrate with the verification conditions generated by \agr?
 %
-In \emph{contract correctness}, the model checker is proving the following property
+In \agr, the model checker is proving the following property
 %
 \[
 \konst{Hist}(A) \imp P
 \]
 %
-and in \emph{code contract correctness} we essentially prove a Hoare triple of the form
+and in \defref{def:correct} we essentially prove a Hoare triple of the form
 %
 \[
 \set{\konst{Hist}(A)}\; (\mathit{Eqs} \cdot G) \; \set{P}
 \]
 %
-This accords with intuition, namely that AGREE is a kind of \emph{program-free program logic};
+This accords with intuition, namely that \agr\ is a kind of \emph{program-free program logic};
 %
 by pulling out a program $(\mathit{Eqs}\cdot G)$ from a code contract we find ourselves in the domain of imperative program verification.
 %
 For example, at this point one could apply a verification condition generator to help break down the proof obligation.
 %
-In order to use the code contract result in system contract verification conditions, one has to show that the code contract result implies the system verification condition.
+In order to use a code contract's computed result in verification, we have to show it's defined computation implies the system verification condition as stated by \defref{def:correct}.
 
-%%
-% IMPERATIVE CODE CONTRACTS
-%%
-
-\subsubsection*{Imperative code contracts}
-
-Stream-based evaluation allows values arbitrarily \emph{deep in the past} to be accessed by use of $\konst{pre}(-)$.
+\paragraph{Rewriting code contracts to be imperative:\/} stream evaluation allows values arbitrarily deep in the past to be accessed by use of $\konst{pre}(-)$, but streams, and accesses to past variable values, are not part of \ckml\ and most other programming languages.
 %
-However, the programming languages targeted by SPLAT do not directly support streams.
+As such, we automatically rewrite code contracts to eliminate deep temporal accesses by the introduction of intermediate variables.
 %
-We are developing a translation to eliminate such deep temporal accesses by the introduction of intermediate variables.
+The essential property of the rewrite is a syntactic restriction that supports easy translation to standard imperative languages.
 %
-The essential property the translation needs to satisfy is a syntactic restriction, call it \emph{Pascal-like}, that supports easy translation to standard imperative languages.
+The guiding intuition is that accesses to values by expressions in {\Eqs} are at most one step in the past and accesses to such past values are only possible until the associated variable is updated.
 %
-The guiding intuition is that a Pascal-like {\Eqs} accesses at most one step in the past;
-%
-also, accesses to a past value of a variable are only possible until the variable is updated.
-%
-In informal terms, this means that ${\Eqs}\cdot G$ in a code contract has the following properties:
+In informal terms, this means that ${\Eqs} \cdot G$ in a code contract has the following properties:
 %
 \begin{compactitem}
-\item Followed-by only occurs at the top level of a variable definition, \eg, $v = e_1 \to e2$;
+\item the followed-by operator only occurs at the top level of a variable definition, \eg, $v = e_1 \to e_2$;
 \item $\konst{pre}(e)$ is allowed only when $e$ is a variable; and
 \item $\konst{pre}(v)$ is allowed only before the defining equation $v = e$ (and may occur in $e$).
 \end{compactitem}
-%
-For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be defined, albeit in a manner that is not Pascal-like, by
+
+
+For example, the Fibonacci sequence is computed by
 %
 {\small
 \begin{lstlisting}[style=agree]
@@ -1043,16 +1037,17 @@ For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be defined, albe
 \end{lstlisting}
 }
 %
-\noindent or by (again this is not Pascal-like)
+\noindent and with a temporary variable can be rewritten to
 %
 {\small
 \begin{lstlisting}[style=agree]
   N = 0 -> 1 + pre(N)
-  Fib = if N <= 1 then 1 else pre(Fib) + pre(pre(Fib))
+  Fib = if N <= 1 then 1
+         else pre(Fib) + pre(pre(Fib))
 \end{lstlisting}
 }
 %
-\noindent or by (this time Pascal-like):
+\noindent and finally, with a few more temporary variables, can be rewritten to
 %
 {\small
 \begin{lstlisting}[style=agree]
@@ -1063,11 +1058,15 @@ For example, the Fibonacci sequence $1,1,2,3,5,8,13,\ldots$ can be defined, albe
 \end{lstlisting}
 }
 %
-Please note that the initial values of \verb+F1+ and \verb+F2+ are never accessed, so 42 could be replaced by any number in their defining equations.
+\noindent This final version of the computation is imperative as the instances of $\konst{pre}$ can be resolved with the current values of the referenced variables:
 %
-A Pascal-like ${\Eqs} \cdot G$ is straightforward to implement in conventional programming languages, as we will see in \secref{sec:synthesis}.
+the instances appear before the associated variables are updated when following a sequential order of evaluation.
+%
+Please note that the initial values of \verb+F1+ and \verb+F2+ are never accessed: 42 could be replaced by any number in their defining equations.
+%
+An imperative ${\Eqs} \cdot G$ is straightforward to implement in conventional programming languages, as we will see in \secref{sec:synthesis}.
 
-\subsection{Code contracts for the hardened system}
+\subsection{Code Contracts for the Hardened System}
 \label{sec:ha-contracts}
 
 \newsavebox{\flt}
@@ -1148,11 +1147,11 @@ The filter is direct: it defines the policy according to the well-formed require
 %
 We now discuss the monitor in some detail.
 
-The monitor informally behaves as follows: if the \emph{policy} is obeyed in the current step, and the alert has not yet been raised, then the \texttt{Response} input is sent out on \texttt{Output}, and the \texttt{Alert} output stays low \lineref{line:mon-alert}.
+The monitor informally behaves as follows: if the \emph{policy} is obeyed in the current step, and the alert has not yet been raised, then the \texttt{Response} input is sent out on \texttt{Output}, and the \texttt{Alert} output stays low \lineref{line:mon-alert};
 %
-Otherwise \texttt{Alert} goes high and stays high, and there is nothing sent henceforth on \texttt{Output}.
+otherwise, \texttt{Alert} goes high and stays high, and there is nothing sent henceforth on \texttt{Output}.
 
-The \texttt{alert} variable (distinct from the \texttt{Alert} port) depends not just on the policy but also on the \texttt{is\_latched} constant, which has been set at configuration time.
+The \texttt{alert} variable (distinct from the \texttt{Alert} port) depends not just on the policy but also on the constant \texttt{is\_latched}, which has been set at configuration time.
 %
 Since \texttt{is\_latched} is \konst{true}, the alert is persistent, meaning that once the alert is raised, it is always raised;
 %
@@ -1162,15 +1161,15 @@ The monitor policy is defined by marking, with variable \texttt{isPending}, when
 %
 See \linesref{line:mon-pre-pending}{line:mon-latency}:
 %
-The \texttt{isPending} variable is true whenever there is a request that does not coincide with a response, \ie, \texttt{isPending} holds when \emph{there is no response since the most recent request without a corresponding response}.
+The \texttt{isPending} variable is true whenever there is a request that does not coincide with a response, \ie, \texttt{isPending} holds when there is no response since the most recent request without a corresponding response.
 %
-The \texttt{latency} variable starts at zero, resets on every request, and otherwise increments by one.  Note that the \texttt{preIsPending} variable is a temporary needed to make the contract Pascal-like;
+The \texttt{latency} variable starts at zero, resets on every request, and otherwise increments by one.  Note that the \texttt{preIsPending} variable is a temporary that makes the contract imperative;
 %
-otherwise, the current and previous value of \texttt{isPending} would be simulataneously accessed in the definition of \texttt{policy}.
+otherwise, the current and previous value of \texttt{isPending} would be simultaneously accessed in the definition of \texttt{policy}.
 
-The policy (\lineref{line:mon-policy}) makes sure the latency is bounded whenever there is a pending request, and it ensures that a response is a result of a request.
+The policy (\lineref{line:mon-policy}) ensures the latency is bounded whenever there is a pending request and that a response is a result of a request.
 %
-The initial step differentiates from later steps in only needing to be sure a response is a result of a request, both happening in the initial step.
+The initial step differentiates from later steps in only needing to be sure that a response is a result of a request with both happening in that initial step.
 
 The latency bound for the monitor is defined by the constant \texttt{MAX\_LATENCY} (\lineref{line:mon-const}).
 %
@@ -1186,13 +1185,13 @@ otherwise, the latency counter resets incorrectly.
 %
 That requirement is encoded in the assumption (\lineref{line:mon-assume}) and is the same assumption used for the system input.
 %
-In fact, the policy can be written without the assumption, but the policy is much simpler to write with the assumption.
+Although the policy can be written without the assumption, it is much simpler to write with the assumption.
 
 As shown in \figref{fig:hardened-certificate}, the cyber-hardened system passes AGREE verification.
 %
 That means that the high-assurance components protect the WM from the untrusted AI generating malformed data, spontaneous responses, or delayed responses.
 %
-Synthesis must generate faithful implementations of the code contracts for the AGREE verification result to apply to the deployed system.
+Synthesis must generate faithful implementations of the code contracts for the \agr\ verification result to apply to the deployed system.
 
 %%
 % TEST CONTRACTS
@@ -1312,14 +1311,14 @@ These same tests can be synthesized to the backend implementation for traditiona
 % SYNTHESIS TO CAKEML
 %%
 
-\section{Synthesis to CakeML}
+\section{Synthesis to \ckml}
 \label{sec:synthesis}
 
 Synthesis maps from model and specifications to code.
 %
 The \splt\ tool traverses the system architecture looking for occurrences of high-assurance components specified by code contracts;
 %
-for each such occurrence it generates a CakeML program.
+for each such occurrence it generates a \ckml\ program.
 %
 \splt\ supports three kinds of behavioral specification from which to generate code.
 %
@@ -1331,7 +1330,7 @@ In this paper, we extend this \emph{specification oriented} approach to the Turi
 %
 We give a short review of that previous work before going into detail on the synthesis.
 
-\paragraph{Regular expressions:\/} often the well-formedness of data on connections can be enforced by matching against a regular expression.
+\paragraph{Regular expressions:\/} often the well-formed property of data on connections can be enforced by matching against a regular expression.
 %
 In other words, the data can be characterized by a \emph{regular language}.
 %
@@ -1355,9 +1354,9 @@ We have formalized and verified a contiguity type matcher, which has been extens
 
 \subsection{Compiling from code contracts}
 
-When full computational power is needed, we can use the expressive power of AGREE code contracts to write arbitrarily complex filter or monitor operations, as we have already seen.
+When full computational power is needed, we can use the expressive power of \agr\ code contracts to write arbitrarily complex filter or monitor operations, as we have already seen.
 %
-Our formal model of AGREE syntax and semantics is applied to extract code contracts and map them to equivalent logic functions.
+Our formal model of \agr\ syntax and semantics is applied to extract code contracts and map them to equivalent logic functions.
 %
 In particular, given a code contract with functionality ${\Eqs}\cdot G$, input ports $\mathbb{I}$, state variables $\mathbb{S}$, and output ports $\mathbb{O}$, the semantics given in \secref{sec:code-contracts} can be applied to define a stream-oriented \emph{step} function $\konst{strmStep} : \mathbb{N}_0 \to \mathit{Env} \to \mathit{Env}$ defined as
 %
@@ -1396,7 +1395,7 @@ In this way we have moved from stream semantics to logic function to CakeML eval
 %
 Once in \ckml, further necessary features can be added, namely imperative variables for storing state between component invocations, also invocations of the (verified) foreign function interface of \ckml\ \cite{cakeml-monadic}.
 %
-Finally, the CakeML compiler can be applied to the program.
+Finally, the \ckml compiler can be applied to the program.
 %
 It delivers an executable which can be shown to preserve the original contract.
 
@@ -1410,8 +1409,8 @@ For any of the three specification languages, we take the following general step
 \begin{compactenum}
 \item Map from specification to computable function in logic, producing a proof of equivalence.
 \item Add parsers and printers (specified by contiguity types) for input and output.
-\item Map to CakeML and add calls to input/output library routines via the CakeML foreign function interface.
-\item Invoke the CakeML compiler.
+\item Map to \ckml\ and add calls to input/output library routines via the \ckml\ foreign function interface.
+\item Invoke the \ckml\ compiler.
 \end{compactenum}
 %
 In the following, we examine further details in both filter and monitor synthesis.
@@ -1434,7 +1433,7 @@ In the first, a relatively shallow scan of the input suffices to enforce the pol
 %
 For example, we have used the expressive power of regular expressions and Contiguity Types \cite{contiguity-types} to enforce \emph{lightweight} bounds constraints on GPS coordinates in UxAS messages.
 %
-On the other hand, a filter may need to parse the input buffer into a data structure specified in AGREE and apply a user-defined \emph{wellformedness} property, also specified in AGREE, to the data.
+On the other hand, a filter may need to parse the input buffer into a data structure specified in \agr\ and apply a user-defined \emph{wellformedness} property, also specified in \agr, to the data.
 %
 Arbitrarily complex wellformedness checks can be made in this way.
 %
@@ -1514,7 +1513,7 @@ end
       \resizebox{\columnwidth}{!}{\usebox{\cml}}
     \end{tabular}
   \end{center}
-  \caption{Synthesized CakeML for the filter.}
+  \caption{Synthesized \ckml\ for the filter.}
   \label{fig:filter-cakeml}
 \end{figure}
 
@@ -1635,7 +1634,7 @@ end
       \resizebox{\columnwidth}{!}{\usebox{\monFn}}
     \end{tabular}
   \end{center}
-  \caption{Synthesized CakeML for the monitor.}
+  \caption{Synthesized \ckml\ for the monitor.}
   \label{fig:monitor-cakeml}
 \end{figure}
 
@@ -1736,7 +1735,7 @@ We perform a formal analysis with \agr\ to verify that the model satisfies the c
 %
 For the initial version of our design, the verification passes.
 %
-Although we are satisfied with the results of the formal verification using AGREE, we have not yet analyzed the design for cyber-vulnerabilities.
+Although we are satisfied with the results of the formal verification using \agr, we have not yet analyzed the design for cyber-vulnerabilities.
 
 In \brfcs, we analyze the model using one (or more) of the integrated cybersecurity analysis tools.
 %
