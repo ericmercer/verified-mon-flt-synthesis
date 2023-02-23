@@ -124,7 +124,7 @@
 \maketitle
 
 \begin{abstract}
-Avionics need to be engineered to be cyber-resilient meaning that systems are able to detect and recover from attacks or safely shutdown.
+Safety critical systems such as avionics need to be engineered to be cyber-resilient meaning that systems are able to detect and recover from attacks or safely shutdown.
 %
 As there are few development tools for cyber-resiliency, designers rely on guidelines and checklists, sometimes missing vulnerabilities until late in the process where remediation is expensive.
 %
@@ -152,7 +152,7 @@ Our case study demonstrates that writing code contracts and then synthesizing co
 %%
 
 \section{Introduction} \label{sec:intro}
-In recent years, aerospace stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.
+In recent years, stakeholders have realized that avionics systems are subject to possible cyber-attacks just like other cyber-physical systems.
 %
 \footnote{This work was funded in part by the
 Defense Advanced Research Projects Agency (DARPA) CASE program.
@@ -164,7 +164,7 @@ Thus, in addition to being fault-tolerant, safety-critical avionics systems must
 %
 Cyber-resiliency means that the system is tolerant to cyber-attacks just as safety-critical systems are tolerant to random faults: they recover and continue to execute their mission function, or safely shut down, as requirements dictate.
 
-Unfortunately, systems designers are currently given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.
+Unfortunately, systems designers are given few development tools to help answer even basic questions about potential vulnerabilities and ways to mitigate vulnerabilities.
 %
 They instead rely on process-oriented checklists and guidelines.
 %
@@ -182,13 +182,13 @@ It adds new capabilities for building cyber-resilient systems.
 %
 In this paper we describe how it facilitates specifying, testing, verifying, and synthesizing high-assurance components inserted into a system to improve its cyber-resiliency.
 
-The main organizing concept is that of an architecture-to-architecture \emph{security-improving transform}, achieved via the insertion of new architectural components aimed at mitigating cyber-vulnerabilities.
+The main concept is that of \emph{security-improving transform} through the insertion of new components aimed at mitigating cyber-vulnerabilities.
 %
 We describe two such transformations in this paper: (1) the insertion of a filter to prevent malformed data from a malicious actor being propagated to downstream components, and (2) the insertion of a runtime monitor to detect (and alert) unexpected behaviors arising from uncontrolled components.
 %
 We refer to these as \emph{high-assurance components} because they must be correct and fulfill their intended purpose for the system to be cyber-resilient.
 
-The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that such high-assurance components meet their intended purpose and are properly implemented.
+The contributions of this paper relate to the aspects of \brfcs\ concerning evidence that such components meet their intended purpose and are properly implemented.
 %
 We leverage the existing {\agr} model checker to provide evidence of the former and the existing verified \ckml\ compiler to provide evidence of the latter \cite{agree2013,compositional-analysis-agree,nfm:agree,cakeml}.
 %
@@ -224,7 +224,9 @@ That proof ensures that the resulting binary exactly preserves the meaning of th
 %
 Preliminary work has shown how to extend our work to handle infinite input since most systems of interest are inherently reactive and intended to run forever~\cite{case-verified-filter,cakeml-space-cost}.
 
-We report on a case study applying these transformations with \brfcs\ to an Unmanned Aerial Vehicle (UAV) system that uses the Air Force Research Laboratory's OpenUxAS services for route planning.
+We report on a case study applying these transformations with \brfcs\ to an Unmanned Aerial Vehicle (UAV) system.
+%
+That system uses the Air Force Research Laboratory's OpenUxAS services for route planning.
 %
 OpenUxAS, as an open source product, is considered \emph{uncontrolled}.
 %
@@ -256,7 +258,7 @@ We see the following as the distinguishing contributions of this paper:
   \item A case study that demonstrates the use of \brfcs\ to add cyber-resiliency to a non-trivial UAV system.
 \end{compactitem}
 
-Our approach currently applies to common cyber-vulnerabilities, such as buffer overflow, lack of input validation, and supply-chain issues.
+Our approach currently applies to common vulnerabilities such as buffer overflow, lack of input validation, and supply-chain issues.
 %
 Other cyber-vulnerabilities such as side-channel attacks and denial of service have not yet been addressed. Moreover, this work does not introduce a new type of high-assurance component in terms of capability.
 %
@@ -355,7 +357,7 @@ The system must by cyber-resilient and actively protect itself from malicious ac
 
 \subsection{System and Component Contract Implementation}
 
-\begin{figure*}[h]
+\begin{figure*}[ht]
   \begin{center}
     \begin{tabular}{c}
       \includegraphics[width=\textwidth]{example.png}
@@ -392,7 +394,7 @@ The WM receives the mission command from AI and starts the UAV flying the missio
 %
 The AI component is third-party software and WM is a legacy component.
 
-The expected behavior of the SW system, and the components implementing the system, are modeled with \agr\ contract specifications as shown by the unshaded boxes in the top-left of \figref{fig:workflow}.
+The behavior of the SW system, and the components implementing the system, are modeled with \agr\ contract specifications as shown by the unshaded boxes in the top-left of \figref{fig:workflow}.
 %
 These contracts assume and guarantee the absence of any malicious, or unspecified, component behavior.
 %
@@ -416,10 +418,10 @@ The legacy WM contract guarantees that
 \begin{compactitem}
   \item it generates a start from a response from the AI and always in the same cycle;
   \item the start coincides with a waypoint; and
-  \item any further waypoints coincide with location updates.
+  \item further waypoints coincide with location updates.
 \end{compactitem}
 
-This behavioral contract definition of the UAV software system is the starting point on the left-side of \figref{fig:workflow}.
+This behavioral definition of the UAV software system is the starting point on the left-side of \figref{fig:workflow}.
 %
 The \agr\ verification engine tries to prove if the component composition of the software system is correct.
 %
@@ -437,7 +439,7 @@ The \agr\ verification conditions, syntax and semantics, and the baseline contra
 
 \subsection{Adding Cyber Requirements}
 
-Having passed \agr\ verification, the workflow in \figref{fig:workflow} proceeds to the thread analysis as the UAV must actively protect itself from malicious actors.
+After \agr\ verification, the workflow in \figref{fig:workflow} proceeds to the thread analysis as the UAV must actively protect itself from malicious actors.
 %
 Threat analysis identifies the potential of a supply chain attack through the AI route planner since its third-party.
 %
@@ -540,7 +542,7 @@ Here \agr\ has generated high-level evidence justifying the claim that the high-
 %
 \subsection{Synthesizing code from code contracts}
 
-As \agr\ proves the system now meets its cyber-requirements, the workflow moves to the right in \figref{fig:workflow} to the code generation box.
+As \agr\ verifies the system now meets its cyber-requirements, the workflow moves to the right in \figref{fig:workflow} to the code generation box.
 %
 High-assurance components are automatically synthesized by \splt\ from the code contracts to equivalent programs in the \ckml\ language.
 %
@@ -599,7 +601,7 @@ Informally, streams assign values to expressions at each point in time.
 
 \subsection{Components}
 
-A system implementation is described by its ports, its subcomponents, and the connections between ports on different subcomponents.
+A system implementation is described by its ports, its sub-components, and the connections between ports on different sub-components.
 %
 Ports in \agr\ are inherited from AADL.
 %
@@ -611,9 +613,9 @@ A data port is a sampled port: the data can be read at anytime.
 %
 An event data port indicates when data is present with an event.
 
-Data flows through the subcomponents of a system in dependency order, with inputs being propagated to outputs through all contracts until they stabilize (\ie, they cannot propagate further).
+Data flows through the sub-components of a system in dependency order: the inputs propagate to outputs through the contracts until everything stabilizes.
 %
-Therefore, subcomponent contracts, and thus the top-level model, must be acyclic.
+Therefore, sub-component contracts, and thus the top-level model, must be acyclic.
 %
 Cyclic systems are made acyclic by breaking cycles with delays.
 %
@@ -654,11 +656,11 @@ A trace at a moment in time satisfies $\globally(f)$ if and only if it satisfies
 %
 $\globally(f)$ is invariant from the current moment into the future and $\historically$ is invariant from the beginning of the trace to the current moment.
 
-A \emph{system} is a tuple $(\inputs, \outputs, \assumes, \guarantees,C)$, where $\inputs$ is the input set, $\outputs$ is the output set, $\assumes$ is the set of assumptions, $\guarantees$ is the set of guarantees, and $C$ are subcomponents.
+A \emph{system} is a tuple $(\inputs, \outputs, \assumes, \guarantees,C)$, where $\inputs$ is the input set, $\outputs$ is the output set, $\assumes$ is the set of assumptions, $\guarantees$ is the set of guarantees, and $C$ are sub-components.
 %
 Assumptions and guarantees only use the past-time operators from PLTL.
 %
-A subcomponent $\component$ is, hierarchically, also a system, and may be designated by its own tuple $(\inputs_\component, \outputs_\component, \assumes_\component, \guarantees_\component, C_c)$.
+A sub-component $\component$ is, hierarchically, also a system, and may be designated by its own tuple $(\inputs_\component, \outputs_\component, \assumes_\component, \guarantees_\component, C_c)$.
 %
 From the components and their connections, $\mathbb{I}_\component$ is defined to be the set of components providing input to some component $\component$ in the system, and $\mathbb{O}$ is defined to be the set of components that provide the output for the system.
 
@@ -738,7 +740,7 @@ A value stream is a total function from time (natural numbers including 0) to va
  \konst{stream} = \mathbb{N}_0 \to \konst{value}
 \]
 %
-Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$ binding variable names to value streams, the semantics $\sem{-}^E_t$ of terms and formulas defines the meaning of compound syntax in terms of the meaning of subexpressions.
+Given an \emph{environment} $E : \konst{name} \mapsto \konst{stream}$ binding variable names to value streams, the semantics $\sem{-}^E_t$ of terms and formulas defines the meaning of compound syntax in terms of the meaning of sub-expressions.
 %
 The value of a variable $v$ at time $t$ is found by looking up the stream bound to $v$ in $E$ (call it $s$) and returning $s_t$. Some clauses of the semantics follow, omitting the temporal operators:
 %
@@ -897,7 +899,7 @@ The guarantee also does not force the start to always happen, it only says that 
 \item
 \lineref{line:sw-guarantee-5}:
 %
-the alert is signaled if the start does not arrive within the one-step bound.
+the alert is signaled if the start does not arrive within one-step.
 %
 Together with \lineref{line:sw-guarantee-4} this allows for non-alerting and alerting behavior.
 
@@ -990,7 +992,7 @@ The contract is \emph{correct}, if for all $E$ and $t$, whenever the assumptions
 %
 \end{definition}\label{def:correct}
 
-How does this notion of correctness integrate with the verification conditions generated by \agr?
+How does this definition of code contract correctness integrate with the verification conditions generated by \agr?
 %
 In \agr, the model checker is proving the following property
 %
@@ -1071,7 +1073,7 @@ An imperative ${\Eqs} \cdot G$ is straightforward to implement in conventional p
 
 \newsavebox{\flt}
 \begin{lrbox}{\flt}
-  \begin{lstlisting}[style=agree,numbers=left] -- start user
+  \begin{lstlisting}[style=agree,numbers=left]
     -- start user definitions
     eq policy : bool =
       WELL_FORMED_AUTOMATION_RESPONSE(Input);
@@ -1187,7 +1189,7 @@ That requirement is encoded in the assumption (\lineref{line:mon-assume}) and is
 %
 Although the policy can be written without the assumption, it is much simpler to write with the assumption.
 
-As shown in \figref{fig:hardened-certificate}, the cyber-hardened system passes AGREE verification.
+\figref{fig:hardened-certificate} shows the hardened system to pass AGREE verification.
 %
 That means that the high-assurance components protect the WM from the uncontrolled AI generating malformed data, spontaneous responses, or delayed responses.
 %
@@ -1301,7 +1303,7 @@ The test additionally proves that nothing happens after the initial test input a
 %
 \figref{fig:hardened-certificate}(a) is the \agr\ output for the test showing that it passes.
 
-Test contracts are effective in detecting vacuity, under-specified behavior, and missed corner cases.
+Test contracts are a tool to help detecting vacuity, under-specification, and missed corner cases.
 %
 They enable designers to iteratively develop code contracts with \agr\ in the modeling environment, and they build assurance that the code contract computes the desired behavior with black-box, white-box, and other test coverage metrics.
 %
@@ -1330,7 +1332,7 @@ In this paper, we extend this \emph{specification oriented} approach to the Turi
 %
 We give a short review of our previous work before going into detail on the synthesis.
 
-\paragraph{Regular expressions:\/} often the well-formed property of data on connections can be enforced by matching against a regular expression.
+\paragraph{Regular expressions:\/} often the well-formed property of data can be enforced by matching against a regular expression.
 %
 In other words, the data can be characterized by a \emph{regular language}.
 %
@@ -1366,7 +1368,7 @@ In particular, given a code contract with functionality ${\Eqs}\cdot G$, input p
 %
 Now suppose ${\Eqs}\cdot G$ is sequentially imperative.
 %
-Then we can direcctly create a logic function
+Then we can directly create a logic function
 %
 \[
 \konst{stateStep} : \mathit{input} \times \mathit{state} \to \mathit{state} \times \mathit{output}
@@ -1408,7 +1410,7 @@ For any of the three specification languages, we take the following general step
 %
 \begin{compactenum}
 \item Map from specification to computable function in logic, producing a proof of equivalence.
-\item Add parsers and printers (specified by contiguity types) for input/output.
+\item Add needed parsers and printers (specified by contiguity types) for input/output.
 \item Map to \ckml\ and add calls to input/output library routines via the \ckml\ foreign function interface.
 \item Invoke the \ckml\ compiler.
 \end{compactenum}
@@ -1517,7 +1519,7 @@ end
   \label{fig:filter-cakeml}
 \end{figure}
 
-The synthesized \ckml\ code for \figref{fig:filter-spec} is in \figref{fig:filter-cakeml}.
+The synthesized code for \figref{fig:filter-spec} is shown in \figref{fig:filter-cakeml}.
 %
 The code is called at dispatch by the scheduler.
 %
@@ -1687,7 +1689,7 @@ Another part of motivation wast to determine whether or not the technology provi
 %
 produces early information about cyber-vulnerabilities,
 %
-provides effective mitigations,
+provides effective mitigation,
 %
 and handles a complex real-world message format, namely the UxAS message format.
 
@@ -1697,7 +1699,7 @@ In response, the UAV's on-board mission computer generates a flight plan consist
 %
 The UAV is also given a set of \textit{keep-in} and \textit{keep-out} zones that may constrain its flight path.
 
-We have modeled the system architecture of the UAV in AADL.
+We modeled the system architecture of the UAV in AADL.
 %
 The model includes a Mission Computer for communicating with the ground station and generating flight plans, and a Flight Control Computer for UAV navigation.
 %
@@ -1723,7 +1725,7 @@ UxAS passes the flight plan in an \textit{Automation Response} message to the Wa
 %
 Because the Flight Control Computer can only process a small number of waypoints at a time, the Waypoint Manager parcels a small number of waypoints corresponding to the current UAV position, and sends them to the Flight Control Computer over a serial connection via the UART Driver.
 
-\begin{figure*}[h]
+\begin{figure*}[ht]
 	\centering
 	\includegraphics[width=2\columnwidth]{figs/sw-initial.PNG}
 	\caption{Initial software architecture.}
@@ -1752,7 +1754,7 @@ Requirements are imported into the model as goals in the assurance case.
 %
 Because we can build the assurance case at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
 
-The intent of the data integrity requirements is to prevent malformed messages from causing a buffer overrun or code injection attack.
+The data integrity requirements serve to prevent any malformed messages from causing a buffer overrun or code injection attack.
 %
 In the UAV design, such messages are most likely to originate from a remote source or the uncontrolled UxAS component.
 %
@@ -1760,13 +1762,13 @@ By placing filters on the connections upstream of mission-critical components, s
 %
 We therefore inserted filter components on the incoming and outgoing UxAS connections.
 
-The filter code contracts for the four UxAS connections are similar in that they check that record values contained in the messages are within appropriate ranges.
+The code contracts for these filters are similar in that they check that values contained in the messages are within appropriate ranges.
 %
 For example, the Automation Response message filter, which drops messages containing malformed flight plans, is defined as shown in \figref{fig:automation-response-filter}.
 %
 Although \texttt{Latitude}, \texttt{Longitude} and \texttt{Altitude} are defined as 64-bit floating-point values, the filter only passes messages containing waypoint values between [-90,90], [-180,180], and [0,15000], respectively.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=1\columnwidth]{figs/automation-response-filter.png}
 	\caption{Automation Response Filter specification.}
@@ -1785,7 +1787,7 @@ The Geofence\_Monitor is a gated monitor in that it prevents the observed automa
 %
 Its code contract is shown in \figref{fig:geofence-monitor}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=1\columnwidth]{figs/geofence-monitor.png}
 	\caption{Geofence Monitor specification.}
@@ -1810,7 +1812,7 @@ After unit testing the monitors, we formally verified the model with \agr\ to sh
 %
 We then ran \splt\ to produce provably-correct code.
 
-\begin{figure*}[h]
+\begin{figure*}[ht]
 	\centering
 	\includegraphics[width=2\columnwidth]{figs/hardened-sw.png}
 	\caption{Cyber-resilient software architecture.}
@@ -1856,7 +1858,7 @@ The response monitor detected and signaled the Ground Station when UxAS failed t
 On the hardened system the Geofence Monitor detected that it was being instructed to fly into a keep-out zone and returned the UAV to Home Base.
 
 %%
-% DISSCUSSION
+% DISCUSSION
 %%
 
 \subsection{Discussion}
@@ -1993,7 +1995,7 @@ A component's code contract states assumptions on the component inputs and provi
 %
 The code contract language itself is Turing complete.
 
-Code contracts are validated with unit tests that are verified with the \agr\ verification engine.
+Code contracts are validated with unit tests that are verified by \agr.
 %
 A unit test is expressed in a test contract in the \agr\ language.
 %
