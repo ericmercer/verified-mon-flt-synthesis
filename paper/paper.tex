@@ -200,7 +200,7 @@ In this way, \agr\ provides the formal framework we use to describe the behavior
 
 We then use semantics preserving transformations to rewrite contracts into \ckml\ where the \ckml\ compiler then turns such contracts into binaries for the intended target platforms.
 %
-The verified compiler, with the semantics preserving transforms, ensures that the high-assurance component adheres to its contract specification.
+The verified compiler, with the semantics preserving transforms, ensure that the high-assurance component adheres to its contract specification.
 %
 This assurance fulfills the underlying assumption of the \agr\ model checker's proof: a component implementation adheres to its contract.
 
@@ -1185,7 +1185,7 @@ The policy definition only works if there is never more than one outstanding req
 %
 otherwise, the latency counter resets incorrectly.
 %
-That requirement is encoded in the assumption (\lineref{line:mon-assume}) and is the same assumption used for the system input.
+That requirement is encoded in an assumption (\lineref{line:mon-assume}) and is the same assumption used for the system input.
 %
 Although the policy can be written without the assumption, it is much simpler to write with the assumption.
 
@@ -1204,21 +1204,21 @@ Synthesis must generate faithful implementations of the code contracts for the \
 
 Writing and proving properties about code contracts is difficult because it is a formal process, and because it reasons about constraints that define the entire input space, and the entire output space, of a high-assurance component at once.
 %
-Our case studies have shown that designers, as well as formal method practitioners, make mistakes writing these contracts, especially if the computation or temporal reasoning in the contract is complex.
+Our case studies have shown that designers, as well as formal methods practitioners, make mistakes writing these contracts, especially if the computation or temporal reasoning in the contract is complex.
 
 We have observed three common types of mistakes in code contracts (aside from self-consistency, which is already checked): vacuity, under-specification, and missed corner cases.
 %
 Vacuity is a common pitfall with implication when the left hand side is always false, making the implication true.
 %
-Under-specification is very challenging, as \agr\ is not able to prove anything (or it can prove everything in the case of existential properties), so nothing is actually known after verification except that the contract is under-specified.
+Under-specification is very challenging as \agr\ is not able to prove anything (or it can prove everything in the case of existential properties), so nothing is actually known after verification except that the contract is under-specified.
 %
 Missed corner cases is a common problem to all disciplines.
 %
 It is an especially difficult challenge here because there is no direct way to exercise code contracts, \eg, there is no runtime \emph{per se}.
 
-A tempting approach to exercising code contracts directly is to use \splt\ to create the target binary and then use that runtime with traditional testing.
+A tempting approach to exercising code contracts directly is to use synthesis to create the target binary and then use the target runtime with traditional testing.
 %
-Such an approach adds extra steps, including test harnesses, that are not needed, as it is possible to bridge the formal model in \agr, with its proof system, to traditional validation using tests.
+Such an approach adds extra steps, including test harnesses, that are not needed, as it is possible to bridge the formal model in \agr, with its proof system, to traditional test validation.
 %
 The intuition for that bridge comes from the compositional reasoning in AADL and \agr.
 %
@@ -1303,7 +1303,7 @@ The test additionally proves that nothing happens after the initial test input a
 %
 \figref{fig:hardened-certificate}(a) is the \agr\ output for the test showing that it passes.
 
-Test contracts are a tool to help detecting vacuity, under-specification, and missed corner cases.
+Test contracts are a tool to help in detecting vacuity, under-specification, and missed corner cases.
 %
 They enable designers to iteratively develop code contracts with \agr\ in the modeling environment, and they build assurance that the code contract computes the desired behavior with black-box, white-box, and other test coverage metrics.
 %
@@ -1328,7 +1328,7 @@ In increasing order of expressiveness, these are: regular expressions, contiguit
 %
 In earlier work we have described how regular expressions and contiguity types are used as specification languages for verified filter implementations.
 %
-In this paper, we extend this \emph{specification oriented} approach to the Turing-complete specifications of code contracts in \agr.
+In this paper, we extend this specification oriented approach to the Turing-complete specifications of code contracts in \agr.
 %
 We give a short review of our previous work before going into detail on the synthesis.
 
@@ -1354,7 +1354,7 @@ We have formalized and verified a contiguity type matcher, and that matcher has 
 % COMPILING FROM CODE CONTRACTS
 %%
 
-\subsection{Compiling from code contracts}
+\subsection{Compiling from Code Contracts}
 
 When full computational power is needed, we can use the expressive power of \agr\ code contracts to write arbitrarily complex filter or monitor operations, as we have already seen.
 %
@@ -1643,7 +1643,7 @@ end
 
 The system scheduler \emph{activates} components in some order.
 %
-It is an obligation on the system that the scheduler follows some sensible partial order of component activation and allows each component sufficient time for its computation.
+It is an obligation on the system that the scheduler follows some sensible total order of component activation and allows each component sufficient time for its computation.
 %
 Activating a monitor component takes the form of the following pseudo-code, in which the monitor evaluates the \konst{stateStep} on its current inputs and the current values of the state variables, returning the new state and the output values.
 %
@@ -1658,11 +1658,11 @@ Activating a monitor component takes the form of the following pseudo-code, in w
 \]
 
 
-\paragraph{Partiality of the Correctess Argument:\/} partiality is an important consideration for both filters and monitors as the input data might not parse or the computation of a filter could be badly written and fail at runtime.
+\paragraph{Partiality of the Correctess Argument:\/} partiality is an important consideration for both filters and monitors as the input data might not parse or the computation of a component could be badly written and fail at runtime.
 %
-In such cases, the filter should recover and yield control without passing the input onwards.
+In such cases, the component should recover and yield control without passing the input onwards.
 %
-For these failure cases, the filter is behaving as it should, but we must also guard against situations in which a correctly specified filter or monitor fails in the runtime.
+For these failure cases, the component is behaving as it should, but we must also guard against situations in which a correctly specified filter or monitor fails in the runtime.
 %
 This kind of defect arises when a filter, for example, ought to accept a message, but lack of resources results in the filter failing to do so.
 %
@@ -1685,7 +1685,7 @@ In this section, we outline the application of the \brfcs\ tool towards the deve
 %
 The motivation was to showcase the utility and capability of the BriefCASE toolchain on an industrial scale problem.
 %
-Another part of motivation wast to determine whether or not the technology provides designers with early validation of their models,
+Another motivation was to determine whether or not the technology provides designers with early validation of their models,
 %
 produces early information about cyber-vulnerabilities,
 %
@@ -1734,9 +1734,9 @@ Because the Flight Control Computer can only process a small number of waypoints
 
 Within the software model, we have formalized some of the high-level requirements as assume-guarantee contracts.
 %
-We perform a formal analysis with \agr\ to verify that the model satisfies the contracts.
+We performed a formal analysis with \agr\ to verify that the model satisfies the contracts.
 %
-For the initial version of our design, the verification passes.
+For the initial version of our design, the verification passed.
 %
 Although we are satisfied with the results of the formal verification using \agr, we have not yet analyzed the design for cyber-vulnerabilities.
 
@@ -1748,17 +1748,17 @@ For example, the vulnerability analysis noted that UxAS is an open source projec
 
 In total, we added seven cyber requirements from the vulnerability analysis into our model.
 %
-These include four integrity requirements on data, two requirements for monitoring the behavior of the open-source UxAS component, and an attestation requirement for ensuring the integrity of the Ground Station software.
+These include four well-formed requirements on data, two requirements for monitoring the behavior of the open-source UxAS component, and an attestation requirement for ensuring the integrity of the Ground Station software.
 %
-Requirements are imported into the model as goals in the assurance case.
+Requirements were imported into the model as goals in the assurance case.
 %
 Because we can build the assurance case at any time during development, we can easily determine for a given snapshot of the model which requirements are not yet supported by evidence.
 
-The data integrity requirements serve to prevent any malformed messages from causing a buffer overrun or code injection attack.
+The well-formed data requirements serve to prevent any malformed messages from causing a buffer overrun or code injection attack.
 %
 In the UAV design, such messages are most likely to originate from a remote source or the uncontrolled UxAS component.
 %
-By placing filters on the connections upstream of mission-critical components, such attacks could be mitigated.
+By placing filters on the connections upstream of mission-critical components, such attacks are mitigated.
 %
 We therefore inserted filter components on the incoming and outgoing UxAS connections.
 
@@ -1777,11 +1777,11 @@ Although \texttt{Latitude}, \texttt{Longitude} and \texttt{Altitude} are defined
 
 In addition to monitoring the UxAS output for malformed messages, we must also monitor for suspicious behavior.
 %
-This requires adding components for detecting that UxAS has crashed, as well as monitoring the correctness of the flight plans it produces.
+This required adding components for detecting that UxAS has crashed, as well as monitoring the correctness of the flight plans it produces.
 %
-We therefore add a response monitor (Resp Monitor) to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.
+We therefore added a response monitor (Resp Monitor) to send an alert if UxAS does not emit a response within a set amount of time from receiving a request.
 %
-And we add a geo-fence monitor (Geofence Monitor) to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.
+And we added a geo-fence monitor (Geofence Monitor) to ensure that generated flight plans are compliant with the specified keep-in and keep-out zones.
 %
 The Geofence\_Monitor is a gated monitor in that it prevents the observed automation response from reaching the Waypoint Manager if the zones are violated.
 %
@@ -1821,9 +1821,9 @@ We then ran \splt\ to produce provably-correct code.
 
 The demonstration system was then assembled for testing.
 %
-\brfcs\ includes the HAMR tool to generate the component stubs and infrastructure code necessary to enable component communication and execution according to a specified schedule.
+\brfcs\ includes the tools to generate the component stubs and infrastructure code necessary to enable component communication and execution according to a specified schedule.
 %
-HAMR was used here to target the verified micro-kernel seL4.
+These tools were used here to target the verified micro-kernel seL4.
 %
 The UAV and Ground Station software were deployed on ODROID XU4 hardware, and communicated with each other over ethernet.
 %
@@ -1837,7 +1837,7 @@ We performed a set of tests on the initial system (\figref{fig:sw-initial}) prio
 A third party evaluator repeated the tests on the hardened system and demonstrated that our mitigation strategy was successful.
 The following scenarios were exercised:
 
-\paragraph{Infected Ground Station:\/} an application file is modified on the Ground Station, which sends the UAV on a mission-violating trajectory.
+\paragraph{Infected Ground Station:\/} an application file is modified on the Ground Station to send the UAV on a mission-violating trajectory.
 %
 On the hardened system, messages sent to the UAV were rejected by the Attestation Manager.
 
